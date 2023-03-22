@@ -1,0 +1,540 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SharBox</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/Content/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <!-- Ionicons -->
+    <!-- <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/Content/dist/css/sharbox.min.css">
+
+    <!-- custom css -->
+    <link rel="stylesheet" href="~/Content/dist/css/custom-css.css">
+
+    <link rel="stylesheet"
+          href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <style>
+        .loadings {
+            font-family: Arial;
+            font-size: 10pt;
+            width: 200px;
+            height: 100px;
+            display: none;
+            position: fixed;
+            z-index: 99999999999999999999999;
+        }
+
+        .modalss {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #000;
+            z-index: 9999999999;
+            opacity: .1;
+            filter: alpha(opacity=80);
+            -moz-opacity: .8;
+            min-height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <style>
+        .pagination {
+            display: inline-block;
+        }
+
+            .pagination a {
+                color: black;
+                float: left;
+                padding: 8px 16px;
+                text-decoration: none;
+                border: 1px solid #ddd;
+            }
+
+            .pagination li.active {
+                background-color: dodgerblue;
+                color: #ffffff;
+            }
+
+            .pagination a:hover:not(.active) {
+                background-color: #ddd;
+            }
+    </style>
+
+    <link href="~/Content/dist/css/sharbox.min.css" rel="stylesheet" />
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed" style="overflow-y:auto">
+    <div class="wrapper">
+
+        <!-- Preloader -->
+        @*<div class="preloader flex-column justify-content-center align-items-center">
+                <img class="animation__shake" src="~/Content/dist/img/logo-icon.png" alt="share Logo" height="60" width="60">
+            </div>*@
+
+        @{ int currentroleid = Convert.ToInt32(Session["CurrentRoleId"]);
+            string currentrole = Convert.ToString(Session["CurrentRole"]); }
+
+        @*<div class="modalss"></div>*@
+        <div class="loadings" align="center">
+            <img class="" src="~/Content/dist/img/ajaxloader.gif" alt="share Logo" height="120" width="120">
+        </div>
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    @if (currentroleid == DataRooms.UI.AppRole.Admin)
+                    {
+        <a href="/admindashboard" class="nav-link">Home</a> }
+    else
+    {
+<a href="/task/dashboard" class="nav-link">Home</a>}
+                </li>
+
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Navbar Search -->
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    <div class="navbar-search-block">
+                        <div class="input-group input-group-sm">
+                            <input class="form-control form-control-navbar txtGlobalSearch" type="text" placeholder="Search" aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-navbar" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+
+                <!-- Notifications Dropdown Menu -->
+                @*<li class="nav-item dropdown">
+                        <a class="nav-link" data-toggle="dropdown" href="#">
+                            <i class="far fa-bell"></i>
+                            <span class="badge badge-warning navbar-badge">15</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                            <span class="dropdown-item dropdown-header">15 Notifications</span>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-envelope mr-2"></i> 4 new messages
+                                <span class="float-right text-muted text-sm">3 mins</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-users mr-2"></i> 8 friend requests
+                                <span class="float-right text-muted text-sm">12 hours</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-file mr-2"></i> 3 new reports
+                                <span class="float-right text-muted text-sm">2 days</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+                        </div>
+                    </li>*@
+
+                <li class="nav-item d-none d-sm-block">
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
+                @{ string username = Convert.ToString(Session["UserName"]);
+                    username = username.Length > 17 ? username.Substring(0, 17) + ".." : username; }
+                <li class="nav-item dropdown">
+                    <div class="user-panel d-flex pb-2" data-toggle="dropdown">
+                        <div class="image">
+                            <img src="~/Content/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                        </div>
+                        <div class="info">
+                            <a href="#" class="d-none d-sm-block">@username</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        @*<div class="dropdown-divider"></div>
+        <span class="dropdown-item dropdown-header">Last Login <span class="color-blue-a">12:00 PM</span></span>*@
+                        <div class="dropdown-divider"></div>
+                        @*<a href="#" class="dropdown-item">
+            <i class="fas fa-users mr-2"></i> Profile
+        </a>*@
+                        <div class="dropdown-divider"></div>
+                        @if (currentroleid == DataRooms.UI.AppRole.Admin)
+                        {
+                            <a href="/settings/list" class="dropdown-item">
+                                <i class="fas fa-cog mr-2"></i> Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        }
+
+
+                        <a href="#" class="dropdown-item" data-toggle="modal" data-target="#logoutModal">
+                            <i class="fas fa-lock mr-2"></i> Logout
+                        </a>
+
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="index.html" class="brand-link">
+                <img src="~/Content/dist/img/logo-icon.png" alt="sharbox Logo" class="brand-image img-circle">
+                <span class="brand-text font-weight-light">SharBox</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        @if (currentroleid == DataRooms.UI.AppRole.Admin)
+                        {
+                            <li class="nav-item">
+                                <a href="/admindashboard" class="nav-link active">
+                                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a href="/task/dashboard" class="nav-link active">
+                                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+}
+
+
+                        <li class="nav-item">
+                            <a href="/datarooms/getuserdatarooms" class="nav-link">
+                                <i class="nav-icon fas fa-share-alt"></i>
+                                <p>
+                                    My SharBox
+                                </p>
+                            </a>
+                        </li>
+
+                        @if (currentroleid == DataRooms.UI.AppRole.SuperAdmin)
+                        {
+                            <li class="nav-item">
+                                <a href="/companies/list" class="nav-link">
+                                    <i class="nav-icon fas fa-building"></i>
+                                    <p>
+                                        Company
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="/users/list" class="nav-link">
+                                    <i class="nav-icon fas fa-user"></i>
+                                    <p>
+                                        Users
+                                    </p>
+                                </a>
+                            </li>
+}
+
+                        @if (currentroleid == DataRooms.UI.AppRole.Admin)
+                        {
+                            <li class="nav-item">
+                                <a href="/datarooms/list" class="nav-link">
+                                    <i class="nav-icon fas fa-share-alt-square"></i>
+                                    <p>
+                                        All SharBox
+                                    </p>
+                                </a>
+                            </li>
+
+
+
+                            <li class="nav-item">
+                                <a href="/users/list" class="nav-link">
+                                    <i class="nav-icon fas fa-user"></i>
+                                    <p>
+                                        Users
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="#" class="nav-link lnkEmail">
+                                    <i class="nav-icon fas fa-cog"></i>
+                                    <p>
+                                        Email Settings
+                                    </p>
+                                </a>
+                            </li>
+                            @*<li class="nav-item">
+                                <a href="#" class="nav-link lnkADConfig">
+                                    <i class="nav-icon fas fa-cog"></i>
+                                    <p>
+                                        AD Settings
+                                    </p>
+                                </a>
+                            </li>*@
+
+                            <li class="nav-item">
+                                <a href="/filecheckin/list" class="nav-link">
+                                    <i class="nav-icon fas fa-file-export"></i>
+                                    <p>
+                                        File Check-Outs
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="/recyclebin" class="nav-link">
+                                    <i class="nav-icon fas fa-recycle"></i>
+                                    <p>
+                                        Recycle Bin
+                                    </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="audit-log.html" class="nav-link">
+                                    <i class="nav-icon fab fa-audible"></i>
+                                    <p>
+                                        Audit log
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="/dataroomlogs/list" class="nav-link">
+                                            <!-- <i class="far fa-circle nav-icon"></i> -->
+                                            <i class="las la-share-square nav-icon"></i>
+                                            <p>SharBox</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/folderlogs/list" class="nav-link">
+                                            <i class="las la-folder-open nav-icon"></i>
+                                            <p>Folder</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/filelogs/list" class="nav-link">
+                                            <i class="las la-file-alt nav-icon"></i>
+                                            <p>File</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+
+                        <li class="nav-item">
+                            <a href="/taskreview/list" class="nav-link">
+                                <i class="nav-icon fas fa-check"></i>
+                                <p>
+                                    My Reviews
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/taskapproval/list" class="nav-link">
+                                <i class="nav-icon fas fa-check"></i>
+                                <p>
+                                    My Approvals
+                                </p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            @RenderBody()
+        </div>
+
+
+
+        <!-- /.content-wrapper -->
+        <footer class="main-footer text-center py-1">
+            Copyright © Data Bricks Technologies @DateTime.Now.Year
+        </footer>
+
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- The Modal for folder -->
+    
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Are you sure, you want to logout?</div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary" href="@Url.Action("Logout","Authenticate",new { area = "Login"})">Yes</a>
+                    <button class="btn btn-danger" type="button" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("_modalpopups")
+
+    <!-- jQuery -->
+    <script src="~/Content/plugins/jquery/jquery.min.js"></script>
+    <!-- jQuery UI 1.11.4 -->
+    <script src="~/Content/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script>
+        $.widget.bridge('uibutton', $.ui.button)
+    </script>
+
+    <!-- Bootstrap 4 -->
+    <script src="~/Content/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- sharboxApp -->
+    <script src="~/Content/dist/js/admin-sharbox.js"></script>
+    <!-- SharBox dashboard demo (This is only for demo purposes) -->
+    <script src="~/Content/dist/js/pages/dashboard.js"></script>
+
+    <script>
+        function fnAlert(message, color) {
+            $("#divAlertMessage").text(message);
+            if (color != null && color != undefined) {
+                $("#alertBody").css({ "background-color": color });
+            }
+
+            $("#alertModel").modal("show");
+        };
+
+        function fnConfirm(message) {
+            $("#pconfirmation").text(message);
+            $("#confirmModel").modal("show");
+        }
+
+
+        $(document).ready(function () {
+            if ("@Convert.ToString(TempData["Notification"])" != "") {
+                fnAlert("@Convert.ToString(TempData["Notification"])");
+            }
+        });
+
+        
+
+        $(document).on("click", ".lnkADConfig", function () {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("Edit", "ManageADConfig",new { area = "Settings"})",
+                dataType: "json",
+                data: {},
+                beforeSend: function () {
+                    formloader();
+                },
+                complete: function () {
+                    formloaderstop();
+                },
+                error: function (err) { },
+                success: function (data) {
+                    $(".divADConfigContent").html("");
+                    $(".divADConfigContent").html(data.HTML);
+                    $("#adConfigModel").modal("show");
+                }
+            });
+        });
+
+        $(document).on("click", ".lnkEmail", function () {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("Edit", "ManageEmailConfig",new { area = "Settings"})",
+                dataType: "json",
+                data: {},
+                beforeSend: function () {
+                    formloader();
+                },
+                complete: function () {
+                    formloaderstop();
+                },
+                error: function (err) { },
+                success: function (data) {
+                    $(".divEmailConfigContent").html("");
+                    $(".divEmailConfigContent").html(data.HTML);
+                    $("#emailConfigModel").modal("show");
+                }
+            });
+        });
+
+        function formloader() {
+            //$("body").attr("disabled", true);
+            var modal = $('<div />');
+            modal.addClass("modalss");
+            $('body').append(modal);
+            $(".loadings").show();
+            var loading = $(".loadings");
+            loading.show();
+            var top = Math.max($(window).height() / 2 - loading[0].offsetHeight / 2, 0);
+            var left = Math.max($(window).width() / 2 - loading[0].offsetWidth / 2, 0);
+            loading.css({ top: top, left: left });
+        };
+        function formloaderstop() {
+            $(".modalss").hide();
+            $(".loadings").hide();
+            //$("body").attr("disabled", false);
+        };
+
+        //Disable Enter Key
+        $('body').on('keyup keypress', function (e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            $('.modal:visible').length && $(document.body).addClass('modal-open');
+        });
+    </script>
+
+</body>
+
+
+
+</html>

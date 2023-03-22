@@ -1,0 +1,30 @@
+﻿
+@{
+    Layout = null;
+    ViewBag.Title = "Error";
+    //Exception ex = TempData["Error"] as Exception;
+}
+
+
+<h2 style="color:red;font-weight:bold">Sorry, Something went wrong. Please try again after some time.</h2>
+<a id="lnkError" href="#">Show Error Info</a>
+<div class="container" id="errorDesc" style="display:none">
+    <div class="row">
+        <h3>Stack Trace:</h3>
+        <div>
+            @TempData["Error"]
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $("#lnkError").click(function () {
+        if ($("#errorDesc").is(":hidden")) {
+            $("#errorDesc").show();
+        }
+        else {
+            $("#errorDesc").hide();
+        }
+    });
+</script>

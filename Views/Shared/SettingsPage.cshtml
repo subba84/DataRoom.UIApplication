@@ -1,0 +1,26 @@
+﻿
+@{
+    ViewBag.Title = "SettingsPage";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-3 card">
+        <div class="container" align="center">
+            Refresh Cache
+            <i class="fa fa-sync ml-1 fa-1x refreshCache" title="Refresh Data Cache" style="cursor:pointer;"></i>
+        </div>        
+    </div>  
+</div>
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    if ("@TempData["Notification"]" != null && "@Convert.ToString(TempData["Notification"])" != "") {
+        fnAlert("@TempData["Notification"]");
+    }
+    $(".refreshCache").click(function () {
+        formloader();
+        window.location.href = "@Url.Action("RefreshDataCache", "ManageSetting",new { area = "Settings"})";
+    });
+</script>
