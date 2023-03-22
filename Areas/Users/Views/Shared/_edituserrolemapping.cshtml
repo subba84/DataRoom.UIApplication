@@ -1,0 +1,77 @@
+﻿@model DataRooms.UI.Areas.Users.Models.CustomUserRoleMapping
+
+<style>
+    .ui-autocomplete {
+        z-index: 2147483647;
+    }
+</style>
+<form class="user" method="post" action="@Url.Action("Edit","ManageUserRole",new { area = "Users"})" id="frmUserRoleMapping">
+    <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">User-Role Mapping</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body  ui-front">
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <label class="col-form-label-sm" for="txtFullName">User Name</label>
+                <input type="hidden" id="hdnUserId" name="UserId" value="@Model.UserId">
+                <input type="text" class="form-control" id="txtUserName"
+                       placeholder="Full Name" name="UserName" value="@Model.UserName">
+            </div>
+            <div class="col-sm-6" id="divRole">
+                @if (Model.ExistedMappings != null && Model.ExistedMappings.Count() > 0)
+                {
+                    int i = 0;
+                    foreach (var role in Model.ExistedMappings)
+                    {
+                        <input type="checkbox" class="chkRole" @(role.UserId > 0 ? "checked" : "") value="@role.RoleId" name="Roles[@i].Id" id="chk_@i"/><label for="chk_@i" class="col-form-label-sm">@role.RoleName</label><br/>
+                        <input type="hidden" value="@role.RoleName" name="Roles[@i].RoleName"/>
+                        i++;
+                    }
+                }
+
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-form-label-sm" for="chkIsActive">Is Active</label>
+            <input type="checkbox" class="form-check-label" @(Model.IsActive ? "checked" : "") value="true" id="chkIsActive"
+                   name="IsActive">
+        </div>
+        <label id="lblErrMessage" class="float-left text-red" style="display:none"></label>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    </div>
+</form>
+
+
+<link href="~/CustomContent/css/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script>
+    $("#txtUserName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetAllUsers", "ManageUserRole",new { area = "Users" })?searchString=' + $("#txtUserName").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnUserId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtUserName").val(ui.item.label);
+                alert(ui.item.val);
+                $("#hdnUserId").val(ui.item.val);
+        }
+    });
+</script>

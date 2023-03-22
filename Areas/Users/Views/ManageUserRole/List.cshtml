@@ -1,0 +1,123 @@
+﻿@model DataRooms.UI.Areas.Users.Models.CustomUserRoleMapping
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <form method="post" action="@Url.Action("List","ManageUserRole",new { area = "Users"})" id="frmUserList">
+        <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3" style="height:65px;">
+                <div class="form-group row">
+                    <div class="col-sm-2 mb-2 mb-sm-0">
+                        <h4 class="font-weight-bold text-primary float-left">User-Role</h4>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="form-group row">
+                            <div class="col-sm-2">
+                                <label class="col-form-label-sm" for="txtSearch">Search</label>
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="txtSearch" placeholder="Search with Role or Name" name="SearchString" value="@Model.SearchString"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="#" class="btn btn-primary float-right editUser" data-id="0" data-toggle="modal" data-target="#userModel">+ Add</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    @Html.Partial("~/Areas/Users/Views/Shared/_userrolemappinglist.cshtml", Model)
+                </div>
+                <br />
+                <div id='Paging' style="text-align:center">
+                    Page @(Model.PagedUserRoleMappings.PageCount < Model.PagedUserRoleMappings.PageNumber ? 0 : Model.PagedUserRoleMappings.PageNumber)
+                    of @Model.PagedUserRoleMappings.PageCount
+                    <input type="hidden" name="RecordsPerPage" value="@Model.RecordsPerPage" />
+                    <input type="hidden" name="CurrentPage" id="hdnCurrentPage" value="@Model.CurrentPage" />
+                    <input type="hidden" name="SortOrder" id="hdnSortOrder" value="@Model.SortOrder" />
+                    <input type="hidden" name="SortColumn" id="hdnSortColumn" value="@Model.SortColumn" />
+                    @Html.PagedListPager(Model.PagedUserRoleMappings, page => "#")
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="userModel" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divUserModalContent">
+
+        </div>
+    </div>
+</div>
+
+
+<link href="~/CustomContent/css/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on("click","#btnSave", function () {
+        $("#lblErrMessage").hide();
+        // validations...
+        var username = $("#txtUserName").val();
+        if (username == "") {
+            $("#txtUserName").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Enter Full Name");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtUserName").css({ "border-color": "#d1d3e2" });
+        }
+        var userid = $("#hdnUserId").val();
+        if (userid == "" || userid == null) {
+            $("#txtUserName").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Select User from Auto Complete List");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtUserName").css({ "border-color": "#d1d3e2" });
+        }
+        var role = $(".chkRole:checked").length;
+        if (role == "0") {
+            $("#lblErrMessage").text("Please Select atleast one role");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        $("#frmUserRoleMapping").submit();
+    });
+
+    //Edit Functionality
+    $(document).on("click", ".editUser", function () {
+        var userid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageUserRole",new { area = "Users"})",
+            data: { "userid": userid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divUserModalContent").html('');
+                $("#divUserModalContent").html(data.HTML);
+            }
+        });
+    });
+
+    //Delete Functionality
+    $(document).on("click", ".deleteUser", function () {
+        var userid = $(this).attr("data-id");
+        window.location.href = "@Url.Action("Delete", "ManageUserRole",new { area = "Users"})?id=" + userid;
+    });
+
+    //List Filter Functionality
+    $("#txtSearch").change(function () {
+        $("#frmUserList").submit();
+    });
+</script>
+

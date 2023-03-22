@@ -1,0 +1,102 @@
+﻿@model DataRooms.UI.Areas.TaskApproval.Model.CustomReviewModel
+
+    <form method="post" action="@Url.Action("Edit","ManageReview",new { area = "TaskApproval"})" id="frmReview">
+        <div class="modal-header">
+            <h5 class="modal-title" id="">File Review</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body ui-front">
+            <div class="row">
+                <div class="col-lg-4">
+                    <h4 class="font-weight-bold">File Name</h4>
+                    <div>
+                        <span>@Model.File.FileName</span>
+                        <input type="hidden" name="FileName" value="@Model.File.FileName" />
+                        <input type="hidden" name="Id" value="@Model.File.Id" />
+                        <input type="hidden" name="TaskId" value="@Model.TaskId" />
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <h4 class="font-weight-bold">Folder Name</h4>
+                    <div>
+                        <span>@Model.File.FolderName</span>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <h4 class="font-weight-bold">SharBox Name</h4>
+                    <div>
+                        <span>@Model.File.DataRoomName</span>
+                    </div>
+                </div>
+            </div>
+            <div class="" style="margin-top:10px;">
+                <b>Comments</b>
+                <div>
+                    <textarea class="form-control" rows="3" maxlength="512" name="FileDescription" id="txtReviewComments"></textarea>
+                </div>
+            </div>
+            <input type="hidden" name="Status" id="hdnReviewStatus" value="Reviewed"/>
+        </div>
+        <div class="modal-footer">
+            <input type="submit" value="Mark as Reviewed" id="btnReview" class="btn btn-primary" />
+            <input type="submit" value="Reject" id="btnReviewReject" class="btn btn-warning" />
+            <input type="button" value="Cancel" id="btnCancel" class="btn btn-danger" />
+        </div>
+    </form>
+<div class="">
+    <h4>Audit History</h4>
+    <table class="table table-bordered" id="" width="100%" cellspacing="0">
+        <thead class="tbl-header">
+            <tr>
+                <th>S.No.</th>
+                <th>User Name</th>
+                <th>Action</th>
+                <th>Comments</th>
+                <th>Action On</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.AuditHistory != null && Model.AuditHistory.Count() > 0)
+            {
+                int i = 1;
+                foreach (var task in Model.AuditHistory)
+                {
+                    <tr>
+                        <td style="text-align:center">@i</td>
+                        <td>@task.AuditorName</td>
+                        <td>@task.Status</td>
+                        <td>@task.Comments</td>
+                        <td>@task.AuditOn.ToApplicationFormat()</td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">No History Found..</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $("#btnReview").click(function () {
+        $("#hdnReviewStatus").val("Reviewed");
+    });
+    $("#btnReviewReject").click(function () {
+        $("#hdnReviewStatus").val("Rejected");
+        var comments = $("#txtReviewComments").val();
+        if (comments == null || comments == "") {
+            $("#txtReviewComments").css({ "border-color": "red" });
+            return false;
+        }
+        else {
+            $("#txtReviewComments").css({ "border-color": "grey" });
+        }
+    });
+</script>
+

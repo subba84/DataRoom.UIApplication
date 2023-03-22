@@ -1,0 +1,121 @@
+﻿@model DataRooms.UI.Areas.TaskApproval.Model.CustomReviewModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+    <div class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/task/dashboard">Home</a></li>
+                        <li class="breadcrumb-item active">My Approvals</li>
+                    </ol>
+                </div><!-- /.col -->
+                
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+<form method="post" action="@Url.Action("List","ManageApproval",new { area = "TaskApprovals"})" id="frmTasks">
+    <!-- DataTales Example -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="font-weight-bold">My Approvals</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="tbl-header">
+                        <tr>
+                            <th>S.No.</th>
+                            <th>File Name</th>
+                            <th>Folder Name</th>
+                            <th>SharBox Name</th>
+                            <th>File Submitted By</th>
+                            <th>File Submitted On</th>
+                            <th colspan="2" style="text-align:center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.PagedTaks != null && Model.PagedTaks.Count() > 0)
+                        {
+                            int i = 1;
+                            foreach (var task in Model.PagedTaks)
+                            {
+                                <tr>
+                                    <td style="text-align:center">@task.FileId</td>
+                                    <td>@task.FileName</td>
+                                    <td>@task.FolderName</td>
+                                    <td>@task.DataRoomName</td>
+                                    <td>@task.CreatorName</td>
+                                    <td>@task.CreatedOn.ToApplicationFormat()</td>
+                                    <td style="text-align:center"><a href="/file/download?fileid=@task.FileId"><i class="fas fa-fw fa-download theme downloadFile" data-id="@task.Id" data-fileid="@task.FileId"></i></a></td>
+                                    <td style="text-align:center"><i class="fas fa-fw fa-tasks text-red approveTask" data-id="@task.Id" data-fileid="@task.FileId"></i></td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">No Tasks Found..</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <div id='Paging' style="text-align:center">
+                Page @(Model.PagedTaks.PageCount < Model.PagedTaks.PageNumber ? 0 : Model.PagedTaks.PageNumber)
+                of @Model.PagedTaks.PageCount
+                <input type="hidden" name="RecordsPerPage" value="@Model.RecordsPerPage" />
+                <input type="hidden" name="SearchString" id="hdnSearchString" value="@Model.SearchString" />
+                <input type="hidden" name="CurrentPage" id="hdnCurrentPage" value="@Model.CurrentPage" />
+                <input type="hidden" name="SortOrder" id="hdnSortOrder" value="@Model.SortOrder" />
+                <input type="hidden" name="SortColumn" id="hdnSortColumn" value="@Model.SortColumn" />
+                @Html.PagedListPager(Model.PagedTaks, page => "#")
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal" id="approvalModel" tabindex="-1" role="dialog" aria-labelledby="approvalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="divApprovalModalContent">
+
+        </div>
+    </div>
+</div>
+
+<link href="~/CustomContent/css/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on("click", ".approveTask", function () {
+        var fileid = $(this).attr("data-fileid");
+        var taskid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit", "ManageApproval",new { area = "TaskApproval"})?fileid=" + fileid + "&taskid=" + taskid,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                $("#divApprovalModalContent").html("");
+                $("#divApprovalModalContent").html(data.HTML);
+                $("#approvalModel").modal("show");
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+</script>
+

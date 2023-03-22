@@ -1,0 +1,51 @@
+﻿@model DataRooms.UI.Areas.Users.Models.CustomUserRoleMapping
+
+    <table class="table table-bordered">
+        <thead class="tbl-header">
+            <tr>
+                <th style="width:70px;">S. No.</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Is Active</th>
+                <th>Created By</th>
+                <th>Created On </th>
+                <th style="width:80px; text-align:center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PagedUsers != null && Model.PagedUsers.Count() > 0)
+            {
+                int i = 1;
+                foreach (var user in Model.PagedUsers)
+                {
+            <tr>
+                <td>@i</td>
+                <td>@user.FullName</td>
+                <td>@user.EmailId</td>
+                <td>@user.UserName</td>
+                <td>@(user.IsActive == true ? "Yes" : "No")</td>
+                <td>@user.CreatorName</td>
+                <td>@user.CreatedOn.ToApplicationFormat()</td>
+                <td style="width:80px; text-align:center">
+                    <button type="button" class="btn btn-link p-0 mr-2 editUser"  data-id="@user.Id" title="Edit" data-toggle="modal"
+                            data-target="#userModel">
+                        <i class="far fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-link p-0 text-danger deleteUser" data-id="@user.Id" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8">No Users Found..</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+

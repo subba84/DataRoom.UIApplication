@@ -1,0 +1,174 @@
+﻿@model DataRooms.UI.Models.User
+
+<form class="user" method="post" action="@Url.Action("Edit","ManageUser",new { area = "Users"})" id="frmUser">
+    <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">Add User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        @if (Convert.ToInt32(Session["CurrentRoleId"]) == DataRooms.UI.AppRole.SuperAdmin)
+        {
+            <div class="form-group row">
+                <label>Company</label>
+                <select class="form-control" name="CompanyId" id="slCompany">
+                    <option value="0">Select Company</option>
+                    @if (DataRooms.DataCache.Companies != null && DataRooms.DataCache.Companies.Count() > 0)
+                    {
+                        foreach (var company in DataRooms.DataCache.Companies)
+                        {
+                            if (Model.CompanyId == company.Id)
+                            {
+                                <option value="@company.Id" selected>@company.CompanyName</option>
+                            }
+                            else
+                            {
+                                <option value="@company.Id">@company.CompanyName</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+        }
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+
+                <input type="hidden" name="CreatedBy" value="@Model.CreatedBy" />
+                <input type="hidden" name="CreatorName" value="@Model.CreatorName" />
+                <input type="hidden" name="CreatedOn" value="@Model.CreatedOn" />
+
+                <label class="col-form-label-sm" for="txtFullName">Full Name</label>
+                <input type="text" class="form-control txtUser" id="txtFullName"
+                       placeholder="Full Name" name="FullName" value="@Model.FullName">
+                <input type="hidden" name="Id" id="hdnUserId" value="@Model.Id" />
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtUsername">User Name</label>
+                <input type="text" class="form-control" id="txtUsername"
+                       placeholder="User Name" name="UserName" value="@Model.UserName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-form-label-sm" for="txtEmailId">Email Address</label>
+            <input type="email" class="form-control" id="txtEmailId"
+                   placeholder="Email Address" name="EmailId" value="@Model.EmailId">
+        </div>
+        <div class="form-group row divpassword">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <label class="col-form-label-sm" for="txtPassword">Password</label>
+                <input type="password" class="form-control"
+                       id="txtPassword" placeholder="Password" name="Password" value="@Model.Password">
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtConfirmPassword">Confirm Password</label>
+                <input type="password" class="form-control"
+                       id="txtConfirmPassword" placeholder="Confirm Password" value="@Model.Password">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 form-group" style="display:none">
+                <label class="col-form-label-sm" for="chkIsActive">Is Active</label>
+                <input type="checkbox" class="form-check-label" checked @*@(Model.IsActive ? "checked" : "")*@ value="true" id="chkIsActive"
+                       placeholder="Email Address" name="IsActive">
+            </div>
+            <div class="col-lg-6 form-group">
+                @{
+                    bool isAdmin = ViewBag.IsAdmin;
+                }
+                <label class="col-form-label-sm" for="chkIsAdmin">Is Admin</label>
+                <input type="checkbox" class="form-check-label" @(isAdmin ? "checked" : "") value="true" id="chkIsAdmin"
+                       name="IsAdmin">
+            </div>
+        </div>
+        
+        <label id="lblErrMessage" class="float-left text-red" style="display:none"></label>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    </div>
+</form>
+
+<style>
+    .ui-autocomplete{
+        position:absolute;
+        cursor:default;
+        z-index:1500 !important;
+    }
+</style>
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+@*<link href="~/Content/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />*@
+<script>
+    $(document).on("focus", ".txtUser", function () {
+        var url = '@Url.Action("GetAllUsers", "ManageUserRole",new { area = "Users" })?searchString=' + $(".txtUser").val();
+        if ("@Convert.ToInt32(Session["CurrentRoleId"])" == "@AppRole.SuperAdmin") {
+            var compid = $("#slCompany").val();
+            url = '@Url.Action("GetAllUsers", "ManageUserRole",new { area = "Users" })?searchString=' + $(".txtUser").val() + '&compid=' + compid;
+        }
+
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: url,
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnUserId").val('');
+                        //$(".txtUser").val('');
+                        $("#txtEmailId").val('');
+                        $("#txtUsername").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                email: item.EmailId,
+                                username:item.UserName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $(".txtUser").val(ui.item.label);
+                $("#txtEmailId").val(ui.item.email);
+                $("#txtUsername").val(ui.item.username);
+                $("#hdnUserId").val(ui.item.val);
+        }
+    });
+    });
+
+
+    $(document).on("change", "#slCompany", function () {
+        var companyid = $(this).val();
+        $("#txtFullName").val("");
+        $("#txtUsername").val("");
+        $("#txtEmailId").val("");
+        $("#hdnUserId").val("");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("CheckCompanyADAuthorNot", "ManageUser",new { area = "Users"})?companyid=" + companyid,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                if (data == "Y") {
+                    $("#txtFullName").addClass("txtUser");
+                    $("#txtUsername").attr("readonly", true);
+                    $("#txtEmailId").attr("readonly", true);
+                    $("#txtPassword").val("");
+                    $("#txtConfirmPassword").val("");
+                    $(".divpassword").hide();
+                }
+                else {
+                    $("#txtFullName").removeClass("txtUser");
+                    $("#txtUsername").attr("readonly", false);
+                    $("#txtEmailId").attr("readonly", false);
+                    $("#txtPassword").val("");
+                    $("#txtConfirmPassword").val("");
+                    $(".divpassword").show();
+                }
+            }
+        });
+    });
+
+</script>
