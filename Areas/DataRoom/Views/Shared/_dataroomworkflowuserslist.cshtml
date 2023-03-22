@@ -1,0 +1,166 @@
+﻿@model List<DataRooms.UI.Models.DataRoomWorkFlowUser>
+
+<div class="row" style="border-bottom:1px solid blue;padding:5px;margin-left:0px;margin-right:0px;">
+    <div class="col-lg-4">
+        <label><b>SharBox</b></label>
+        <div>
+            <input type="hidden" value="" id="hdnDataRoomWorkFlowUserDataRoomId" />
+            <span id="spnDataRoomWorkFlowDataRoomName"></span>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <label><b>Work Flow</b></label>
+        <div>
+            <input type="hidden" value="" id="hdnDataRoomWorkFlowUserWorkFlowId" />
+            <span id="spnDataRoomWorkFlowUserWorkFlowName"></span>
+        </div>
+    </div>
+</div>
+
+
+<div class="row" id="divDataRoomWorkFlowUserControls" style="margin-top:20px;margin-left:0px;margin-right:0px;">
+    <div class="col-lg-3">
+        <label>User</label>
+        <div id="divUserNameControl">
+            <input type="text" class="form-control" id="txtDataRoomWorkFlowUserUserName" />
+            <input type="hidden" id="hdnDataRoomWorkFlowUserUserId" />
+            <input type="hidden" id="hdnDataRoomWorkFlowUserId" />
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <label>Role</label>
+        <div>
+            <select class="form-control" id="slDataRoomWorkFlowUserRoleId">
+                <option value="0">--Select--</option>
+                <option value="@AppRole.Initiator">Initiator</option>
+                <option value="@AppRole.Reviewer">Reviewer</option>
+                <option value="@AppRole.Approver">Approver</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-2" style="display:none">
+        <label>Is Mandatory?</label>
+        <div>
+            <input type="checkbox" checked id="chkDataRoomWorkFlowUserIsMandatory" />
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <label>Is Active</label>
+        <div>
+            <input type="checkbox" id="chkDataRoomWorkFlowUserIsActive" checked/>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <div>
+            <input type="button" class="btn btn-secondary" style="margin-top:33px;" value="Save" id="btnDataRoomWorkFlowUserEdit" />
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-top:20px;margin-right:0px;margin-left:0px;border-top:1px solid blue;">
+    <div class="col-lg-12" style="overflow:auto" id="divDataRoomWorkFlowUsersListPart">
+        <div class="row">
+            <div class="col-lg-6" align="left">
+                <h5><b>Work Flow Users</b></h5>
+            </div>
+            <div class="col-lg-6" align="right">
+                <label>Search : </label>
+                <input type="text" id="txtDataRoomWorkFlowUserSearch" placeholder="Search with User Name.." />
+            </div>
+        </div>
+        <table class="table table-bordered" id="tblDataRoomWorkFlowUser" width="50%" cellspacing="0">
+            <thead class="tbl-header">
+                <tr>
+                    <th>S.No.</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Is Mandatory Action</th>
+                    <th>Is Active</th>
+                    <th colspan="2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count() > 0)
+                {
+                    int i = 1;
+                    foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@i</td>
+                            <td>
+                                @user.UserName
+                            </td>
+                            <td>@user.RoleName</td>
+                            <td>@(user.IsMandatoryAction == true ? "Yes" : "No")</td>
+                            <td>@(user.IsActive == true ? "Yes" : "No")</td>
+                            <td style="cursor:pointer">
+                                <i class="fas fa-fw fa-edit theme editDataRoomWorkFlowUser" data-id="@user.Id" data-isactive="@user.IsActive" data-userid="@user.UserId" data-username="@user.UserName" data-roleid="@user.RoleId" data-rolename="@user.RoleName" data-ismandatory="@user.IsMandatoryAction"></i>
+                            </td>
+                            <td style="cursor:pointer"><i class="fas fa-fw fa-trash text-red deleteDataRoomWorkFlowUser" data-username="@user.UserName" data-id="@user.Id"></i></td>
+                        </tr>
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7">No Users Found..</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#txtDataRoomWorkFlowUserSearch').keyup(function () {
+            search_table_dataroomworkflowuser($(this).val());
+        });
+        function search_table_dataroomworkflowuser(value) {
+            $('#tblDataRoomWorkFlowUser tr').each(function () {
+                var found = 'false';
+                $(this).each(function () {
+                    if ($(this).text().toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+                        found = 'true';
+                    }
+                });
+                if (found == 'true') {
+                    $(this).show();
+                }
+                else {
+                    $(this).hide();
+                }
+            });
+        }
+    });
+
+    $("#txtDataRoomWorkFlowUserUserName").autocomplete({
+        appendTo: "#divUserNameControl",
+            source: function (request, response) {
+                $.ajax({
+                    url: '/dataroom/workflowusers?searchString=' + $("#txtDataRoomWorkFlowUserUserName").val() + "&dataroomid=" + $("#hdnDataRoomWorkFlowUserDataRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnUserId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtDataRoomWorkFlowUserUserName").val(ui.item.label);
+                $("#hdnDataRoomWorkFlowUserUserId").val(ui.item.val);
+        }
+    });
+
+</script>
+
+
+

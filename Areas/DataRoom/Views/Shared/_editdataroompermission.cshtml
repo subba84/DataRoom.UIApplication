@@ -1,0 +1,110 @@
+﻿@model DataRooms.UI.Models.DataRoomPermission
+
+    <style>
+
+    </style>
+<form class="user" method="post" action="@Url.Action("Edit","ManageDataRoomPermission",new { area = "DataRoom"})" id="frmDataRoomPermission">
+    <div class="modal-header">
+        <h5 class="modal-title" id="dataRoomModalLabel">SharBox Permission</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body ui-front">
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="CreatedBy" value="@Model.CreatedBy" />
+                <input type="hidden" name="CreatorName" value="@Model.CreatorName" />
+                <input type="hidden" name="CreatedOn" value="@Model.CreatedOn" />
+
+                <label class="col-form-label-sm" for="txtDataRoomName">Shar Box</label>
+                <input type="text" class="form-control border-0" readonly id="txtDataRoomName"
+                       placeholder="Room Name" name="DataRoomName" value="@Model.DataRoomName" />
+                <input type="hidden" name="DataRoomId" id="hdnRoomId" value="@Model.DataRoomId" />
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtUserName">User</label>
+                <input class="form-control" rows="3" id="txtUserName"
+                       placeholder="Full Name" name="UserName" value="@Model.UserName" />
+                <input type="hidden" name="UserId" id="hdnUserId" value="@Model.UserId" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <label class="col-form-label-sm" for="txtConfirmPassword">Permissions</label>
+                <div class="row" style="font-size:11px;">
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <input type="checkbox" name="HasFullControl" value="true" id="chk_0" @(Model.HasFullControl ? "checked" : "") class="chkPermission"/>
+                        <label for="chk_0">Full Control</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <input type="checkbox" name="HasRead" value="true" id="chk_1" @(Model.HasRead ? "checked" : "")  class="chkPermission childPermissions"/>
+                        <label for="chk_1">Read</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-2">
+                        <input type="checkbox" name="HasWrite" value="true" id="chk_2" @(Model.HasWrite ? "checked" : "") class="chkPermission childPermissions" />
+                        <label for="chk_2">Write</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        <input type="checkbox" name="HasDelete" value="true" id="chk_3" @(Model.HasDelete ? "checked" : "") class="chkPermission childPermissions" />
+                        <label for="chk_3">Delete</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <label class="col-form-label-sm" for="txtPassword">IsActive</label>
+                <input type="checkbox" class="form-check-label" @(Model.IsActive ? "checked" : "") value="true" id="chkIsActive"
+                       name="IsActive">
+            </div>
+        </div>
+        <label id="lblErrMessage" class="float-left text-red" style="display:none"></label>
+    </div>
+    <div class="modal-footer">
+        @*<label id="lblErrMsg">Permission Saved Successfully</label>*@
+        <button type="button" class="btn btn-primary" id="btnDataRoomPermissionSave">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    </div>
+</form>
+
+@*<link href="~/CustomContent/css/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>*@
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script>
+    $("#txtUserName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetAllUsers", "ManageUserRole",new { area = "Users" })?searchString=' + $("#txtUserName").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnUserId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtUserName").val(ui.item.label);
+                $("#hdnUserId").val(ui.item.val);
+        }
+    });
+
+
+
+    $(document).on("click", ".childPermissions", function () {
+        if ($(".childPermissions:checked").length == 3) {
+            $("#chk_0").prop("checked", true);
+        }
+        else {
+            $("#chk_0").prop("checked", false);
+        }
+    });
+
+    
+</script>

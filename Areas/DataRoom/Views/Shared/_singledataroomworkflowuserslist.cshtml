@@ -1,0 +1,51 @@
+﻿@model List<DataRooms.UI.Models.DataRoomWorkFlowUser>
+<div class="row">
+    <div class="col-lg-6" align="left">
+        <h5><b>Work Flow Users</b></h5>
+    </div>
+    <div class="col-lg-6" align="right">
+        <label>Search : </label>
+        <input type="text" id="txtDataRoomWorkFlowUserSearch" placeholder="Search with User Name.." />
+    </div>
+</div>
+<table class="table table-bordered" id="tblDataRoomWorkFlowUser" width="50%" cellspacing="0">
+    <thead>
+        <tr>
+            <th>S.No.</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Is Mandatory Action</th>
+            <th>Is Active</th>
+            <th colspan="2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+            int i = 1;
+            foreach (var user in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>
+                        @user.UserName
+                    </td>
+                    <td>@user.RoleName</td>
+                    <td>@(user.IsMandatoryAction == true ? "Yes" : "No")</td>
+                    <td>@(user.IsActive == true ? "Yes" : "No")</td>
+                    <td style="cursor:pointer">
+                        <i class="fas fa-fw fa-edit theme editDataRoomWorkFlowUser" data-id="@user.Id" data-isactive="@user.IsActive" data-userid="@user.UserId" data-username="@user.UserName" data-roleid="@user.RoleId" data-rolename="@user.RoleName" data-ismandatory="@user.IsMandatoryAction"></i>
+                    </td>
+                    <td style="cursor:pointer"><i class="fas fa-fw fa-trash text-red deleteDataRoomWorkFlowUser" data-username="@user.UserName" data-id="@user.Id"></i></td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7">No Users Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>

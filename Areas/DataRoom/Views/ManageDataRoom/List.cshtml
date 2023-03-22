@@ -1,0 +1,861 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header pb-0">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">All SharBox</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <button class="float-right btn-curved editDataRoom" data-id="0" type="button"> <i class="fas fa-plus"></i>&nbsp; SharBox</button>
+            </div>
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid border-top">
+        <div class="row mt-2">
+
+            @if (Model.DataRooms != null && Model.DataRooms.Count() > 0)
+            {
+                foreach (var dataroom in Model.DataRooms)
+                {
+                    <div class="divDataroom col-lg-2 col-md-3 col-6 mb-2" data-id="@dataroom.Id" title="@dataroom.DataRoomName | @dataroom.CreatorName | @dataroom.CreatedOn.ToApplicationFormat()">
+                        <div class="card-a">
+                            <div class="btn-group w-100">
+                                <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                      style="border-top-right-radius: 6px;">
+                                    @dataroom.DataRoomName
+                                </span>
+                                <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                      aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                    <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                </span>
+                                <div class="dropdown-menu dropdown-menu-right pl-2">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><a href="#" class="deleteDataRoom" data-name="@dataroom.DataRoomName" data-id="@dataroom.Id" title="Delete SharBox"><i class="las la-trash fa-lg color-red-b"></i> Delete SharBox</a></li>
+                                        <li><a href="#" class="editDataRoom" data-name="@dataroom.DataRoomName" data-id="@dataroom.Id" title="Edit SharBox"><i class="las la-edit fa-lg color-red-b"></i> Edit SharBox</a></li>
+                                        <li><a href="#" class="addDataRoomPermission" data-id="@dataroom.Id" data-permissionid="0" title="Add SharBox Permission"><i class="las la-user-cog fa-lg color-red-b"></i> Add Permisson</a></li>
+                                        <li><a href="#" class="viewDataRoomPermission" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="View SharBox Permissions"><i class="las la-eye fa-lg color-red-b"></i> View Permisson</a></li>
+                                        <li><a href="#" class="manageDataRoomWorkFlow" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="Manage Workflows"><i class="las la-bars fa-lg"></i> Manage Work Flows</a></li>
+                                        @*<li><a href="#" class="manageItemTracker" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="Manage Item Tracker"><i class="las la-cog fa-lg"></i> Manage Item Tracker</a></li>*@
+                                        @*<li><a href="#" class="manageWorkFlowUsers" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="Manage Workflow Users"><i class="las la-user-cog fa-lg color-red-b"></i> Manage Work Flow Users</a></li>*@
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-a-body">
+                                <img src="~/Content/dist/img/folder-icon.png" alt="folder-image">
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            <input type="hidden" id="hdnSearchStringDataRoom" value="@Model.SearchString" name="SearchString" />
+
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+<!-- Begin Page Content -->
+@*<div class="" style="margin-left:30px;margin-right:30px;">
+    <div class="row">
+        <input type="button" class="btn btn-primary float-right editDataRoom" data-id="0" style="float:right" value="+ SharBox" />
+        <form method="post" action="@Url.Action("List","ManageDataRoom",new { area = "DataRoom"})" id="frmDataRoomsList">
+            @Html.Partial("~/Areas/DataRoom/Views/Shared/_dataroomslist.cshtml", Model)
+            <input type="hidden" id="hdnSearchStringDataRoom" value="@Model.SearchString" name="SearchString" />
+        </form>
+    </div>
+</div>*@
+
+
+
+
+<div class="modal" id="dataRoomModel" tabindex="-1" role="dialog" aria-labelledby="dataRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" id="divDataRoomModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="dataroomPermissionModel" tabindex="-1" role="dialog" aria-labelledby="dataroomPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divDataRoomPermissionModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="dataroomPermissionListModel" tabindex="-1" role="dialog" aria-labelledby="dataroomPermissionListModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width:1000px">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">DataRoom Permissions</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divDataRoomPermissionListModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="dataroomWorkFlowListModel" tabindex="-1" role="dialog" aria-labelledby="dataroomWorkFlowListModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width:1000px">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">DataRoom Work Flow Users</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divDataRoomWorkFlowUsersListModalContent">
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="dataroomWorkFlowCreationModel" tabindex="-1" role="dialog" aria-labelledby="dataroomWorkFlowCreationModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width:1000px">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">DataRoom Work Flows</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divDataRoomWorkFlowCreationModalContent">
+
+        </div>
+    </div>
+</div>
+
+
+
+<link href="~/Content/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on("click","#btnSaveDataRoom", function () {
+        $("#lblErrMessage").hide();
+        // validations...
+        var fullname = $("#txtDataRoomName").val();
+        if (fullname == "") {
+            $("#txtDataRoomName").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Enter SharBox Name");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtDataRoomName").css({ "border-color": "#d1d3e2" });
+        }
+        var username = $("#txtDescription").val();
+        if (username == "") {
+            $("#txtUsername").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Enter Description");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtDescription").css({ "border-color": "#d1d3e2" });
+        }
+
+        //if ($("#chkIsWorkFlowRequired").is(":checked") == true) {
+        //    if ($("#slWorkFlow").val() == "0") {
+        //        $("#slWorkFlow").css({ "border-color": "red" });
+        //        $("#lblErrMessage").text("Please Select a Work Flow, If Work Flow is not there, Please create one");
+        //        $("#lblErrMessage").show();
+        //        return false;
+        //    }
+        //    else {
+        //        $("#slWorkFlow").css({ "border-color": "#d1d3e2" });
+        //    }
+        //}
+
+        if ($("#chkArchival").is(":checked") == true) {
+            var archivalperiod = $("#txtArchivalPeriod").val();
+            if (archivalperiod == "") {
+                $("#txtArchivalPeriod").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter Archival Period");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtArchivalPeriod").css({ "border-color": "#d1d3e2" });
+            }
+        }
+
+        if ($("#chkDeletion").is(":checked") == true) {
+            var deletionperiod = $("#txtDeletionPeriod").val();
+            if (deletionperiod == "") {
+                $("#txtDeletionPeriod").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter Deletion Period");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtDeletionPeriod").css({ "border-color": "#d1d3e2" });
+            }
+        }
+
+        if ($("#chkLogsRequired").is(":checked") == true) {
+            var retentionPeriod = $("#txtRetentionPeriod").val();
+            if (retentionPeriod == "") {
+                $("#txtRetentionPeriod").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter Retention Period");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtRetentionPeriod").css({ "border-color": "#d1d3e2" });
+            }
+        }
+    });
+
+     $(document).on("click", ".manageDataRoomPermissions", function () {
+        var dataroomid = $(this).attr("data-id");
+        formloader();
+        window.location.href = "@Url.Action("List","ManageDataRoomPermission",new { area = "DataRoom"})?dataroomid=" + dataroomid;
+    });
+
+
+    
+
+
+    //Edit Functionality
+    $(document).on("click", ".editDataRoom", function () {
+        var roomid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageDataRoom",new { area = "DataRoom"})",
+            data: { "id": roomid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divDataRoomModalContent").html('');
+                $("#divDataRoomModalContent").html(data.HTML);
+                $("#dataRoomModel").modal("show");
+            }
+        });
+    });
+
+    //Edit WorkFlow Functionality
+    $(document).on("click", ".manageDataRoomWorkFlow", function () {
+        var roomid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetWorkFlowsbyDataRoomId", "ManageDataRoomWorkFlowUser", new { area = "DataRoom"})",
+            data: { "dataroomid": roomid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divDataRoomWorkFlowCreationModalContent").html('');
+                $("#divDataRoomWorkFlowCreationModalContent").html(data.HTML);
+                $("#dataroomWorkFlowCreationModel").modal("show");
+            }
+        });
+    });
+
+
+    $(document).on("dblclick", ".divDataroom", function () {
+        var roomid = $(this).attr("data-id");
+        formloader();
+        window.location.href = "@Url.Action("Index","FileExplorer",new { area = "Explorer"})?dataroomid=" + roomid;
+    });
+
+
+     //Delete Functionality
+    $(document).on("click", ".deleteDataRoom", function (e) {
+        var roomid = $(this).attr("data-id");
+        var dataroomname = $(this).attr("data-name");
+        fnConfirm("Are you sure, you want to delete sharbox - " + dataroomname + "?");
+        $("#btnConfirmOk").click(function () {
+            formloader();
+            window.location.href = "@Url.Action("Delete", "ManageDataRoom",new { area = "DataRoom"})?id=" + roomid;
+        });
+    });
+
+    //List Filter Functionality
+    //$("#txtSearch").change(function () {
+    //    $("#frmDataRoomsList").submit();
+    //});
+
+    //$.getJSON("/userroles/getallroles", function (data) {
+    //    $.each(data, function (item, index) {
+    //        alert(item.RoleName);
+    //    });
+    //});
+
+    $(document).on("click", ".addDataRoomPermission", function () {
+        var dataroomid = $(this).attr("data-id");
+        var id = $(this).attr("data-permissionid");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageDataRoomPermission",new { area = "DataRoom"})",
+            data: { "id": id, "dataroomid": dataroomid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomPermissionModalContent").html('');
+                $("#divDataRoomPermissionModalContent").html(data.HTML);
+                $("#dataroomPermissionModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".viewDataRoomPermission", function () {
+        var dataroomid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetDataRoomPermissions", "ManageDataRoomPermission",new { area = "DataRoom"})",
+            data: { "dataroomid": dataroomid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomPermissionListModalContent").html('');
+                $("#divDataRoomPermissionListModalContent").html(data.HTML);
+                $("#dataroomPermissionListModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    //List Filter Functionality
+    $(document).on("change", ".txtGlobalSearch", function () {
+        $("#hdnSearchStringDataRoom").val($(this).val());
+        $("#frmDataRoomsList").submit();
+    });
+
+    $(document).on("keypress", ".txtGlobalSearch", function (event) {
+        if (event.keyCode == 13) {
+            $("#hdnSearchStringDataRoom").val($(this).val());
+            $("#frmDataRoomsList").submit();
+        }
+    });
+
+    $(document).ready(function () {
+        $(".txtGlobalSearch").val($("#hdnSearchStringDataRoom").val());
+    });
+
+</script>
+
+<script>
+    $(document).on("click", ".editDataRoomPermission", function () {
+        var user = $(this).parent().parent().find(".tdDataRoomPermissionUserName").text();
+        var full = $(this).attr("data-fullcontrol");
+        var read = $(this).attr("data-read");
+        var write = $(this).attr("data-write");
+        var delte = $(this).attr("data-delete");
+        var isactive = $(this).attr("data-isactive");
+        var id = $(this).attr("data-id");
+        $("#hdnDataRoomPermissionId").val(id);
+        $("#bDataRoomPermissionUser").text(user);
+        if (full == "True") {
+            $("#chkDataRoomPermissionFull").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomPermissionFull").prop("checked", false);
+        }
+        if (read == "True") {
+            $("#chkDataRoomPermissionRead").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomPermissionRead").prop("checked", false);
+        }
+        if (write == "True") {
+            $("#chkDataRoomPermissionWrite").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomPermissionWrite").prop("checked", false);
+        }
+        if (delte == "True") {
+            $("#chkDataRoomPermissionDelete").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomPermissionDelete").prop("checked", false);
+        }
+        if (isactive == "True") {
+            $("#chkDataRoomPermissionIsActive").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomPermissionIsActive").prop("checked", false);
+        }
+        $("#divDataRoomPermissionControls").show();
+    });
+
+    $(document).on("click", "#btnDataRoomPermissionEdit", function () {
+        var full = $("#chkDataRoomPermissionFull").prop("checked");
+        var read = $("#chkDataRoomPermissionRead").prop("checked");
+        var write = $("#chkDataRoomPermissionWrite").prop("checked");
+        var delte = $("#chkDataRoomPermissionDelete").prop("checked");
+        var isactive = $("#chkDataRoomPermissionIsActive").prop("checked");
+        var id = $("#hdnDataRoomPermissionId").val();
+
+        $("#divDataRoomPermissionListPart").html('');
+
+        var modal = {
+            Id: id,
+            HasFullControl: full,
+            HasRead: read,
+            HasWrite: write,
+            HasDelete: delte,
+            IsActive: isactive
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Edit","ManageDataRoomPermission",new { area = "DataRoom"})",
+            data: JSON.stringify(modal),
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomPermissionListPart").html('');
+                $("#divDataRoomPermissionListPart").html(data.HTML);
+                $("#divDataRoomPermissionControls").hide();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".deleteDataRoomPermission", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete","ManageDataRoomPermission",new { area = "DataRoom"})?id=" + id,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomPermissionListPart").html('');
+                $("#divDataRoomPermissionListPart").html(data.HTML);
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", "#btnDataRoomPermissionSave", function () {
+
+        $.post("@Url.Action("Edit","ManageDataRoomPermission",new { area = "DataRoom"})", $('#frmDataRoomPermission').serialize());
+
+        //$("#dataroomPermissionModel").modal("hide");
+
+        fnAlert("SharBox Permission Saved Successfully");
+        
+    });
+
+    $(document).on("click", ".manageWorkFlowUsers", function () {
+        var dataroomid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetDataRoomWorkFlowUsers", "ManageDataRoomWorkFlowUser", new { area = "DataRoom"})",
+            data: { "dataroomid": dataroomid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomWorkFlowUsersListModalContent").html('');
+                $("#divDataRoomWorkFlowUsersListModalContent").html(data.HTML);
+                $("#hdnDataRoomWorkFlowUserDataRoomId").val(data.DataRoom.Id);
+                $("#hdnDataRoomWorkFlowUserWorkFlowId").val(data.DataRoom.WorkFlowId);
+                $("#spnDataRoomWorkFlowDataRoomName").text(data.DataRoom.DataRoomName);
+                $("#spnDataRoomWorkFlowUserWorkFlowName").text(data.DataRoom.WorkFlowName);
+                $("#dataroomWorkFlowListModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+</script>
+
+<script>
+        $(document).on("click", ".editDataRoomWorkFlowUser", function () {
+        var userid = $(this).attr("data-userid");
+        var username = $(this).attr("data-username");
+        var roleid = $(this).attr("data-roleid");
+        var rolename = $(this).attr("data-rolename");
+        var ismandatory = $(this).attr("data-ismandatory");
+        var isactive = $(this).attr("data-isactive");
+        var id = $(this).attr("data-id");
+        $("#hdnDataRoomWorkFlowUserId").val(id);
+        if (ismandatory == "True") {
+            $("#chkDataRoomWorkFlowUserIsMandatory").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomWorkFlowUserIsMandatory").prop("checked", false);
+        }
+        if (isactive == "True") {
+            $("#chkDataRoomWorkFlowUserIsActive").prop("checked", true);
+        }
+        else {
+            $("#chkDataRoomWorkFlowUserIsActive").prop("checked", false);
+            }
+            $("#hdnDataRoomWorkFlowUserId").val(id);
+            $("#hdnDataRoomWorkFlowUserUserId").val(userid);
+            $("#txtDataRoomWorkFlowUserUserName").val(username);
+            $("#slDataRoomWorkFlowUserRoleId").val(roleid);
+        });
+
+    function fnClearDataRoomWorkFlowUserControls() {
+        $("#hdnDataRoomWorkFlowUserUserId").val('');
+        $("#txtDataRoomWorkFlowUserUserName").val('');
+        $("#slDataRoomWorkFlowUserRoleId").val('0');
+        $("#chkDataRoomWorkFlowUserIsMandatory").prop("checked",false);
+        $("#chkDataRoomWorkFlowUserIsActive").prop("checked",false);
+        $("#hdnDataRoomWorkFlowUserId").val('0');
+    };
+
+    $(document).on("click", "#btnDataRoomWorkFlowUserEdit", function (e) {
+        var userid = $("#hdnDataRoomWorkFlowUserUserId").val();
+        var username = $("#txtDataRoomWorkFlowUserUserName").val();
+        var roleid = $("#slDataRoomWorkFlowUserRoleId").val();
+        var rolename = $("#slDataRoomWorkFlowUserRoleId option:selected").text();
+        var ismandatory = $("#chkDataRoomWorkFlowUserIsMandatory").prop("checked");
+        var isactive = $("#chkDataRoomWorkFlowUserIsActive").prop("checked");
+        var id = $("#hdnDataRoomWorkFlowUserId").val();
+
+        $("#divDataRoomWorkFlowUsersListPart").html('');
+
+        var modal = {
+            Id: id,
+            DataRoomId: $("#hdnDataRoomWorkFlowUserDataRoomId").val(),
+            DataRoomName: $("#spnDataRoomWorkFlowDataRoomName").text(),
+            WorkFlowId: $("#hdnDataRoomWorkFlowUserWorkFlowId").val(),
+            WorkFlowName: $("#spnDataRoomWorkFlowUserWorkFlowName").text(),
+            RoleId: roleid,
+            RoleName: rolename,
+            UserId: userid,
+            UserName: username,
+            IsActive: isactive,
+            IsMandatoryAction: ismandatory
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Edit", "ManageDataRoomWorkFlowUser", new { area = "DataRoom" })",
+            data: JSON.stringify(modal),
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomWorkFlowUsersListPart").html('');
+                fnClearDataRoomWorkFlowUserControls();
+                $("#divDataRoomWorkFlowUsersListPart").html(data.HTML);
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+     $(document).on("click", ".deleteDataRoomWorkFlowUser", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Delete", "ManageDataRoomWorkFlowUser", new { area = "DataRoom" })?id=" + id,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divDataRoomWorkFlowUsersListPart").html('');
+                $("#divDataRoomWorkFlowUsersListPart").html(data.HTML);
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).on("click", ".editDataRoomWorkFlow", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("EditWorkFlow", "ManageDataRoomWorkFlowUser",new { area = "DataRoom"})?workflowid=" + id,
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            dataType:"json",
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                fnClearWorkFlowFields();
+                $("#workfloweditpart").html("");
+                $("#workfloweditpart").html(data.HTML);
+            }
+        });
+        //var workflowname = $(this).attr("data-workflowname");
+        //var isinitiatorreq = $(this).attr("data-isinitiatorreq");
+        //var isoneinitiator = $(this).attr("data-isoneinitiator");
+        //var isreviewreq = $(this).attr("data-isreviewreq");
+        //var isonereviewer = $(this).attr("data-isonereviewer");
+        //var isoneamongreview = $(this).attr("data-isoneamongreview");
+        //var isapprovalreq = $(this).attr("data-isapprovalreq");
+        //var isoneapprover = $(this).attr("data-isoneapprover");
+        //var isoneamongapproval = $(this).attr("data-isoneamongapproval");
+        //var dataroomid = $(this).attr("data-dataroomid");
+        //var dataroomname = $(this).attr("data-dataroomname");
+
+        //$("#hdnWorkFlowId").val(id);
+        //$("#txtWorkFlowName").val(workflowname);
+        //if (isinitiatorreq == "True") {
+        //    $("#chkIsInitiationRequired").prop("checked", true);
+        //}
+        //else {
+        //    $("#chkIsInitiationRequired").prop("checked", false);
+        //}
+
+        //if (isoneinitiator == "True") {
+        //    $("#rdbIsSingleInitiatorYes").prop("checked", true);
+        //}
+        //else {
+        //    $("#rdbIsSingleInitiatorNo").prop("checked", false);
+        //}
+
+        //if (isreviewreq == "True") {
+        //    $("#chkIsReviewRequired").prop("checked", true);
+        //    $(".review").show();
+        //}
+        //else {
+        //    $("#chkIsReviewRequired").prop("checked", false);
+        //    $(".review").hide();
+        //}
+
+        //if (isonereviewer == "True") {
+        //    $("#rdbIsSingleReviewerRequiredYes").prop("checked", true);
+        //    $(".oneAmongReview").hide();
+        //}
+        //else {
+        //    $("#rdbIsSingleReviewerRequiredNo").prop("checked", true);
+        //    $(".oneAmongReview").show();
+        //}
+        //if (isoneamongreview == "True") {
+        //    $("#chkIsSignleReviewSufficient").prop("checked", true);
+        //}
+        //else {
+        //    $("#chkIsSignleReviewSufficient").prop("checked", false);
+        //}
+
+        //if (isapprovalreq == "True") {
+        //    $("#chkIsApprovalRequired").prop("checked", true);
+        //    $(".approval").show();
+        //}
+        //else {
+        //    $("#chkIsApprovalRequired").prop("checked", false);
+        //    $(".approval").hide();
+        //}
+
+        //if (isoneapprover == "True") {
+        //    $("#rdbIsSingleApproverRequiredYes").prop("checked", true);
+        //    $(".oneAmongApproval").hide();
+        //}
+        //else {
+        //    $("#rdbIsSingleApproverRequiredNo").prop("checked", true);
+        //    $(".oneAmongApproval").show();
+        //}
+
+        //if (isoneamongapproval == "True") {
+        //    $("#chkIsSignleApprovalSufficient").prop("checked", true);
+        //}
+        //else {
+        //    $("#chkIsSignleApprovalSufficient").prop("checked", false);
+        //}
+        //$("#hdnWorkFlowDataRoomId").val(dataroomid);
+        //$("#hdnWorkFlowDataRoomName").val(dataroomname);
+    });
+
+    function fnClearWorkFlowFields() {
+        $("#hdnWorkFlowId").val("");
+        $("#txtWorkFlowName").val("");
+        //$("#chkIsInitiationRequired").prop("checked", false);
+        $("#rdbIsSingleInitiatorYes").prop("checked", false);
+        $("#rdbIsSingleInitiatorNo").prop("checked", false);
+        $("#chkIsReviewRequired").prop("checked", false);
+        $("#rdbIsSingleReviewerRequiredYes").prop("checked", false);
+        $("#rdbIsSingleReviewerRequiredNo").prop("checked", false);
+        $("#chkIsSignleReviewSufficient").prop("checked", false);
+        $("#chkIsApprovalRequired").prop("checked", false);
+        $("#rdbIsSingleApproverRequiredYes").prop("checked", false);
+        $("#rdbIsSingleApproverRequiredNo").prop("checked", false);
+        $("#chkIsSignleApprovalSufficient").prop("checked", false);
+        $(".reviewSection,.approvalSection").hide();
+        $(".approverslist,.reviewerslist,.initiatorslist").remove();
+        $(".tr_initiator,.tr_reviewer,.tr_approver").remove();
+        $(".review,.approval,.oneAmongReview,.oneAmongApproval").hide();
+
+
+
+
+        //$("#hdnWorkFlowDataRoomId").val("");
+        //$("#hdnWorkFlowDataRoomName").val("");
+    };
+
+    $(document).on("click", "#btnSaveWorkFlow", function () {
+
+        $("#lblWorkFlowErrMsg").hide();
+        var workflowname = $("#txtWorkFlowName").val();
+        if (workflowname == "") {
+            $("#txtWorkFlowName").css({ "border-color": "red" });
+            $("#lblWorkFlowErrMsg").text("Please Enter Work Flow Name");
+            $("#lblWorkFlowErrMsg").show();
+            return false;
+        }
+        else {
+            $("#txtWorkFlowName").css({ "border-color": "#d1d3e2" });
+        }
+
+        // Initiator Validations
+        if ($("#chkIsInitiationRequired").prop("checked") == true) {
+            var initiatorlength = 0;
+            $(".initiator").each(function () {
+                if ($(this).closest("td").find(".hdnisactive").val() != false) {
+                    initiatorlength++;
+                }
+            });
+            if (initiatorlength == 0) {
+                $("#lblWorkFlowErrMsg").text("Please assign intiator(s) to workflow");
+                $("#lblWorkFlowErrMsg").show();
+                return false;
+            }
+            else {
+                $("#lblWorkFlowErrMsg").hide();
+            }
+        }
+
+        // Reviewer Validations
+        if ($("#chkIsReviewRequired").prop("checked") == true) {
+            var reviewerlength = 0;
+            $(".reviewer").each(function () {
+                if ($(this).closest("td").find(".hdnisactive").val() != false) {
+                    reviewerlength++;
+                }
+            });
+            if (reviewerlength == 0) {
+                $("#lblWorkFlowErrMsg").text("You have selected Review Required Option, Please assign reviewer(s) to workflow");
+                $("#lblWorkFlowErrMsg").show();
+                return false;
+            }
+            else {
+                $("#lblWorkFlowErrMsg").hide();
+            }
+        }
+
+        // Approver Validations
+        if ($("#chkIsApprovalRequired").prop("checked") == true) {
+            var approverlength = 0;
+            $(".approver").each(function () {
+                if ($(this).closest("td").find(".hdnisactive").val() != false) {
+                    approverlength++;
+                }
+            });
+            if (approverlength == 0) {
+                $("#lblWorkFlowErrMsg").text("You have selected Approval Required Option, Please assign approver(s) to workflow");
+                $("#lblWorkFlowErrMsg").show();
+                return false;
+            }
+            else {
+                $("#lblWorkFlowErrMsg").hide();
+            }
+        }
+
+        
+        var form = $("#frmSaveWorkFlow");
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            dataType:"json",
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+
+                fnClearWorkFlowFields();
+                $("#divWorkFlowList").html("");
+                $("#divWorkFlowList").html(data.HTML);
+
+                //$("#divDataRoomWorkFlowCreationModalContent").html("");
+                //$("#divDataRoomWorkFlowCreationModalContent").html(data.HTML);
+            }
+        });
+    });
+
+    $(document).on("click", ".deleteDataRoomWorkFlow", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeleteDataRoomWorkFlow", "ManageDataRoomWorkFlowUser",new { area = "DataRoom"})?id=" + id,
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            dataType:"json",
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+
+                fnClearWorkFlowFields();
+                $("#divWorkFlowList").html("");
+                $("#divWorkFlowList").html(data.HTML);
+
+                //$("#divDataRoomWorkFlowCreationModalContent").html("");
+                //$("#divDataRoomWorkFlowCreationModalContent").html(data.HTML);
+            }
+        });
+    });
+
+
+
+</script>

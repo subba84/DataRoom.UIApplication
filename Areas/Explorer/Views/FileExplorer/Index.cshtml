@@ -1,0 +1,1899 @@
+﻿@model DataRooms.UI.Areas.Explorer.Model.ExplorerCustomModel
+@using PagedList.Mvc;
+
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+<link href="~/Content/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<style>
+    .modal-open{
+        overflow-y:scroll;
+    }
+    
+</style>
+
+<div id="divExplorer">
+    @Html.Partial("~/Areas/Explorer/Views/Shared/_explorerview.cshtml", Model)
+</div>
+
+
+@Html.Partial("~/Areas/Explorer/Views/Shared/_savefolder.cshtml", Model)
+
+@Html.Partial("~/Areas/Explorer/Views/Shared/_savefile.cshtml", Model)
+
+<div class="modal" id="fileCopyMoveModal" tabindex="-1" role="dialog" aria-labelledby="fileCopyMoveModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="width:325px;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fileCopyMoveModalLabel">File</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <input type="hidden" id="hdnCopyMoveFileId" />
+                <input type="hidden" id="hdnCopyMoveFolderId" />
+                <input type="hidden" id="hdnFileCopyMoveDataRoomId" />
+            </div>
+            <div class="modal-body" id="divCopyandMoveFile" style="overflow:auto;">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnCopyMove" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-danger" id="btnCopyMoveCancel" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="folderCopyMoveModal" tabindex="-1" role="dialog" aria-labelledby="folderCopyMoveModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="width:325px;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="folderCopyMoveModalLabel">Folder</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <input type="hidden" id="hdnCopyMoveTargetFolderId" />
+                <input type="hidden" id="hdnCopyMoveCurrentFolderId" />
+                <input type="hidden" id="hdnFolderCopyMoveDataRoomId" />
+            </div>
+            <div class="modal-body" id="divCopyandMoveFolder" style="overflow:auto;">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnFolderCopyMove" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-danger" id="btnFolderCopyMoveCancel" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="filePermissionModel" tabindex="-1" role="dialog" aria-labelledby="filePermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divFilePermissionModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="filePermissionListModel" tabindex="-1" role="dialog" aria-labelledby="filePermissionListModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width:1000px">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">File Permissions</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divFilePermissionListModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="folderPermissionModel" tabindex="-1" role="dialog" aria-labelledby="folderPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divFolderPermissionModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="folderPermissionListModel" tabindex="-1" role="dialog" aria-labelledby="folderPermissionListModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width:1000px">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Folder Permissions</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divFolderPermissionListModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="fileVersionListModel" tabindex="-1" role="dialog" aria-labelledby="fileVersionListModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="hFileVersionTitle"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divFileVersionListModalContent">
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal" id="viewFileModel" tabindex="-1" role="dialog" aria-labelledby="filePermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="divViewFileModelContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="editFileChangesModel" tabindex="-1" role="dialog" aria-labelledby="filePermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divEditFileChangesModelContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="assignFolderWorkFlowModel" tabindex="-1" role="dialog" aria-labelledby="assignFolderWorkFlowModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Assign Work Flow</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divAssignFolderWorkFlowModelContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="fileSharingModel" tabindex="-1" role="dialog" aria-labelledby="fileSharingModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Share File</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divShareFileModelContent">
+            <div class="modal-body">
+                <div class="form-group row">
+                    <div class="col-lg-3">
+                        <label class="font-weight-bold col-sm-3">File</label>
+                        <input type="hidden" id="hdnFileShareId" />
+                        <input type="text" class="form-control" readonly id="txtSharingFileName" />
+                    </div>
+                    <div class="col-lg-9">
+                        <label class="font-weight-bold col-sm-9">Users(Comma Seperated email ids)</label>
+                        <input type="text" class="form-control" id="txtSharingEmailIds" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnFileShare">Save</button>
+                <button type="button" class="btn btn-danger" id="btnFileShareCancel" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerMetaModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerMetaModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="">
+            <div class="modal-body" id="divItemTrackerCreationContent">
+                @*<div class="form-group row" style="display:none">
+                    <div class="col-lg-6">
+                        <label class="font-weight-bold col-sm-3">SharBox</label>
+                        <input type="text" class="form-control" readonly id="txtItemTrackerMetaDataRoomName" />
+                        <input type="hidden" id="hdnItemTrackerMetaDataRoomId" />
+                        <input type="hidden" id="hdnItemTrackerMetaId" />
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="font-weight-bold col-sm-9">Folder</label>
+                        <input type="text" readonly class="form-control" id="txtItemTrackerMetaFolderName" />
+                        <input type="hidden" id="hdnItemTrackerMetaFolderId" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-lg-6">
+                        <label class="font-weight-bold col-sm-9">Item Tracker Name</label>
+                        <input type="text" class="form-control" placeholder="Item Tracker Name.." id="txtItemTrackerMetaName" />
+                    </div>
+                    <div class="col-lg-6" style="display:none;">
+                        <label class="font-weight-bold col-sm-9">IsActive</label><br />
+                        <input type="checkbox" class="form-input-check" checked id="chkItemTrackerMetaIsActive" />
+                    </div>
+                </div>*@
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnItemTrackerMetaSave">Save</button>
+                <button type="button" class="btn btn-danger" id="btnItemTrackerMetaCancel" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker Data</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divItemTrackerContent">
+            @*@Html.Partial("~/Areas/DataRoom/Views/Shared/_itemtracker.cshtml")*@
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerControlModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerControlModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker Control</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divItemTrackerControlListContent" style="min-height:500px;">
+            @*@Html.Partial("~/Areas/DataRoom/Views/Shared/_itemtrackercontrol.cshtml")*@
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerSingleControlModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerControlModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker Control</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="" style="min-height:500px;">
+            @Html.Partial("~/Areas/DataRoom/Views/Shared/_itemtrackercontrol.cshtml")
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerFormModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerFormModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:1000px;">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker Form</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divItemTrackerFormContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerPermissionModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker Permission</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divItemTrackerPermissionModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="itemTrackerPermissionListModel" tabindex="-1" role="dialog" aria-labelledby="itemTrackerPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-header">
+            <h5 class="modal-title text-white" id="">Item Tracker Permission</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divItemTrackerPermissionListModalContent">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="divItemTrackerHistoryModal" tabindex="-1" role="dialog" aria-labelledby="itemTrackerPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-header" style="background-color: #7a73cf !important; padding: 2px !important ">
+            <h5 class="modal-title text-white" id="">Item Tracker History</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-content" id="divItemTrackerHistoryContent">
+
+        </div>
+    </div>
+</div>
+
+@*Hidden Fields Section*@
+<input type="hidden" value="@Model.IsParentFolder" id="hdnIsParentFolder" />
+
+
+<script>
+    @*$(".txtGlobalSearch").val("@Model.SearchString");*@
+
+
+
+    $(document).on("dblclick", ".folderDiv", function () {
+        var id = $(this).attr("data-id");
+        var name = $(this).attr("data-name");
+        fnFillFolderInfo(id, name);
+        fnGetFolderContent("@Model.DataRoom.Id", id);
+        return false;
+    });
+
+     $(document).on("click", "#tree2 li", function (e) {
+         var id = $(this).attr("data-id");
+         var name = $(this).attr("data-name");
+         fnFillFolderInfo(id, name);
+         fnGetFolderContent("@Model.DataRoom.Id", id);
+        return false;
+     });
+
+    $(document).on("click", ".breadcrumbpart", function (e) {
+         var id = $(this).attr("data-folderid");
+        var name = "";//$(this).attr("data-name");
+         fnFillFolderInfo(id, name);
+         fnGetFolderContent("@Model.DataRoom.Id", id);
+        return false;
+     });
+
+
+    function fnGetFolderContent(dataroomid, folderid) {
+        if (isNaN(folderid) || folderid == "NaN" || folderid == NaN || folderid == "") {
+            folderid=0;
+        }
+
+        $.ajax({
+            method: "GET",
+            async:true,
+            url: "@Url.Action("GetFolderContent","FileExplorer",new { area = "Explorer"})",
+            data: { "dataroomid": parseInt(dataroomid), "parentfolderid": parseInt(folderid) },
+            beforeSend: function() {
+                formloader();
+            },
+            success: function (data) {
+                $("#divExplorer").html('');
+                $("#divExplorer").html(data.HTML);
+            },
+            error: function (err) {
+
+            },
+            complete:function() {
+                formloaderstop();
+            }
+        });
+    };
+
+    function clearItemTrackerMetaColumns() {
+        //alert();
+        debugger;
+        $("#txtItemTrackerMetaDataRoomName").val("");
+        $("#hdnItemTrackerMetaDataRoomId").val("");
+        $("#txtItemTrackerMetaFolderName").val("");
+        $("#hdnItemTrackerMetaFolderId").val("");
+        $("#txtItemTrackerMetaName").val("");
+        $("#chkItemTrackerMetaIsActive").val("");
+        $("#hdnItemTrackerMetaId").prop("checked",false);
+    };
+
+    function fnOpenItemTrackerMetaDataModal() {
+        debugger;
+        clearItemTrackerMetaColumns();
+        var folderid = $("#hdnDragFolderId").val();
+        var foldername = $("#hdnDragFolderName").val();
+        var dataroomid = $("#hdnDataRoomId").val();
+        var dataroomname = $("#hdnDataRoomName").val();
+        $("#txtItemTrackerMetaDataRoomName").val(dataroomname);
+        $("#hdnItemTrackerMetaDataRoomId").val(dataroomid);
+        $("#txtItemTrackerMetaFolderName").val(foldername);
+        $("#hdnItemTrackerMetaFolderId").val(folderid);
+        //$("#itemTrackerMetaModel").modal("show");
+        
+        fnGetItemTrackerTemplte(dataroomid, folderid);
+    };
+
+    function fnGetItemTrackerTemplte(dataroomid, folderid) {
+        if (folderid == null || folderid == "") {
+            folderid = parseInt(0);
+        }
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("ItemTrackerCreation", "ManageItemTracker",new { area = "DataRoom"})?dataroomid=" + dataroomid + "&folderid=" + folderid,
+            data: {},
+            dataType: "json",
+            //processData: false,
+            contentType: "application/json",
+            success: function (data) {
+                $("#divItemTrackerCreationContent").html("");
+                $("#divItemTrackerCreationContent").html(data.HTML);
+                $("#itemTrackerMetaModel").modal("show");
+            },
+            error: function (err) {
+                alert(JSON.stringify(err));
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    };
+
+
+    //List Filter Functionality
+    $(document).on("change", ".txtGlobalSearch", function () {
+        $("#hdnSearchStringDataRoom").val($(this).val());
+        $("#frmDataRoomExplorer").submit();
+    });
+
+    //$(document).on("keypress", ".txtGlobalSearch", function (event) {
+    //    if (event.keyCode == 13) {
+    //        $("#hdnSearchStringDataRoom").val($(this).val());
+    //        $("#frmDataRoomExplorer").submit();
+    //    }
+    //});
+
+    $(document).ready(function () {
+        $(".txtGlobalSearch").val($("#hdnSearchStringDataRoom").val());
+    });
+
+    //$(document).on("click", ".pagination li", function () {
+    //    var currentPage = $(this).find('a').text();
+    //    $("#hdnCurrentPage").val(currentPage);
+    //    $("#frmDataRoomExplorer").submit();
+    //});
+</script>
+
+<script>
+    $(document).on("click", ".editFileCheckOut", function () {
+        var filename = $(this).attr("data-name");
+        var fileid = $(this).attr("data-id");
+        $("#hdnCheckOutFileId").val(fileid);
+        $("#checkOutFileName").text(filename + " ?");
+    });
+
+    $(document).on("click", ".editFileCheckIn", function () {
+        var filename = $(this).attr("data-name");
+        var fileid = $(this).attr("data-id");
+        $("#hdnCheckInFileId").val(fileid);
+        $("#checkInFileName").text(filename + " ?");
+    });
+
+    function fnTransferFileId() {
+        var fileid = $("#hdnCheckInFileId").val();
+        $("#hdnCheckInFinalFileId").val(fileid);
+    };
+
+
+    $(document).on("click", "#btnCheckInFile", function () {
+        //$("#frmFileCheckIn").submit();
+        var fileid = $("#hdnCheckInFinalFileId").val();
+        var formData = new FormData();
+        formData.append("files", $("#flCheckIn")[0].files[0]);
+        formData.append("FileId", fileid);
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("CheckInFile","ManageFile",new { area = "Files"})",
+            data: formData,
+            dataType: "json",
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                var folderid = data;
+                fnAlert("File Check-In Successful");
+                fnGetFolderContent("@Model.DataRoom.Id", parseInt(folderid));
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", "#btnCheckOut", function () {
+        var fileid = $("#hdnCheckOutFileId").val();
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("CheckOutFile","ManageFile",new { area = "Files"})?fileid=" + fileid,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                if ($.isNumeric(data)) {
+                    var folderid = data;
+                fnAlert("File Check-Out Successful");
+                fnGetFolderContent("@Model.DataRoom.Id", parseInt(folderid));
+                fnDownloadFile(0,0,fileid);
+                }
+                else {
+                    fnAlert(data);
+                }
+
+                //$("#checkoutModal").modal("hide");
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".copyFile", function () {
+        var fileid = $(this).attr("data-id");
+        var filename = $(this).attr("data-filename");
+        var folderid = $(this).attr("data-folderid");
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("GetFoldersforCopyandMove", "FileExplorer",new { area = "Explorer"})?folderid=" + 0,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                $("#divCopyandMoveFile").html("");
+                $("#divCopyandMoveFile").html(data.HTML);
+                $("#fileCopyMoveModalLabel").text(filename);
+                $("#hdnCopyMoveFileId").val(fileid);
+                $("#btnCopyMove").text("Paste");
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".moveFile", function () {
+        var fileid = $(this).attr("data-id");
+        var filename = $(this).attr("data-filename");
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("GetFoldersforCopyandMove", "FileExplorer",new { area = "Explorer"})?folderid=" + 0,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                $("#divCopyandMoveFile").html("");
+                $("#divCopyandMoveFile").html(data.HTML);
+                $("#fileCopyMoveModalLabel").text(filename);
+                $("#hdnCopyMoveFileId").val(fileid);
+                $("#btnCopyMove").text("Move");
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    function fnCopyMove(isCopy) {
+        var fileid = $("#hdnCopyMoveFileId").val();
+        var folderid = $("#hdnCopyMoveFolderId").val();
+        var dataroomid = $("#hdnFileCopyMoveDataRoomId").val();
+        var url = "@Url.Action("CopyFile", "FileExplorer",new { area = "Explorer"})?targetfolderid=" + folderid + "&selectedfileid=" + fileid + "&targetDataRoomId=" + dataroomid;
+        if (isCopy == false) {
+            url = "@Url.Action("MoveFile", "FileExplorer",new { area = "Explorer"})?targetfolderid=" + folderid + "&selectedfileid=" + fileid + "&targetDataRoomId=" + dataroomid;
+        }
+        $.ajax({
+            type: "post",
+            url: url,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                if (isCopy == false) {
+                    fnAlert("File Move Successful");
+                }
+                else {
+                    fnAlert("File Copy Successful");
+                }
+                fnGetFolderContent("@Model.DataRoom.Id", $("#hdnParentFolderId").val());
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    };
+
+    $(document).on("click", ".downloadFolder", function () {
+        var id = $(this).attr("data-id");
+        window.location.href = "@Url.Action("DownloadFolder", "FileExplorer",new { area = "Explorer"})?folderid=" + id;
+    });
+
+
+    $(document).on("click", "#btnCopyMove", function () {
+        var thisVal = $("#btnCopyMove").text();
+        var selectedPath = $("#selectedFolderPath").text();
+        if (selectedPath == null || selectedPath == "") {
+            if (thisVal == "Paste") {
+                alert("Select Folder you want to copy");
+            }
+            else {
+                alert("Select Folder you want to move");
+            }
+            return false;
+        }
+        if (thisVal == "Paste") {
+            fnCopyMove(true);
+        }
+        else {
+            fnCopyMove(false);
+        }
+    });
+
+    // Folder Copy and Move Functionality
+    $(document).on("click", ".copyFolder,.moveFolder", function () {
+        $("#hdnFolderCopyMoveDataRoomId").val("");
+        $("#hdnCopyMoveTargetFolderId").val("");
+
+        var folderid = $(this).attr("data-id");
+        var foldername = $(this).attr("data-name");
+        var thisClass = $(this).attr("class");
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("GetFoldersforCopyandMove", "FileExplorer",new { area = "Explorer"})?folderid=" + 0,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                $("#divCopyandMoveFolder").html("");
+                $("#divCopyandMoveFolder").html(data.HTML);
+                $("#folderCopyMoveModalLabel").text(foldername);
+                $("#hdnCopyMoveCurrentFolderId").val(folderid);
+                if (thisClass == "copyFolder") {
+                    $("#btnFolderCopyMove").text("Paste");
+                }
+                else {
+                    $("#btnFolderCopyMove").text("Move");
+                }
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", "#btnFolderCopyMove", function () {
+        var thisVal = $("#btnFolderCopyMove").text();
+        var selectedPath = $("#selectedFolderPath").text();
+        if (selectedPath == null || selectedPath == "") {
+            if (thisVal == "Paste") {
+                alert("Select Data Room/Folder you want to copy");
+            }
+            else {
+                alert("Select Data Room/Folder you want to move");
+            }
+            return false;
+        }
+        if (thisVal == "Paste") {
+            fnCopyMoveFolder(true);
+        }
+        else {
+            fnCopyMoveFolder(false);
+        }
+    });
+
+    function fnCopyMoveFolder(isCopy) {
+        var dataroomid = $("#hdnFolderCopyMoveDataRoomId").val();
+        var selectedfolderid = $("#hdnCopyMoveCurrentFolderId").val();
+        var targetfolderid = $("#hdnCopyMoveTargetFolderId").val();
+        var url = "@Url.Action("CopyFolder", "FileExplorer",new { area = "Explorer"})?targetdataroomid=" + dataroomid + "&targetfolderid=" + targetfolderid + "&selectedfolderid=" + selectedfolderid;
+        if (isCopy == false) {
+            var url = "@Url.Action("MoveFolder", "FileExplorer",new { area = "Explorer"})?targetdataroomid=" + dataroomid + "&targetfolderid=" + targetfolderid + "&selectedfolderid=" + selectedfolderid;
+        }
+        $.ajax({
+            type: "post",
+            url: url,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                if (isCopy == false) {
+                    fnAlert("Folder Move Successful");
+                }
+                else {
+                    fnAlert("Folder Copy Successful");
+                }
+                fnGetFolderContent("@Model.DataRoom.Id", $("#hdnParentFolderId").val());
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    };
+</script>
+
+<script type="text/javascript">
+    var hdncurrentPage = 2;
+    var hdncurrentPageSize = 100;
+
+    function fnLoadDataonScrollandSearch() {
+        var hdndataroomid = "@Model.DataRoom.Id";
+        var hdnfolderid = $("#hdnFolderId").val();
+        if (hdnfolderid == null) {
+            hdnfolderid = 0;
+        }
+        var hdnisParent = $("#hdnIsParentFolder").val();
+        if (hdnisParent == null) {
+            hdnisParent = false;
+        }
+        var hdnsearchstring = $("#txtSearch").val();
+
+        var model = {
+            DataRoomId: hdndataroomid,
+            FolderId: hdnfolderid,
+            IsParentFolder: hdnisParent,
+            SearchString: hdnsearchstring,
+            CurrentPage: hdncurrentPage,
+            RecordsPerPage: hdncurrentPageSize
+        };
+
+        debugger;
+        $.ajax({
+            type: "POST",
+            contentType: 'application/json; charset=utf-8',
+            url: "@Url.Action("GetPagedFoldersandPagedFiles", "FileExplorer",new { area = "Explorer"})",
+            data: JSON.stringify(model),
+            dataType: "json",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                if (hdnsearchstring != null && hdnsearchstring != "") {
+                    $("#divDynamicContent").html('');
+                }
+                if (data != null) {
+                    var folderdata = eval(data.HTML);
+                    fnAppendDynamicContent(folderdata);
+                }
+            },
+            error: function (err) {
+                alert(JSON.stringify(err));
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    };
+
+    function fnAppendDynamicContent(folderdata) {
+        var folderstructure = '';
+        //if (folderdata.Folders != null) {
+        //    for (var i = 0; i < folderdata.Folders.length; i++) {
+        //        folderstructure += '<div class="folderDiv col-lg-2 col-md-4 col-sm-12" style="border:none;padding:5px;" data-id="' + folderdata.Folders[i].Id + '" data-name="' + folderdata.Folders[i].FolderName + '" data-path="" title="Created On : ' + folderdata.Folders[i].CreatedOn + '">' +
+        //            '<div class="float-right">' +
+        //            '<i class="fa fa-trash fa-1x deleteFolder" data-id="' + folderdata.Folders[i].Id + '" title="Delete Folder" style="cursor:pointer;"></i>' +
+        //            '</div>' +
+        //            '<div class="mt-4" align="center">' +
+        //            '<i class="fa fa-folder fa-3x float-md-none" data-id="0" style="cursor:pointer;color:goldenrod"></i>' +
+        //            '</div>' +
+        //            '<div align="center">' +
+        //            '<span>' + folderdata.Folders[i].FolderName + '</span>' +
+        //            '</div>' +
+        //            '</div>';
+        //    }
+        //    $("#divDynamicContent").append(folderstructure);
+        //}
+
+        if (folderdata.Files != null) {
+            var filestructure = '';
+            for (var i = 0; i < folderdata.Files.length; i++) {
+                //filestructure += '<div class="fileDiv col-lg-2 col-md-4 col-sm-12" style="border:none;padding:5px;" data-id="' + folderdata.PagedFiles[i].Id + '" data-name="' + folderdata.PagedFiles[i].FileName + '" data-path="" title="Created On : ' + folderdata.PagedFiles[i].CreatedOn + '"><div class="float-right"><i class="fa fa-trash fa-1x deleteFile" data-id="' + folderdata.PagedFiles[i].Id + '" title="Delete File" style="cursor:pointer;"></i></div></div>';
+                filestructure += '<div class="fileDiv col-lg-2 col-md-4 col-sm-12" style="border:none;padding:5px;" data-id="' + folderdata.Files[i].Id + '" data-name="' + folderdata.Files[i].FileName + '" data-path="" title="Created On : ' + folderdata.Files[i].CreatedOn + '">' +
+                    '<div class="float-right">' +
+                    '<i class="fa fa-trash fa-1x deleteFile" data-id="' + folderdata.Files[i].Id + '" title="Delete File" style="cursor:pointer;"></i>' +
+                    '<i class="fa fa-edit ml-1 fa-1x editFile" data-id="' + folderdata.Files[i].Id + '" data-folderid="' + folderdata.Files[i].Id + '" data-dataroomid="' + folderdata.Files[i].Id + '" title="Edit File" style="cursor:pointer;"></i>' +
+                    '<i class="fa fa-download ml-1 fa-1x downloadFile" data-id="' + folderdata.Files[i].Id + '" data-folderid="' + folderdata.Files[i].FolderId + '" data-dataroomid="' + folderdata.Files[i].DataRoomId + '" title = "Download File" style = "cursor:pointer;" ></i>' +
+                    '</div>' +
+                    '<div class="mt-4" align="center">';
+                if (folderdata.Files[i].ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    || folderdata.Files[i].ContentType == "text/csv" || folderdata.Files[i].ContentType == "application/vnd.ms-excel") {
+                    filestructure += '<i class="fa fa-file-excel fa-3x float-md-none" data-id="' + folderdata.Files[i].Id + '" style="cursor:pointer;color:darkgreen"></i>';
+                }
+                else if (folderdata.Files[i].ContentType == "image/jpeg") {
+                    filestructure += '<i class="fa fa-image fa-3x float-md-none" data-id="' + folderdata.Files[i].Id + '" style="cursor:pointer;color:blue"></i>';
+                }
+                else if (folderdata.Files[i].ContentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+                    filestructure += '<i class="fa fa-file-word fa-3x float-md-none" data-id="' + folderdata.Files[i].Id + '" style="cursor:pointer;color:blue"></i>';
+                }
+                else if (folderdata.Files[i].ContentType == "application/pdf") {
+                    filestructure += '<i class="fa fa-file-pdf fa-3x float-md-none" data-id="' + folderdata.Files[i].Id + '" style="cursor:pointer;color:red"></i>';
+                }
+                else {
+                    filestructure += '<i class="fa fa-file fa-3x float-md-none" data-id="' + folderdata.Files[i].Id + '" style="cursor:pointer;color:blue"></i>';
+                }
+                filestructure += '</div>' +
+                    '<div align="center">' +
+                    '<span>' + folderdata.Files[i].FileName + '</span>' +
+                    '</div>' +
+                    '</div>';
+            }
+            $("#divDynamicContent").append(filestructure);
+        }
+
+        hdncurrentPage = hdncurrentPage + 1;
+    };
+
+
+
+    //$(document).ready(function () {
+    //    $(document).on("scroll", window, function () {
+    //        if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+    //            fnLoadDataonScrollandSearch();
+    //        }
+    //    });
+    //});
+
+</script>
+
+<script>
+    //Edit Functionality
+    $(document).on("click", ".addFilePermission", function () {
+        var fileid = $(this).attr("data-id");
+        var id = $(this).attr("data-permissionid");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageFilePermission",new { area = "Files"})",
+            data: { "id": id,"fileid": fileid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divFilePermissionModalContent").html('');
+                $("#divFilePermissionModalContent").html(data.HTML);
+                $("#filePermissionModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".addFolderPermission", function () {
+        var folderid = $(this).attr("data-id");
+        var id = $(this).attr("data-permissionid");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageFolderPermission",new { area = "Folders"})",
+            data: { "id": id, "folderid": folderid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divFolderPermissionModalContent").html('');
+                $("#divFolderPermissionModalContent").html(data.HTML);
+                $("#folderPermissionModel").modal("show");
+                return false;
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+        return false;
+    });
+
+     $(document).on("click", ".editFile", function () {
+        var fileid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("EditFileforSubmission", "ManageFile",new { area = "Files"})",
+            data: { "fileid": fileid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divEditFileChangesModelContent").html('');
+                $("#divEditFileChangesModelContent").html(data.HTML);
+                $("#editFileChangesModel").modal("show");
+                return false;
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+        return false;
+    });
+</script>
+
+<script>
+    $(document).on("click", ".viewFolderPermission", function () {
+        var folderid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetFolderPermissions", "ManageFolderPermission",new { area = "Folders"})",
+            data: { "folderid": folderid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divFolderPermissionListModalContent").html('');
+                $("#divFolderPermissionListModalContent").html(data.HTML);
+                $("#folderPermissionListModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".viewFilePermission", function () {
+        var fileid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetFilePermissions", "ManageFilePermission",new { area = "Files"})",
+            data: { "fileid": fileid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divFilePermissionListModalContent").html('');
+                $("#divFilePermissionListModalContent").html(data.HTML);
+                $("#filePermissionListModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".viewFileVersions", function () {
+        var fileid = $(this).attr("data-id");
+        var filename = $(this).attr("data-filename");
+        $("#hFileVersionTitle").text(filename);
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetFileVersions", "FileExplorer",new { area = "Explorer"})",
+            data: { "fileid": fileid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divFileVersionListModalContent").html('');
+                $("#divFileVersionListModalContent").html(data.HTML);
+                $("#fileVersionListModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".viewFile", function () {
+        var fileid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("ViewFile", "ManageFile",new { area = "Files"})",
+            data: { "fileid": fileid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divViewFileModelContent").html('');
+                $("#divViewFileModelContent").html(data.HTML);
+                $("#viewFileModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+</script>
+
+<script>
+    function fnChangetoTabularView() {
+        if ($("#tblFolderContent").is(":visible")) {
+            $("#tblFolderContent").hide();
+            $("#divFolderContent").show();
+        }
+        else {
+            $("#divFolderContent").hide();
+            $("#tblFolderContent").show();
+        }
+    };
+
+
+    function clearFileColumns() {
+        debugger;
+        $("#txtFileDescription").val("");
+        var folderid = $("#hdnDragFolderId").val();
+        if (folderid == NaN || folderid == null || folderid == "" || folderid == undefined) {
+            folderid = 0;
+        }
+        fnCheckforInitiatorRole(folderid);
+    };
+
+    function fnCheckforInitiatorRole(folderid) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("CheckforInitiatorRole", "ManageDataRoomWorkFlowUser", new { area = "DataRoom"})?folderid=" + parseInt(folderid),
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                if (data == "False") {
+                    $("#lblFileErrMessage").show();
+                    $("#lblFileErrMessage").text("You must be assigned with Initiator/Approver role to create file since this folder is associated with work flow");
+                    $("#btnClose,#btnSubmitClose").hide();
+                }
+                else
+                {
+                    $("#lblFileErrMessage").hide();
+                    $("#lblFileErrMessage").text("");
+                    $("#btnClose,#btnSubmitClose").show();
+                }
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    };
+
+    function clearFolderColumns() {
+        $("#txtFolderName").val('');
+        $("#txtFolderDescription").val('');
+    };
+
+    function fnFillFolderInfo(id, name) {
+        $("#hdnFolderId").val(id);
+        $("#hdnFolderName").val(name);
+        $("#spnParentFolder").text(name);
+        $("#hdnParentFolderId").val(id);
+        $("#hdnParentFolderName").val(name);
+        $("#spnFileFolder").text(name);
+        $("#hdnFileFolderId").val(id);
+        $("#hdnFileFolderName").val(name);
+        $("#hdnDragFolderId").val(id);
+        $("#hdnDragFolderName").val(name);
+        $("#hdnPagingFolderId").val(id);
+    };
+
+
+    $(document).on("click", ".manageFolderPermission", function () {
+        var folderid = $(this).attr("data-id");
+        formloader();
+        window.location.href = "@Url.Action("List","ManageFolderPermission",new { area = "Folders"})?folderid=" + folderid;
+    });
+
+     $(document).on("click", ".manageFilePermission", function () {
+        var fileid = $(this).attr("data-id");
+        formloader();
+         window.location.href = "@Url.Action("List","ManageFilePermission",new { area = "Files"})?fileid=" + fileid;
+    });
+
+    $(document).on("dblclick", ".fileDiv", function () {
+        var fileid = $(this).attr("data-id");
+        var folderid = $(this).attr("data-folderid");
+        var dataroomid = $(this).attr("data-dataroomid");
+        fnDownloadFile(dataroomid, folderid, fileid);
+    });
+
+    $(document).on("click", ".downloadFile", function () {
+        var fileid = $(this).attr("data-id");
+        var folderid = $(this).attr("data-folderid");
+        var dataroomid = $(this).attr("data-dataroomid");
+        fnDownloadFile(dataroomid, folderid, fileid);
+    });
+
+
+
+    //$(document).on("click", ".deleteFolder", function () {
+    //    var id = $(this).attr("data-id");
+    //    fnDeleteFolder(id);
+    //});
+
+    //$(document).on("click", ".deleteFile", function () {
+    //    var id = $(this).attr("data-id");
+    //    fnDeleteFile(id);
+    //});
+
+
+     //Delete Functionality
+    $(document).on("click", ".deleteFile", function (e) {
+        var id = $(this).attr("data-id");
+        var filename = $(this).attr("data-name");
+        fnConfirm("Are you sure, you want to remove file - " + filename + "?");
+        $("#btnConfirmOk").click(function () {
+            fnDeleteFile(id);
+        });
+    });
+
+    //Delete Functionality
+    $(document).on("click", ".deleteFolder", function (e) {
+        var id = $(this).attr("data-id");
+        var foldername = $(this).attr("data-name");
+        fnConfirm("Are you sure, you want to remove folder - " + foldername + "?");
+        $("#btnConfirmOk").click(function () {
+            fnDeleteFolder(id);
+        });
+    });
+
+    function fnDeleteFolder(id) {
+        formloader();
+        window.location.href = "@Url.Action("Delete","ManageFolder",new { area = "Folders"})?id=" + id;
+    };
+
+    function fnDeleteFile(id) {
+        formloader();
+        window.location.href = "@Url.Action("Delete","ManageFile",new { area = "Files"})?id=" + id;
+    };
+
+    function fnDownloadFile(dataroomid, folderid, fileid) {
+        $.ajax({
+            url: "@Url.Action("CheckforFileContent", "ManageFile",new { area = "Files"})?dataroomid=" + dataroomid + "&folderid=" + folderid + "&fileid=" + fileid,
+            contentType: 'application/json; charset=utf-8',
+            datatype: 'json',
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            type: "GET",
+            success: function (data) {
+                if (data != "File Not Found") {
+                    window.location.href = "@Url.Action("DownloadFile","ManageFile",new { area = "Files"})?dataroomid=" + dataroomid + "&folderid=" + folderid + "&fileid=" + fileid;
+                }
+                else {
+                    fnAlert("File Not Found","red");
+                }
+            },
+            complete: function () {
+                formloaderstop();
+            }
+            });
+    };
+
+
+
+</script>
+
+<script>
+    $(document).on("click", ".downloadFileVersion", function () {
+        var fileid = $(this).attr("data-fileid");
+        var versionid = $(this).attr("data-id");
+        fnDownloadFileVersion(fileid, versionid);
+    });
+
+    function fnDownloadFileVersion(fileid, versionid) {
+        $.ajax({
+            url: "@Url.Action("CheckforFileVersionContent", "ManageFile",new { area = "Files"})?fileid=" + fileid + "&fileversionid=" + versionid,
+            contentType: 'application/json; charset=utf-8',
+            datatype: 'json',
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            type: "GET",
+            success: function (data) {
+                if (data != "File Not Found") {
+                    window.location.href = "@Url.Action("DownloadFileVersion", "ManageFile",new { area = "Files"})?fileid=" + fileid + "&fileversionid=" + versionid;
+                }
+                else {
+                    fnAlert("File Not Found","red");
+                }
+            },
+            complete: function () {
+                formloaderstop();
+            }
+            });
+    };
+</script>
+
+<script>
+    $(document).on("click", ".node", function () {
+        debugger;
+        var dataroomid = $(this).attr("data-roomid");
+        var folderid = $(this).attr("data-folderid");
+        var control = $(this);
+        var path = $(this).attr("data-path");
+
+        $("#selectedFolderPath").text(path);
+        $("#hdnCopyMoveFolderId").val(folderid);
+        $("#hdnFileCopyMoveDataRoomId").val(dataroomid);
+        // Folder Copy Move
+        $("#hdnFolderCopyMoveDataRoomId").val(dataroomid);
+        $("#hdnCopyMoveTargetFolderId").val(folderid);
+
+
+
+        $(".node").each(function () {
+            $(this).removeClass('highlite');
+        });
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("GetFoldersbasedonParentId", "FileExplorer",new { area = "Explorer"})?dataroomid=" + dataroomid + "&folderid=" + folderid,
+            data: {},
+            dataType: "json",
+            success: function (data) {
+                var thisClass = $(control).find("i").attr("class");
+                $(control).addClass('highlite');
+                if (thisClass == "glyphicon glyphicon-folder-close") {
+                    $(control).find("i").removeClass("glyphicon-folder-close");
+                    $(control).find("i").addClass("glyphicon-folder-open");//highlite
+                    if (data != null && data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            var path = "";
+                            if (data[i].ParentFolderName == null || data[i].ParentFolderName == "") {
+                                path = ""; data[i].DataRoomName + "/" + data[i].FolderName;
+                            }
+                            else {
+                                path = data[i].DataRoomName + "/" + data[i].ParentFolderName + "/" + data[i].FolderName;
+                            }
+                            $(control).append("<ul style='list-style-type:none'><li  style='list-style-type:none;cursor:pointer;' class='node' data-roomid='" + data[i].DataRoomId + "' data-folderid='" + data[i].Id + "' data-path='" + path + "'><i  class='glyphicon glyphicon-folder-close'></i> " + data[i].FolderName + "</li></ul>");
+                        }
+                    }
+                    //$(control).append("<ul style='list-style-type:none'><li  style='list-style-type:none' class='node'><i  class='glyphicon glyphicon-folder-close'></i> Folder 1</li><li class='node' style='list-style-type:none'><i class='glyphicon glyphicon-folder-close'></i> Folder 2</li><li class='node'  style='list-style-type:none'><i class='glyphicon glyphicon-folder-close'></i> Folder 3</li></ul>");
+                }
+                else {
+                    $(control).find("i").removeClass("glyphicon-folder-open");
+                    $(control).find("i").addClass("glyphicon-folder-close");
+                    $(control).find('ul').remove();
+                }
+            },
+            error: function () {
+
+            },
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+        return false;
+    });
+</script>
+@*<script src="~/Scripts/FileDragDrop.js"></script>*@
+
+<script>
+    $(document).on("click", ".manageFolderWorkFlow", function () {
+        var dataroomid = $(this).attr("data-dataroomid");
+        var id = $(this).attr("data-id");
+        $.ajax({
+            url: "@Url.Action("GetDataRoomWorkFlows", "ManageFolder",new { area = "Folders"})?dataroomid=" + dataroomid + "&folderid=" + id,
+            contentType: 'application/json; charset=utf-8',
+            datatype: 'json',
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            type: "GET",
+            success: function (data) {
+                $("#divAssignFolderWorkFlowModelContent").html("");
+                $("#divAssignFolderWorkFlowModelContent").html(data.HTML);
+                $("#assignFolderWorkFlowModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", "#btnFolderWorkFlowSave", function () {
+        var folderid = $("#hdnWorkFlowFolderId").val();
+        var workflowid = $("input[type='radio'][name='workflow']:checked").val();
+
+        if (workflowid == null || workflowid == "") {
+            $(this).closest("div").find("#wrkflowerrmsg").text("Please select a workflow");
+            return false;
+        }
+
+        $.ajax({
+            url: "@Url.Action("AssignWorkFlowtoFolder", "ManageFolder",new { area = "Folders"})?folderid=" + folderid + "&workflowid=" + workflowid,
+            contentType: 'application/json; charset=utf-8',
+            datatype: 'json',
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            type: "GET",
+            success: function (data) {
+                if (data == "Success") {
+                    $("#assignFolderWorkFlowModel").modal("hide");
+                    fnAlert("Work Flow Assigned to Folder Successfully");
+                }
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).on("click", ".shareFile", function () {
+        var fileid = $(this).attr("data-id");
+        var filename = $(this).attr("data-name");
+        $("#hdnFileShareId").val(fileid);
+        $("#txtSharingFileName").val(filename);
+        $("#fileSharingModel").modal("show");
+    });
+
+    $(document).on("click", "#btnFileShare", function () {
+        var emailids = $("#txtSharingEmailIds").val();
+        if (emailids == "") {
+            $("#txtSharingEmailIds").css({ "border-color": "red" });
+            return false;
+        }
+        else {
+            $("#txtSharingEmailIds").css({ "border-color": "#d1d3e2" });
+        }
+        var fileid = $("#hdnFileShareId").val();
+        $.ajax({
+            url: "@Url.Action("ShareFile", "ManageFile",new { area = "Files"})?fileid=" + fileid + "&emailids=" + emailids,
+            contentType: 'application/json; charset=utf-8',
+            datatype: 'json',
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            type: "GET",
+            success: function (data) {
+                $("#hdnFileShareId").val("");
+                $("#txtSharingFileName").val("");
+                $("#txtSharingEmailIds").val("");
+                $("#fileSharingModel").modal("hide");
+                fnAlert(data);
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+</script>
+
+<script>
+    function fnGetItemTrackerControls(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, itemtrackerguid) {
+
+
+
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetItemTrackerControlsbasedonDataRoomFolderTracker", "ManageItemTracker",new { area = "DataRoom"})?dataroomid=" + dataroomid + "&folderid=" + folderid + "&itemtrackerid=" + itemtrackerid + "&guid=" + itemtrackerguid,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                if (itemtrackerguid != null && itemtrackerguid != "") {
+                    $("#divItemTrackerCreationofControls").html('');
+                    $("#divItemTrackerCreationofControls").html(data.HTML);
+                    $("#divItemTrackerNameGrid").hide();
+                }
+                else {
+                    $("#divItemTrackerControlListContent").html('');
+                    $("#divItemTrackerControlListContent").html(data.HTML);
+                }
+
+                $("#txtItemTrackerControlItemTrackerName").val(itemtrackername);
+                $("#txtItemTrackerControlDataRoomName").val(dataroomname);
+                $("#txtItemTrackerControlFolderName").val(foldername);
+                $("#hdnItemTrackerControlDataRoomId").val(dataroomid);
+                $("#hdnItemTrackerControlFolderId").val(folderid);
+                $("#hdnItemTrackerControlItemTrackerId").val(itemtrackerid);
+                $("#itemTrackerSingleControlModel").modal("hide");
+            },
+            error: function (err) {
+                alert(JSON.stringify(err));
+            }
+        });
+    };
+
+    function fnGetItemTrackerForm(dataroomid,folderid,itemtrackerid,guid) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetItemTrackerEditFormPartbasedonDataRoom", "ManageItemTracker",new { area = "DataRoom"})?dataroomid=" + dataroomid + "&folderid=" + folderid + "&itemtrackerid=" + itemtrackerid + "&rowguid=" + guid,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divItemTrackerFormContent").html('');
+                $("#divItemTrackerFormContent").html(data.HTML);
+                $("#itemTrackerFormModel").modal("show");
+            }
+        });
+    };
+
+    function fnGetItemTrackerData(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, permissions) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetItemTrackerDatabasedonDataRoom", "ManageItemTracker",new { area = "DataRoom"})?dataroomid=" + dataroomid + "&folderid=" + folderid + "&itemtrackerid=" + itemtrackerid,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divItemTrackerContent").html('');
+                $("#divItemTrackerContent").html(data.HTML);
+                $("#txtItemTrackerDataRoomName").val(dataroomname);
+                $("#hdnItemTrackerDataRoomId").val(dataroomid);
+                $("#txtItemTrackerFolderName").val(foldername);
+                $("#hdnItemTrackerFolderId").val(folderid);
+                $("#txtItemTrackerItemTrackerName").val(itemtrackername);
+                $("#hdnItemTrackerItemTrackerId").val(itemtrackerid);
+                fnGetItemTrackerDataList(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, permissions);
+            }
+        });
+    };
+
+    function fnGetItemTrackerDataList(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, permissions) {
+        //alert(dataroomid + "," + folderid + "," + itemtrackerid);
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetItemTrackerDatabasedonDataRoomFolderItemTracker", "ManageItemTracker",new { area = "DataRoom"})?dataroomid=" + dataroomid + "&folderid=" + folderid + "&itemtrackerid=" + itemtrackerid,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divItemTrackerList").html('');
+                $("#divItemTrackerList").html(data.HTML);
+                if (permissions != null && permissions != "") {
+                    var fullaccess = permissions.indexOf("F") != -1;
+                    var read = permissions.indexOf("R") != -1;
+                    var write = permissions.indexOf("W") != -1;
+                    if (fullaccess || write) {
+
+                        $(".writeAccess").show();
+                    }
+                    else {
+
+                        $(".writeAccess").hide();
+                    }
+                }
+            },
+            error: function (err) {
+
+            }
+        });
+    };
+
+    function fnDeleteItemTrackerControl(guid) {
+        var dataroomid = $("#hdnItemTrackerControlDataRoomId").val();
+        var dataroomname = $("#hdnItemTrackerControlDataRoomName").val();
+        var folderid = $("#hdnItemTrackerControlFolderId").val();
+        var foldername = $("#txtItemTrackerControlFolderName").val();
+        var itemtrackerid = $("#hdnItemTrackerControlItemTrackerId").val();
+        var itemtrackername = $("#txtItemTrackerControlitemTrackerName").val();
+        var itemtrackerguid = $("#hdnItemTrackerMetaGuid").val();
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("DeleteItemTrackerControl", "ManageItemTracker",new { area = "DataRoom"})",
+            data: { 'guid': guid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                fnGetItemTrackerControls(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, itemtrackerguid);
+            },
+            error: function (err) {
+                fnGetItemTrackerControls(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, itemtrackerguid);
+            }
+        });
+    };
+
+    function fnGetItemTrackerHistory(itemtrackerid, rowguid) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetItemTrackerHistory", "ManageItemTracker",new { area = "DataRoom"})?itemtrackerid=" + itemtrackerid + "&rowguid=" + rowguid,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divItemTrackerHistoryContent").html('');
+                $("#divItemTrackerHistoryContent").html(data.HTML);
+                $("#divItemTrackerHistoryModal").modal("show");
+            }
+        });
+    };
+
+    $(document).on("click", ".manageItemTrackerControl", function () {
+        var dataroomid = $(this).attr("data-dataroomid");
+        var dataroomname = $(this).attr("data-dataroomname");
+        var folderid = $(this).attr("data-folderid");
+        var foldername = $(this).attr("data-foldername");
+        var itemtrackerid = $(this).attr("data-id");
+        var itemtrackername = $(this).attr("data-name");
+        //alert(itemtrackername);
+        fnGetItemTrackerControls(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername);
+        $("#itemTrackerControlModel").modal("show");
+    });
+
+    $(document).on("click", "#btnAddControl", function () {
+        var dataroomid = $("#txtItemTrackerControlDataRoomId").val();
+        var dataroomname = $("#hdnItemTrackerControlDataRoomName").val();
+        var folderid = $("#hdnItemTrackerControlFolderId").val();
+        var foldername = $("#txtItemTrackerControlFolderName").val();
+        var itemtrackerid = $("#hdnItemTrackerControlItemTrackerId").val();
+        var itemtrackername = $("#txtItemTrackerControlitemTrackerName").val();
+        //$("#hdnItemTrackerControlDataRoomId").val(dataroomid);
+        //$("#hdnItemTrackerControlDataRoomName").val(dataroomname);
+        //$("#hdnItemTrackerControlFolderId").val(folderid);
+        //$("#hdnItemTrackerControlFolderName").val(foldername);
+        //$("#hdnItemTrackerControlItemTrackerId").val(itemtrackerid);
+        //$("#hdnItemTrackerControlItemTrackerName").val(itemtrackername);
+        $("#slControlType").val('0');
+        $("#dynamicControlContent").html('');
+        $("#itemTrackerSingleControlModel").modal("show");
+    });
+
+    //$(document).on("click", ".manageItemTracker", function () {
+    //    var dataroomid = $(this).attr("data-dataroomid");
+    //    var dataroomname = $(this).attr("data-dataroomname");
+    //    var folderid = $(this).attr("data-folderid");
+    //    var foldername = $(this).attr("data-foldername");
+    //    var itemtrackerid = $(this).attr("data-id");
+    //    var itemtrackername = $(this).attr("data-name");
+    //    fnGetItemTrackerData(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername);
+    //    $("#itemTrackerModel").modal("show");
+    //});
+
+    $(document).on("click", "#btnItemTrackerMetaSave", function () {
+        var itemTrackerName = $("#txtItemTrackerMetaName").val();
+        if (itemTrackerName == "") {
+            $("#txtItemTrackerMetaName").css({ "border-color": "red" });
+            return false;
+        }
+        else {
+            $("#txtItemTrackerMetaName").css({ "border-color": "#d1d3e2" });
+        }
+
+
+
+        var form = $("#frmItemTrackerMetaData");
+        var formData = new FormData(form[0]);
+
+
+
+
+        //var model = {
+        //    DataRoomId: $("#hdnItemTrackerMetaDataRoomId").val(),
+        //    DataRoomName: $("#txtItemTrackerMetaDataRoomName").val(),
+        //    FolderId: $("#hdnItemTrackerMetaFolderId").val(),
+        //    FolderName: $("#txtItemTrackerMetaFolderName").val(),
+        //    ItemTrackerName: $("#txtItemTrackerMetaName").val(),
+        //    IsActive: $("#chkItemTrackerMetaIsActive").prop("checked"),
+        //};
+
+        $.ajax({
+            url: "@Url.Action("CreateItemTrackerMetaData", "ManageItemTracker",new { area = "DataRoom"})",
+            contentType: 'application/json; charset=utf-8',
+            datatype: 'json',
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            type: "POST",
+            success: function (data) {
+                fnAlert("Item Tracker Saved Successfully");
+                clearItemTrackerMetaColumns();
+                $("#itemTrackerMetaModel").modal("hide");
+                fnGetFolderContent("@Model.DataRoom.Id", $("#hdnItemTrackerMetaFolderId").val());
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("dblclick", ".itemTrackerDiv", function () {
+        var permissions = $(this).attr("data-permissions");
+        if (permissions != null && permissions.length > 0) {
+            var fullaccess = permissions.indexOf("F") != -1;
+            var read = permissions.indexOf("R") != -1;
+            var write = permissions.indexOf("W") != -1;
+
+            if (fullaccess || read || write) {
+                var dataroomid = $(this).attr("data-dataroomid");
+                var dataroomname = $(this).attr("data-dataroomname");
+                var folderid = $(this).attr("data-folderid");
+                var foldername = $(this).attr("data-foldername");
+                var itemtrackerid = $(this).attr("data-id");
+                var itemtrackername = $(this).attr("data-name");
+                fnGetItemTrackerData(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername,permissions);
+                $("#itemTrackerModel").modal("show");
+            }
+        }
+
+    });
+
+    $(document).on("click", "#btnAddItemTracker", function () {
+        $("#divItemTrackerFormContent").html('');
+        var dataroomname = $("#txtItemTrackerDataRoomName").val();
+        var dataroomid = $("#hdnItemTrackerDataRoomId").val();
+        var foldername = $("#txtItemTrackerFolderName").val();
+        var folderid = $("#hdnItemTrackerFolderId").val();
+        var itemtrackername = $("#txtItemTrackerItemTrackerName").val();
+        var itemtrackerid = $("#hdnItemTrackerItemTrackerId").val();
+        fnGetItemTrackerForm(dataroomid, folderid, itemtrackerid);
+    });
+
+    $(document).on("click", ".deleteItemTrackerControl", function () {
+        var guid = $(this).attr("data-guid");
+        fnDeleteItemTrackerControl(guid);
+        $(this).closest("tr").remove();
+    });
+
+    $(document).on("click", "#btnItemTrackerDataSave", function () {
+        var isControlEmpty = false;
+        $(".divFormControlPart .required").each(function () {
+            var typeofcontrol = $(this).prop('type');
+            var thisname = $(this).attr("data-name");
+            if (typeofcontrol == "select-one") {
+                if ($(this).val() == '0' || $(this).val() == 0) {
+                    $("#lblItemTrackerErrMsg").show();
+                    $(this).css({ "border-color": "red" });
+                    isControlEmpty = true;
+                    $("#lblItemTrackerErrMsg").text('Please Select ' + thisname);
+                    return false;
+                }
+                else {
+                    $("#lblItemTrackerErrMsg").hide();
+                    $("#lblItemTrackerErrMsg").text('');
+                    $(this).css({ "border-color": "#d1d3e2" });
+                }
+            }
+            else {
+                if ($(this).val() == null || $(this).val() == "") {
+                    $(this).css({ "border-color": "red" });
+                    $("#lblItemTrackerErrMsg").show();
+                    $("#lblItemTrackerErrMsg").text('Please Enter ' + thisname);
+                    isControlEmpty = true;
+                    return false;
+                }
+                else {
+                    $("#lblItemTrackerErrMsg").hide();
+                    $("#lblItemTrackerErrMsg").text('');
+                    $(this).css({ "border-color": "#d1d3e2" });
+                }
+            }
+        });
+
+        if (isControlEmpty == true) {
+            return false;
+        }
+
+
+
+        
+        var dataroomid = $("#hdnItemTrackerFormDataRoomId").val();
+        var dataroomname = $("#hdnItemTrackerFormDataRoomName").val();
+        var folderid = $("#hdnItemTrackerFormFolderId").val();
+        var foldername = $("#hdnItemTrackerFormFolderName").val();
+        var itemtrackerid = $("#hdnItemTrackerFormItemTrackerId").val();
+        var itemtrackername = $("#hdnItemTrackerFormItemTrackerName").val();
+        var form = $("#frmItemTracker");
+        var formData = new FormData(form[0]);
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                $("#divItemTrackerFormContent").html('');
+                $("#itemTrackerFormModel").modal("hide");
+                fnGetItemTrackerDataList(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername,null);
+                fnAlert(data);
+            }
+        });
+    });
+
+    $(document).on("click", ".deleteItemTrackerData", function () {
+        var guid = $(this).attr("data-guid");
+        var tr = $(this).closest("tr");
+        $.ajax({
+             type: "POST",
+             url: "@Url.Action("DeleteItemTrackerData", "ManageItemTracker", new { area = "DataRoom" })?rowguid=" + guid,
+             data: {},
+             dataType: "json",
+             contentType: "application/json;charset=utf-8",
+             beforeSend: function () {
+                formloader();
+             },
+             success: function (data) {
+                 //fnGetItemTrackerData();
+                 $(tr).remove();
+             },
+             complete: function () {
+                formloaderstop();
+             }
+        });
+    });
+
+    $(document).on("click", ".deleteItemTracker", function () {
+        var id = $(this).attr("data-id");
+        var folderid = $(this).attr("data-folderid");
+        $.ajax({
+                type: "POST",
+            url: "@Url.Action("DeleteItemTracker", "ManageItemTracker", new { area = "DataRoom" })?itemtrackerid=" + id,
+                data: {},
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                beforeSend: function () {
+                formloader();
+                },
+                success: function (data) {
+
+                    fnGetFolderContent("@Model.DataRoom.Id", parseInt(folderid));
+                },
+                complete: function () {
+                formloaderstop();
+                }
+        });
+    });
+
+    $(document).on("click", ".downloadItemTrackerFile", function () {
+        var guid = $(this).attr("data-guid");
+        alert(guid);
+        window.location.href = "@Url.Action("DownloadItemTrackerFile", "ManageItemTracker", new { area = "DataRoom" })?guid=" + guid;
+    });
+
+    $(document).on("click", ".addItemTrackerPermission", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("EditItemTrackerPermission", "ManageItemTrackerPermission", new { area = "DataRoom" })?itemtrackerid=" + id,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divItemTrackerPermissionModalContent").html('');
+                $("#divItemTrackerPermissionModalContent").html(data.HTML);
+                $("#itemTrackerPermissionModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".viewItemTrackerPermission", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("GetItemtrackerPermissions", "ManageItemTrackerPermission", new { area = "DataRoom" })?itemtrackerid=" + id,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divItemTrackerPermissionModalContent").html('');
+                $("#divItemTrackerPermissionModalContent").html(data.HTML);
+                $("#itemTrackerPermissionModel").modal("show");
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+    $(document).on("click", ".editItemTrackerData", function () {
+        var guid = $(this).attr("data-guid");
+        var dataroomname = $("#txtItemTrackerDataRoomName").val();
+        var dataroomid = $("#hdnItemTrackerDataRoomId").val();
+        var foldername = $("#txtItemTrackerFolderName").val();
+        var folderid = $("#hdnItemTrackerFolderId").val();
+        var itemtrackername = $("#txtItemTrackerItemTrackerName").val();
+        var itemtrackerid = $("#hdnItemTrackerItemTrackerId").val();
+        fnGetItemTrackerForm(dataroomid, folderid, itemtrackerid, guid);
+    });
+
+    $(document).on("click", ".itemTrackerHistory", function () {
+
+        var rowguid = $(this).attr("data-guid");
+        var itemtrackerid = $(this).attr("data-id");
+        fnGetItemTrackerHistory(itemtrackerid, rowguid);
+    });
+
+    $(document).on("click", "#btnDownloadItemTrackerData", function () {
+        var itemtrackerid = $(this).attr("data-id");
+        window.location.href = "@Url.Action("DownloadItemTrackerData", "ManageItemTracker", new { area = "DataRoom"})?itemtrackerid=" + itemtrackerid + "&reportType=PDF";
+    });
+
+    $(document).on("click", "#btnDownloadItemTrackerDataExcel", function () {
+        var itemtrackerid = $(this).attr("data-id");
+        window.location.href = "@Url.Action("DownloadItemTrackerData", "ManageItemTracker", new { area = "DataRoom"})?itemtrackerid=" + itemtrackerid + "&reportType=Excel";
+    });
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

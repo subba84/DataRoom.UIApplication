@@ -1,0 +1,479 @@
+﻿@model DataRooms.UI.Areas.Explorer.Model.ExplorerCustomModel
+
+@{
+    var currentRoleId = Convert.ToInt32(Session["CurrentRoleId"]);
+}
+<!-- Content Header (Page header) -->
+<div class="content-header pb-0">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6" id="pBreadCrumb">
+                @Html.Raw(Model.FolderTreeView)
+            </div><!-- /.col -->
+            @if (currentRoleId == AppRole.Admin)
+            {
+                <div class="col-sm-6">
+                    <div class="dropdown float-right">
+                        <button class="btn btn-normal btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="las la-cog"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="#" data-id="0" onclick="clearFolderColumns();" data-toggle="modal" data-target="#folderModel"><i class="las la-folder-open fa-lg color-blue-b"></i> Add Folder</a>
+                            <a class="dropdown-item" href="#" data-id="0" onclick="clearFileColumns();" data-toggle="modal" data-target="#fileModel"><i class="las la-file-invoice fa-lg color-blue-b"></i> Add File</a>
+                            <a class="dropdown-item" href="#" data-id="0" onclick="fnOpenItemTrackerMetaDataModal();" @*data-toggle="modal" data-target="#itemTrackerMetaModel"*@><i class="las la-sitemap fa-lg color-blue-b"></i> Add Item Tracker</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                if (Model.DataRoomPermission.HasFullControl == true || Model.DataRoomPermission.HasWrite == true)
+                {
+                    <div class="col-sm-6">
+                        <div class="dropdown float-right">
+                            <button class="btn btn-normal btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="las la-cog"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#" data-id="0" onclick="clearFolderColumns();" data-toggle="modal" data-target="#folderModel"><i class="las la-folder-open fa-lg color-blue-b"></i> Add Folder</a>
+                                <a class="dropdown-item" href="#" data-id="0" onclick="clearFileColumns();" data-toggle="modal" data-target="#fileModel"><i class="las la-file-invoice fa-lg color-blue-b"></i> Add File</a>
+                                <a class="dropdown-item" href="#" data-id="0" onclick="fnOpenItemTrackerMetaDataModal();" @*data-toggle="modal" data-target="#itemTrackerMetaModel"*@><i class="las la-sitemap fa-lg color-blue-b"></i> Add Item Tracker</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <form method="post" action="@Url.Action("Index","FileExplorer",new { area = "Explorer"})" id="frmDataRoomExplorer" enctype="multipart/form-data">
+        <div class="container-fluid border-top">
+            <input type="hidden" name="SearchString" id="hdnSearchStringDataRoom" value="@Model.SearchString" />
+            <input type="hidden" name="DataRoom.Id" value="@Model.DataRoom.Id" />
+            <div class="row mt-2">
+                <input type="hidden" name="Folder.Id" value="@(Model.Folder!=null ? Model.Folder.Id : 0)" />
+                <input type="hidden" id="hdnFolderId" />
+                <input type="hidden" id="hdnFolderName" />
+                @{
+                    int loggedInUser = Convert.ToInt32(Session["UserId"]);
+                    var folders = (Model.IsFileCachingEnabled ? Model.FolderswithPemrissions : null);
+                    var files = (Model.IsFileCachingEnabled ? Model.FileswithPermissions : null);
+                    var itemtrackers = (Model.IsFileCachingEnabled ? Model.ItemTrackersswithPemrissions : null);
+                }
+                @if (folders != null && folders.Count() > 0)
+                {
+                    foreach (var folder in folders)
+                    {
+                        <div class="folderDiv col-lg-2 col-md-3 col-6 mb-2" data-id="@folder.Id" data-name="@folder.FolderName" data-path="@folder.ParentFolderName > @folder.FolderName" title="@folder.FolderName | @folder.CreatorName | Created On : @folder.CreatedOn.ToApplicationFormat()">
+                            <div class="card-a">
+                                <div class="btn-group w-100">
+                                    <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                          style="border-top-right-radius: 6px;">
+                                        @folder.FolderName
+                                    </span>
+                                    <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                          aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                        <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                    </span>
+                                    <div class="dropdown-menu dropdown-menu-right pl-2">
+                                        <ul class="list-unstyled mb-0">
+                                            @if (folder.FolderPermission.HasFullControl == true)
+                                            {
+                                                <li><a href="#" class="downloadFolder" data-id="@folder.Id" data-name="@folder.FolderName" data-dataroomid="@folder.DataRoomId" title="Download Folder"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                <li><a href="#" class="copyFolder" data-id="@folder.Id" data-name="@folder.FolderName" data-dataroomid="@folder.DataRoomId" title="Copy Folder" data-target="#folderCopyMoveModal" data-toggle="modal"><i class="las la-copy fa-lg color-red-b"></i> Copy</a></li>
+                                                <li><a href="#" class="moveFolder" data-id="@folder.Id" data-name="@folder.FolderName" data-dataroomid="@folder.DataRoomId" title="Move Folder" data-target="#folderCopyMoveModal" data-toggle="modal"><i class="las la-arrow-right fa-lg color-red-b"></i> Move</a></li>
+                                                <li><a href="#" class="addFolderPermission" data-id="@folder.Id" data-name="@folder.FolderName" data-permissionid="0" title="Add Folder Permissions"><i class="las la-user fa-lg color-red-b"></i> Add Folder Permission</a></li>
+                                                <li><a href="#" class="viewFolderPermission" data-id="@folder.Id" data-name="@folder.FolderName" data-dataroomid="@folder.DataRoomId" title="View Folder Permissions"><i class="las la-eye fa-lg color-red-b"></i> View Folder Permission</a></li>
+                                                <li><a href="#" class="manageFolderWorkFlow" data-id="@folder.Id" data-name="@folder.FolderName" data-dataroomid="@folder.DataRoomId" title="Assign Folder Work Flow"><i class="las la-bars fa-lg color-red-b"></i> Assign Workflow</a></li>
+                                                <li><a href="#" class="deleteFolder" data-id="@folder.Id" data-folderexists="@folder.IsFolderExists" data-name="@folder.FolderName" title="Delete Folder"><i class="las la-trash fa-lg color-red-b"></i> Delete Folder</a></li>
+                                            }
+                                            else
+                                            {
+                                                if (folder.FolderPermission.HasDelete == true)
+                                                {
+                                                    <li><a href="#" class="deleteFolder" data-id="@folder.Id" data-folderexists="@folder.IsFolderExists" data-name="@folder.FolderName" title="Delete Folder"><i class="las la-trash fa-lg color-red-b"></i> Delete Folder</a></li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-a-body">
+                                    <img src="~/Content/dist/img/folder-icon.png" alt="folder-image">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @if (itemtrackers != null && itemtrackers.Count() > 0)
+                {
+                    foreach (var itemtracker in itemtrackers)
+                    {
+                        List<string> permissions = new List<string>();
+                        if(itemtracker.ItemTrackerPermission.HasFullControl == true)
+                        {
+                            permissions.Add("F");
+                        }
+                        if (itemtracker.ItemTrackerPermission.HasWrite == true)
+                        {
+                            permissions.Add("W");
+                        }
+                        if (itemtracker.ItemTrackerPermission.HasRead == true)
+                        {
+                            permissions.Add("R");
+                        }
+                        if (itemtracker.ItemTrackerPermission.HasDelete == true)
+                        {
+                            permissions.Add("D");
+                        }
+                        <div class="itemTrackerDiv col-lg-2 col-md-3 col-6 mb-2" data-permissions="@string.Join(",",permissions)" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName"  data-dataroomid="@itemtracker.DataRoomId" data-dataroomname="@itemtracker.DataRoomName" data-folderid="@itemtracker.FolderId" data-foldername="@itemtracker.FolderName"  title="@itemtracker.ItemTrackerName | @itemtracker.CreatorName | Created On : @itemtracker.CreatedOn.ToApplicationFormat()">
+                            <div class="card-a">
+                                <div class="btn-group w-100">
+                                    <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                          style="border-top-right-radius: 6px;">
+                                        @itemtracker.ItemTrackerName
+                                    </span>
+                                    <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                          aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                        <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                    </span>
+                                    <div class="dropdown-menu dropdown-menu-right pl-2">
+                                        <ul class="list-unstyled mb-0">
+                                            @if (itemtracker.ItemTrackerPermission.HasFullControl == true)
+                                            {
+                                                @*<li><a href="#" class="manageItemTracker"  data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" data-dataroomid="@itemtracker.DataRoomId" data-dataroomname="@itemtracker.DataRoomName" data-folderid="@itemtracker.FolderId" data-foldername="@itemtracker.FolderName"  title="Manage Item Tracker"><i class="las la-cog fa-lg color-red-b"></i> Manage Item Tracker</a></li>*@
+                                                <li><a href="#" class="manageItemTrackerControl" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" data-dataroomid="@itemtracker.DataRoomId" data-dataroomname="@itemtracker.DataRoomName" data-folderid="@itemtracker.FolderId" data-foldername="@itemtracker.FolderName" title="Manage Item Tracker Controls"><i class="las la-cog fa-lg color-red-b"></i> Manage Controls</a></li>
+                                                <li><a href="#" class="addItemTrackerPermission" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" data-dataroomid="@itemtracker.DataRoomId" data-dataroomname="@itemtracker.DataRoomName" data-folderid="@itemtracker.FolderId" data-foldername="@itemtracker.FolderName" title="Add Item Tracker Permission"><i class="las la-user fa-lg color-red-b"></i> Add Permission</a></li>
+                                                <li><a href="#" class="viewItemTrackerPermission" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" data-dataroomid="@itemtracker.DataRoomId" data-dataroomname="@itemtracker.DataRoomName" data-folderid="@itemtracker.FolderId" data-foldername="@itemtracker.FolderName" title="View Item Tracker Permission"><i class="las la-eye fa-lg color-red-b"></i> View Permission</a></li>
+                                                <li><a href="#" class="deleteItemTracker" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" data-dataroomid="@itemtracker.DataRoomId" data-dataroomname="@itemtracker.DataRoomName" data-folderid="@itemtracker.FolderId" data-foldername="@itemtracker.FolderName" title="Delete Item Tracker"><i class="las la-trash fa-lg color-red-b"></i> Delete Item Tracker</a></li>
+                                            }
+                                            else
+                                            {
+                                                if (itemtracker.ItemTrackerPermission.HasWrite == true)
+                                                {
+                                                    @*<li><a href="#" class="deleteItemTracker" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" title="Delete Item Tracker"><i class="las la-trash fa-lg color-red-b"></i> Delete Item Tracker</a></li>*@
+                                                }
+                                                if (itemtracker.ItemTrackerPermission.HasRead == true)
+                                                {
+                                                    @*<li><a href="#" class="deleteItemTracker" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" title="Delete Item Tracker"><i class="las la-trash fa-lg color-red-b"></i> Delete Item Tracker</a></li>*@
+                                                }
+                                                if (itemtracker.ItemTrackerPermission.HasDelete == true)
+                                                {
+                                                    <li><a href="#" class="deleteItemTracker" data-id="@itemtracker.Id" data-name="@itemtracker.ItemTrackerName" title="Delete Item Tracker"><i class="las la-trash fa-lg color-red-b"></i> Delete Item Tracker</a></li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-a-body">
+                                    <img src="~/Content/dist/img/itemtrackerimage.png" alt="tracker-image">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @if (files != null && files.Count() > 0)
+                {
+                    bool isExternalSharingEnabled = false;
+                    var companyDetails = DataRooms.DataCache.Companies.Where(x => x.Id == files.First().CompanyId);
+                    if (companyDetails != null && companyDetails.Count() > 0)
+                    {
+                        if (companyDetails.First().IsExternalSharingEnabled == true)
+                        {
+                            isExternalSharingEnabled = true;
+                        }
+                    }
+                    foreach (var file in files)
+                    {
+                        bool isVisible = true;
+                        if (file.IsWorkFlowRequired == true && (file.Status == "Submitted" || file.Status == "Reviewed") && file.CreatedBy == Convert.ToInt32(Session["UserId"]))
+                        {
+                            isVisible = true;
+                        }
+                        else if (file.IsWorkFlowRequired == true && file.Status == "Approved")
+                        {
+                            isVisible = true;
+                        }
+                        else if (file.IsWorkFlowRequired == false || file.IsWorkFlowRequired == null)
+                        {
+                            isVisible = true;
+                        }
+                        else
+                        {
+                            isVisible = false;
+                        }
+
+                        <div class="fileDiv col-lg-2 col-md-3 col-6 mb-2" @(file.CreatedBy == Convert.ToInt32(Session["UserId"]) ? "owncreate" : "") style="display:@(isVisible ? "block" : "none")" data-id="@file.Id" data-dataroomid="@file.DataRoomId" data-folderid="@file.FolderId" data-name="@file.FolderName" data-path="@file.FolderName > @file.FileName" title="@file.FileName | @file.CreatorName | @file.CreatedOn.ToApplicationFormat()">
+                            <div class="card-a">
+                                <div class="btn-group w-100">
+                                    <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                          style="border-top-right-radius: 6px;">
+                                        @{
+                                            string filename = file.FileName.Length > 20 ? file.FileName.Substring(0, 17) + "..." : file.FileName;
+                                        }
+                                        @filename
+                                    </span>
+                                    <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                          aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                        <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                    </span>
+                                    <div class="dropdown-menu dropdown-menu-right pl-2">
+                                        <ul class="list-unstyled mb-0">
+                                            @if (file.IsWorkFlowRequired == true)
+                                            {
+                                                if (file.Status == "Save")
+                                                {
+                                                    if (file.FilePermission.HasFullControl == true)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasRead)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasWrite)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasDelete)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                    }
+                                                }
+                                                else if (file.Status == "Submitted")
+                                                {
+                                                    if (file.FilePermission.HasFullControl == true)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasRead)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasWrite)
+                                                    {
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasDelete)
+                                                    {
+
+                                                    }
+                                                }
+                                                else if (file.Status == "Reviewed")
+                                                {
+                                                    if (file.FilePermission.HasFullControl == true)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasRead)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasWrite)
+                                                    {
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasDelete)
+                                                    {
+
+                                                    }
+                                                }
+                                                else if (file.Status == "Approved")
+                                                {
+                                                    if (file.FilePermission.HasFullControl == true)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="copyFile" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions" data-target="#fileCopyMoveModal" data-toggle="modal"><i class="las la-copy fa-lg color-red-b"></i> Copy</a></li>
+                                                        <li><a href="#" class="moveFile" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions" data-target="#fileCopyMoveModal" data-toggle="modal"><i class="las la-arrow-right fa-lg color-red-b"></i> Move</a></li>
+
+                                                        if (file.IsCheckOut == true && file.CheckOutBy == loggedInUser)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckIn" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-In File" data-target="#checkinModal" data-toggle="modal"><i class="las la-lock fa-lg color-red-b"></i> File Check-In</a></li>
+                                                        }
+                                                        if (file.IsCheckOut == null)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckOut" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-Out File" data-target="#checkoutModal" data-toggle="modal"><i class="las la-lock-open fa-lg color-red-b"></i> File Check-Out</a></li>
+
+                                                        }
+                                                        <li><a href="#" class="addFilePermission" data-id="@file.Id" data-permissionid="0" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-user-cog fa-lg color-red-b"></i> Add Permisson</a></li>
+                                                        <li><a href="#" class="viewFilePermission" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-eye fa-lg color-red-b"></i> View Permisson</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                        <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                        <li><a href="#" class="shareFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Share File"><i class="las la-share fa-lg color-red-b"></i> Share</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasRead)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasWrite)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        if (file.IsCheckOut == true && file.CheckOutBy == loggedInUser)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckIn" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-In File" data-target="#checkinModal" data-toggle="modal"><i class="las la-lock fa-lg color-red-b"></i> File Check-In</a></li>
+                                                        }
+                                                        if (file.IsCheckOut == null)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckOut" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-Out File" data-target="#checkoutModal" data-toggle="modal"><i class="las la-lock-open fa-lg color-red-b"></i> File Check-Out</a></li>
+                                                        }
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                        <li><a href="#" class="shareFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Share File"><i class="las la-share fa-lg color-red-b"></i> Share</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasDelete)
+                                                    {
+                                                        <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                    }
+                                                }
+                                                else if (file.Status == "Rejected")
+                                                {
+                                                    if (file.FilePermission.HasFullControl == true)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        if (file.IsCheckOut == true && file.CheckOutBy == loggedInUser)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckIn" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-In File" data-target="#checkinModal" data-toggle="modal"><i class="las la-lock fa-lg color-red-b"></i> File Check-In</a></li>
+                                                        }
+                                                        if (file.IsCheckOut == null)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckOut" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-Out File" data-target="#checkoutModal" data-toggle="modal"><i class="las la-lock-open fa-lg color-red-b"></i> File Check-Out</a></li>
+
+                                                        }
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                        <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasRead)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+
+                                                    }
+                                                    else if (file.FilePermission.HasWrite)
+                                                    {
+                                                        <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                        if (file.IsCheckOut == true && file.CheckOutBy == loggedInUser)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckIn" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-In File" data-target="#checkinModal" data-toggle="modal"><i class="las la-lock fa-lg color-red-b"></i> File Check-In</a></li>
+                                                        }
+                                                        if (file.IsCheckOut == null)
+                                                        {
+                                                            <li><a href="#" class="editFileCheckOut" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-Out File" data-target="#checkoutModal" data-toggle="modal"><i class="las la-lock-open fa-lg color-red-b"></i> File Check-Out</a></li>
+
+                                                        }
+                                                        <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                        <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    }
+                                                    else if (file.FilePermission.HasDelete)
+                                                    {
+                                                        <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (file.FilePermission.HasFullControl == true)
+                                                {
+                                                    <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                    <li><a href="#" class="copyFile" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions" data-target="#fileCopyMoveModal" data-toggle="modal"><i class="las la-copy fa-lg color-red-b"></i> Copy</a></li>
+                                                    <li><a href="#" class="moveFile" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions" data-target="#fileCopyMoveModal" data-toggle="modal"><i class="las la-arrow-right fa-lg color-red-b"></i> Move</a></li>
+
+                                                    if (file.IsCheckOut == true && file.CheckOutBy == loggedInUser)
+                                                    {
+                                                        <li><a href="#" class="editFileCheckIn" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-In File" data-target="#checkinModal" data-toggle="modal"><i class="las la-lock fa-lg color-red-b"></i> File Check-In</a></li>
+                                                    }
+                                                    if (file.IsCheckOut == null)
+                                                    {
+                                                        <li><a href="#" class="editFileCheckOut" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-Out File" data-target="#checkoutModal" data-toggle="modal"><i class="las la-lock-open fa-lg color-red-b"></i> File Check-Out</a></li>
+
+                                                    }
+                                                    <li><a href="#" class="addFilePermission" data-id="@file.Id" data-permissionid="0" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-user-cog fa-lg color-red-b"></i> Add Permisson</a></li>
+                                                    <li><a href="#" class="viewFilePermission" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-eye fa-lg color-red-b"></i> View Permisson</a></li>
+                                                    <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                    <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                    <li><a href="#" class="shareFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Share File"><i class="las la-share fa-lg color-red-b"></i> Share</a></li>
+                                                }
+                                                else if (file.FilePermission.HasRead)
+                                                {
+                                                    <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                    <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                    <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                }
+                                                else if (file.FilePermission.HasWrite)
+                                                {
+                                                    <li><a href="#" class="downloadFile" data-id="@file.Id" data-fileexists="@file.IsFileExists" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Download File"><i class="las la-download fa-lg color-red-b"></i> Download</a></li>
+                                                    if (file.IsCheckOut == true && file.CheckOutBy == loggedInUser)
+                                                    {
+                                                        <li><a href="#" class="editFileCheckIn" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-In File" data-target="#checkinModal" data-toggle="modal"><i class="las la-lock fa-lg color-red-b"></i> File Check-In</a></li>
+                                                    }
+                                                    if (file.IsCheckOut == null)
+                                                    {
+                                                        <li><a href="#" class="editFileCheckOut" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Check-Out File" data-target="#checkoutModal" data-toggle="modal"><i class="las la-lock-open fa-lg color-red-b"></i> File Check-Out</a></li>
+                                                    }
+                                                    <li><a href="#" class="viewFile" data-name="@file.FileName" data-id="@file.Id" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="View File"><i class="las la-eye fa-lg color-red-b"></i> View File Audit Trail</a></li>
+                                                    <li><a href="#" class="viewFileVersions" data-id="@file.Id" data-filename="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Manage File Permissions"><i class="las la-history fa-lg color-red-b"></i> File Version History</a></li>
+                                                    <li><a href="#" class="shareFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Share File"><i class="las la-share fa-lg color-red-b"></i> Share</a></li>
+                                                }
+                                                else if (file.FilePermission.HasDelete)
+                                                {
+                                                    <li><a href="#" class="deleteFile" data-id="@file.Id" data-name="@file.FileName" data-folderid="@file.FolderId" data-dataroomid="@file.DataRoomId" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete</a></li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-a-body">
+                                    @if (file.ContentType == ".csv"
+                                || file.ContentType == ".xls" || file.ContentType == ".xlsx")
+                                    {
+                                        <img src="~/Content/dist/img/file-icon.png" alt="folder-image">
+                                    }
+                                    else if (file.ContentType == ".jpg" || file.ContentType == ".JPEG" || file.ContentType == ".png")
+                                    {
+                                        <img src="~/Content/dist/img/icon-img.png" alt="folder-image">
+                                    }
+                                    else if (file.ContentType == ".doc" || file.ContentType == ".docx")
+                                    {
+                                        <img src="~/Content/dist/img/icon-doc.png" alt="folder-image">
+                                    }
+                                    else if (file.ContentType == ".pdf")
+                                    {
+                                        <img src="~/Content/dist/img/icon-pdf.png" alt="folder-image">
+                                    }
+                                    else
+                                    {
+                                        <img src="~/Content/dist/img/icon-files.png" alt="folder-image">
+                                    }
+                                    @*<img src="~/Content/dist/img/folder-icon.png" alt="folder-image">*@
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </form>
+    <!-- /.container-fluid -->
+</section>
+<!-- /.content -->

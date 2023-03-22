@@ -1,0 +1,41 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+
+@if (Model.DataRoomPermissions != null && Model.DataRoomPermissions.Count() > 0)
+{
+    foreach (var dataroom in Model.DataRoomPermissions.ToList())
+    {
+        <div class="col-lg-2 col-md-3 col-6 mb-2">
+            <div class="card-a">
+                <div class="btn-group w-100">
+                    <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                          style="border-top-right-radius: 6px;">
+                        @{
+                            string dataroomname = dataroom.DataRoomName.Length > 17 ? dataroom.DataRoomName.Substring(0, 12) + "..." : dataroom.DataRoomName;
+                        }
+                        @dataroomname
+                    </span>
+                    <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                          aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                        <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                    </span>
+                    <div class="dropdown-menu dropdown-menu-right pl-2">
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="#"><i class="las la-folder-plus fa-lg color-blue-b"></i> Add Permission</a></li>
+                            <li><a href="#"><i class="las la-eye fa-lg color-blue-b"></i> View Permission</a></li>
+                            <li>
+                                <a href="#" data-toggle="modal" data-target="#AssignWorkflows"><i class="las la-file-medical-alt fa-lg color-blue-b"></i> Assign Workflows</a>
+                            </li>
+                            <li><a href="#"><i class="las la-trash fa-lg color-blue-b"></i> Delete Folder</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-a-body">
+                    <img src="~/Content/dist/img/folder-icon.png" alt="folder-image">
+                </div>
+            </div>
+        </div>
+    }
+}
+
+
+

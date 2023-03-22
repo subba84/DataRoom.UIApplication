@@ -1,0 +1,171 @@
+﻿@model List<DataRooms.UI.Models.DataRoomPermission>
+
+@if (Model.Count == 0)
+{
+    <div>No Permissions found for this sharbox..</div>
+}
+else
+{
+    <div class="row" style="border-bottom:1px solid grey;padding:5px;margin-left:0px;margin-right:0px;">
+        <div class="col-lg-4">
+            <label><b>SharBox</b></label>
+            <div>
+                <input type="hidden" value="@Model[0].DataRoomId" id="hdnFilePermissionDataRoomId" />
+                <span>@Model[0].DataRoomName</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row" id="divDataRoomPermissionControls" style="border-bottom: 1px solid grey; background-color: #ede2e2; display: none; margin-top: 20px; margin-left: 0px; margin-right: 0px;">
+        <div class="col-lg-3">
+            <label>User</label>
+            <div>
+                <span><b id="bDataRoomPermissionUser"></b></span>
+                <input type="hidden" id="hdnDataRoomPermissionId" />
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <label>Permissions</label>
+            <div class="row">
+                <div class="col-lg-3">
+                    <span>Full</span>
+                    <input type="checkbox" id="chkDataRoomPermissionFull" />
+                </div>
+                <div class="col-lg-3">
+                    <span>Read</span>
+                    <input type="checkbox" id="chkDataRoomPermissionRead" />
+                </div>
+                <div class="col-lg-3">
+                    <span>Write</span>
+                    <input type="checkbox" id="chkDataRoomPermissionWrite" />
+                </div>
+                <div class="col-lg-3">
+                    <span>Delete</span>
+                    <input type="checkbox" id="chkDataRoomPermissionDelete" />
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <label>Is Active</label>
+            <div>
+                <input type="checkbox" id="chkDataRoomPermissionIsActive" />
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div>
+                <input type="button" class="btn btn-secondary" style="margin-top:10px;" value="Save" id="btnDataRoomPermissionEdit" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:20px;margin-right:0px;margin-left:0px;">
+        <div class="col-lg-12" style="overflow:auto" id="divDataRoomPermissionListPart">
+            <div class="row">
+                <div class="col-lg-6" align="left">
+                    <h5><b>DataRoom Permissions</b></h5>
+                </div>
+                <div class="col-lg-6" align="right">
+                    <label>Search : </label>
+                    <input type="text" id="txtDataRoomPermissionSearch" placeholder="Search with User Name.." />
+                </div>
+            </div>
+            <table class="table table-bordered" id="tblDataRoomPermissions" width="50%" cellspacing="0">
+                <thead class="tbl-header">
+                    <tr>
+                        <th>S.No.</th>
+                        <th>User</th>
+                        <th>Permission</th>
+                        <th>Is Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count() > 0)
+                    {
+                        int i = 1;
+                        foreach (var permission in Model)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td class="tdDataRoomPermissionUserName">
+                                    @permission.UserName
+                                </td>
+                                @{
+                                    List<string> permissions = new List<string>();
+                                    if (permission.HasFullControl == true)
+                                    {
+                                        permissions.Add("Full Control");
+                                    }
+                                    if (permission.HasRead == true)
+                                    {
+                                        permissions.Add("Read");
+                                    }
+                                    if (permission.HasWrite == true)
+                                    {
+                                        permissions.Add("Write");
+                                    }
+                                    if (permission.HasDelete == true)
+                                    {
+                                        permissions.Add("Delete");
+                                    }
+                                }
+                                <td>@string.Join(",", permissions)</td>
+                                <td>@(permission.IsActive == true ? "Yes" : "No")</td>
+
+                                <td style="text-align:center">
+                                    <button class="btn btn-link p-0 mr-2 editDataRoomPermission" title="Edit"  data-id="@permission.Id" data-fullcontrol="@permission.HasFullControl" data-read="@permission.HasRead" data-write="@permission.HasWrite" data-delete="@permission.HasDelete" data-isactive="@permission.IsActive"><i class="far fa-edit"></i></button>
+                                    <button class="btn btn-link p-0 text-danger deleteDataRoomPermission" title="Delete"  data-username="@permission.UserName" data-id="@permission.Id"><i class="fas fa-trash-alt"></i></button>
+                                </td>
+
+                                @*<td style="cursor:pointer"><i class="fas fa-fw fa-edit theme editDataRoomPermission" data-id="@permission.Id" data-fullcontrol="@permission.HasFullControl" data-read="@permission.HasRead" data-write="@permission.HasWrite" data-delete="@permission.HasDelete" data-isactive="@permission.IsActive"></i></td>
+                                <td style="cursor:pointer"><i class="fas fa-fw fa-trash text-red deleteDataRoomPermission" data-username="@permission.UserName" data-id="@permission.Id"></i></td>*@
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6">No Permissions Found..</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#txtDataRoomPermissionSearch').keyup(function () {
+                search_table_dataroom($(this).val());
+            });
+            function search_table_dataroom(value) {
+                $('#tblDataRoomPermissions tr').each(function () {
+                    var found = 'false';
+                    $(this).each(function () {
+                        if ($(this).text().toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+                            found = 'true';
+                        }
+                    });
+                    if (found == 'true') {
+                        $(this).show();
+                    }
+                    else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+
+    </script>
+
+    
+}
+
+
+
+
+

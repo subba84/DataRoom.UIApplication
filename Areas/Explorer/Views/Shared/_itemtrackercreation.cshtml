@@ -1,0 +1,257 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.ItemTrackerModel
+
+<style>
+    .ui-autocomplete{
+        z-index:15001!important;
+    }
+</style>
+
+<form action="@Url.Action("CreateItemTrackerMetaData", "ManageItemTracker", new { area = "DataRoom"})" id="frmItemTrackerMetaData">
+    <div style="overflow-y:auto !important">
+        <div class="form-group row" style="display:none">
+            <div class="col-lg-6">
+                <label class="font-weight-bold col-sm-3">SharBox</label>
+                <input type="text" class="form-control" readonly id="txtItemTrackerMetaDataRoomName" />
+                <input type="hidden" id="hdnItemTrackerMetaDataRoomId" value="@Model.DataRoomId" name="DataRoomId"/>
+                <input type="hidden" id="hdnItemTrackerMetaId" value="@Model.DataRoomName" name="DataRoomName"/>
+            </div>
+            <div class="col-lg-6">
+                <label class="font-weight-bold col-sm-9">Folder</label>
+                <input type="text" readonly class="form-control" id="txtItemTrackerMetaFolderName" value="@Model.FolderName" name="FolderName"/>
+                <input type="hidden" id="hdnItemTrackerMetaFolderId" value="@Model.FolderId" name="FolderId" />
+                <input type="hidden" id="hdnItemTrackerMetaGuid" value="@Model.ItemTrackerGuid" name="ItemTrackerGuid"/>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-lg-6">
+                <label class="font-weight-bold col-sm-9">Item Tracker Name</label>
+                <input type="text" class="form-control" placeholder="Item Tracker Name.." id="txtItemTrackerMetaName" name="ItemTrackerName" />
+            </div>
+            <div class="col-lg-6" style="display:none;">
+                <label class="font-weight-bold col-sm-9">IsActive</label><br />
+                <input type="checkbox" class="form-input-check" checked id="chkItemTrackerMetaIsActive" name=""/>
+            </div>
+        </div>
+
+        <hr />
+
+        <label class="font-weight-bold col-sm-9">Controls Configuration</label>
+        <div id="divItemTrackerCreationofControls">
+            <div class="form-group row">
+                <div class="form-group row" style="padding:3px;">
+                    <div class="col-lg-4" style="display:none">
+                        <label class="col-sm-6 font-weight-bold">SharBox</label>
+                        <input type="text" class="form-control" readonly id="txtItemTrackerControlDataRoomName" value="@Model.DataRoomName" />
+                        <input type="hidden" id="hdnItemTrackerControlDataRoomId" value="@Model.DataRoomId" />
+                    </div>
+                    <div class="col-lg-4" style="display:none">
+                        <label class="col-sm-6 font-weight-bold">Folder</label>
+                        <input type="text" class="form-control" readonly id="txtItemTrackerControlFolderName" value="@Model.FolderName" />
+                        <input type="hidden" id="hdnItemTrackerControlFolderId" value="@Model.FolderId" />
+                    </div>
+                    <div class="col-lg-4" style="display:none">
+                        <label class="col-sm-6 font-weight-bold">Item Tracker</label>
+                        <input type="text" class="form-control" readonly id="txtItemTrackerControlItemTrackerName" />
+                        <input type="hidden" id="hdnItemTrackerControlItemTrackerId" value="0" />
+                    </div>
+                </div>
+                <div class="col-lg-6">
+
+                </div>
+                <div class="col-lg-6" style="padding:3px">
+                    <input type="button" value="Add Control" class="btn btn-primary" id="btnAddControl" style="float:right" />
+                </div>
+            </div>
+            <div class="col-lg-12" style="font-size:12px;">
+                <table class="table table-bordered" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr class="tbl-header">
+                            <th>S.No.</th>
+                            <th>Control Type</th>
+                            <th>Control Name</th>
+                            <th colspan="1">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.DataRoomItemTrackerControls.Count > 0)
+                        {
+                            var consolidatedData = from c in Model.DataRoomItemTrackerControls
+                                                   group c by new
+                                                   {
+                                                       c.ControlType,
+                                                       c.ParentGuid
+                                                   } into gcs
+                                                   select new DataRooms.UI.Models.ItemTrackerControl()
+                                                   {
+                                                       ControlType = gcs.Key.ControlType,
+                                                       ParentGuid = gcs.Key.ParentGuid
+                                                   };
+                            if (consolidatedData != null && consolidatedData.Count() > 0)
+                            {
+                                int i = 1;
+                                foreach (var control in consolidatedData)
+                                {
+                                    <tr>
+                                        <td style="text-align:center">@i</td>
+                                        <td>
+                                            @{
+                                                string controlType = string.Empty;
+                                                switch (Convert.ToInt32(control.ControlType))
+                                                {
+                                                    case ControlType.TextBox:
+                                                        controlType = "TextBox";
+                                                        break;
+                                                    case ControlType.Dropdown:
+                                                        controlType = "Dropdown";
+                                                        break;
+                                                    case ControlType.TwoLevelDropDown:
+                                                        controlType = "2 Level Dropdown";
+                                                        break;
+                                                    case ControlType.ThreeLevelDropdown:
+                                                        controlType = "3 Level Dropdown";
+                                                        break;
+                                                    case ControlType.FileUpload:
+                                                        controlType = "File Upload";
+                                                        break;
+                                                }
+                                            }
+                                            @controlType
+                                        </td>
+                                        <td>
+                                            @{
+                                                string controlName = string.Empty;
+                                                controlName = Model.DataRoomItemTrackerControls.Where(x => x.ParentGuid == control.ParentGuid).First().ControlName;
+                                            }
+                                            @controlName
+                                        </td>
+                                        <td style="text-align:center">
+                                            <a href="#" data-guid="@control.ParentGuid" class="deleteItemTrackerControl"><i class="las la-trash fa-lg" style="color:red;"></i> </a>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4">No Controls Found..</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4">No Controls Found..</td>
+                            </tr>
+                        }
+
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <hr />
+
+        <label class="font-weight-bold col-sm-9">User Permissions</label>
+        <div class="">
+            <div class="form-group row">
+                <div class="col-lg-6">
+
+                </div>
+                <div class="col-lg-6">
+                    <input type="button" value="+ Add" id="btnAddItemTrackerControlNew" class="btn btn-primary" style="float:right" />
+                </div>
+            </div>
+
+
+            <div class="col-lg-12">
+                <table class="table table-bordered table-hover" id="tblItemTrackerControl">
+                    <thead class="tbl-header">
+                        <tr style="text-align:center">
+                            <th>User</th>
+                            <th>Full Access</th>
+                            <th>Read</th>
+                            <th>Write</th>
+                            <th>Delete</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+@*<script src="~/Scripts/Jquery.ui.min.js"></script>*@
+<script>
+    $(document).on("click", "#btnAddItemTrackerControlNew", function (e) {
+        e.preventDefault();
+        var trlength = $("#tblItemTrackerControl tbody tr").length;
+        var tr = "<tr style='text-align:center'><td><input type='text' id='username_" + trlength + "' class='form-control txtITUserPermission' placeholder='Username' name='ItemTrackerPermissions[" + trlength + "].UserName'/><input type='hidden' class='form-control  txtITUserPermissionId' name='ItemTrackerPermissions[" + trlength + "].UserId'  id='userid_" + trlength +"' /></td><td><input type='checkbox' class='chkFullAccess' value='true'  name='ItemTrackerPermissions[" + trlength + "].HasFullControl'/></td><td><input type='checkbox' class='chkReadAccess' value='true'  name='ItemTrackerPermissions[" + trlength + "].HasRead'/></td><td><input type='checkbox' class='chkWriteAccess' value='true'  name='ItemTrackerPermissions[" + trlength + "].HasWrite'/></td><td><input type='checkbox' class='chkDeleteAccess' value='true'  name='ItemTrackerPermissions[" + trlength + "].HasDelete'/></td><td><input type='hidden' class='form-control hdnUserPermissionIsActive' name='ItemTrackerPermissions[" + trlength + "].IsActive' value='true'/><i class='las la-trash fa-lg deleteUserPermission' style='color:red;'></i></td></tr>";
+
+
+
+
+
+
+
+        @*$(document).on("focus", ".txtITUserPermission", function () {
+        var thisuserid = $(this).closest("tr").find(".txtITUserPermissionId");
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetUsersBasedonDataRoom", "ManageFolderPermission",new { area = "Folders" })?searchString=' + $(this).val() + "&dataroomid=" + $("#hdnItemTrackerMetaDataRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $(thisuserid).val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $(this).val(ui.item.label);
+                $(thisuserid).val(ui.item.val);
+            }
+        });*@
+    //});
+
+        $("#tblItemTrackerControl tbody").append(tr);
+
+        $("#username_" + trlength).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetUsersBasedonDataRoom", "ManageFolderPermission",new { area = "Folders" })?searchString=' + $("#username_" + trlength).val() + "&dataroomid=" + $("#hdnItemTrackerMetaDataRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#userid_" + trlength).val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $(this).val(ui.item.label);
+                $("#userid_" + trlength).val(ui.item.val);
+            }
+        });
+    });
+
+    $(document).on("click", ".deleteUserPermission", function () {
+        $(this).closest("tr").find(".hdnUserPermissionIsActive").val(false);
+        $(this).closest("tr").hide();
+    });
+</script>

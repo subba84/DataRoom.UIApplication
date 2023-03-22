@@ -1,0 +1,224 @@
+﻿@model DataRooms.UI.Models.DataRoom
+
+<form class="user" method="post" action="@Url.Action("Edit","ManageDataRoom",new { area = "DataRoom"})">
+    <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">SharBox</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="card">
+            <div class="card-body bg-light">
+                <div class="form-group row">
+                    <div class="col-sm-6 mb-3 mb-sm-0">
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <input type="hidden" name="CreatedBy" value="@Model.CreatedBy" />
+                        <input type="hidden" name="CreatorName" value="@Model.CreatorName" />
+                        <input type="hidden" name="CreatedOn" value="@Model.CreatedOn" />
+
+                        <label class="col-form-label-sm" for="txtDataRoomName">SharBox Name</label>
+                        <input type="text" class="form-control" id="txtDataRoomName"
+                               placeholder="Room Name" name="DataRoomName" value="@Model.DataRoomName" style="height:50px">
+                        <div style="margin-top:20px;display:none">
+                            <label class="col-form-label-sm" for="chkIsActive">Is Active</label>
+                            <input type="checkbox" class="form-check-label" checked value="true" id="chkIsActive"
+                                   name="IsActive">
+                        </div>
+
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="col-form-label-sm" for="txtDescription">Description</label>
+                        <textarea class="form-control" rows="1" id="txtDescription"
+                                  placeholder="Description" name="Description" value="" style="height:50px">@Model.Description</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="form-group row">
+            <div class="col-sm-6">
+                <label class="col-form-label-sm col-lg-6" for="chkLogs">Is Work Flow Required?</label>
+                <input type="checkbox" id="chkIsWorkFlowRequired" name="IsWorkFlowRequired" @(Model.IsWorkFlowRequired == true ? "checked" : "") value="true" />
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm col-lg-4" for="">Work Flow</label>
+                <select class="col-lg-6" id="slWorkFlow" name="WorkFlowId">
+                    <option value="0">--Select--</option>
+                    @if(DataRooms.DataCache.WorkFlows!=null && DataRooms.DataCache.WorkFlows.Count() > 0)
+                    {
+                        foreach(var workflow in DataRooms.DataCache.WorkFlows)
+                        {
+                            <option value="@workflow.Id">@workflow.WorkFlowName</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>*@
+        <div class="form-group row" style="font-size:10px">
+            <div class="col-lg-4">
+                <input type="checkbox" id="chkArchival" name="IsArchivalRequired" @(Model.IsArchivalRequired == true ? "checked" : "") value="true" />
+                <label class="col-form-label-sm" for="chkArchival">Archival Required?</label>
+            </div>
+            <div class="col-lg-4 form-inline">
+                <label class="col-form-label-sm col-lg-6" for="txtArchivalPeriod">Archival Period</label>
+                <input type="number" min="1" max="365" class="col-lg-6 form-control" id="txtArchivalPeriod" name="ArchivalPeriod" value="@Model.ArchivalPeriod" />
+            </div>
+            <div class="col-lg-3 offset-lg-1">
+                <label class="col-form-label-sm col-sm-12 mb-0" for="txtDeletionPeriod">Archival Based On</label>
+                <label class="form-check-label" style=" margin-left: 1.8rem; font-size: 14px;">
+                    <input type="radio" class="form-check-input rdbArchival" name="ArchivalBasedOn" value="Created Date" checked /> Created Date
+                </label>
+                <label class="form-check-label" style=" margin-left: 1.8rem; font-size: 14px;">
+                    <input type="radio" class="form-check-input rdbArchival" name="ArchivalBasedOn" value="Modified Date" />Modified Date
+                </label>
+                @*<input type="radio" name="ArchivalBasedOn" value="Created Date" checked />Created Date
+                <input type="radio" name="ArchivalBasedOn" value="Modified Date" />Modified Date*@
+            </div>
+        </div>
+        <div class="form-group row" style="font-size:10px">
+            <div class="col-lg-4">
+                <input type="checkbox" id="chkDeletion" name="IsDeletionRequired" @(Model.IsDeletionRequired == true ? "checked" : "") value="true" />
+                <label class="col-form-label-sm" for="chkDeletion">Deletion Required?</label>
+            </div>
+            <div class="col-lg-4  form-inline">
+                <label class="col-form-label-sm col-lg-6 " for="txtDeletionPeriod">Deletion Period</label>
+                <input type="number" min="1" max="365" class="col-lg-6 form-control" id="txtDeletionPeriod" name="DeletionPeriod" value="@Model.DeletionPeriod" />
+            </div>
+            <div class="col-lg-3 offset-lg-1">
+                <label class="col-form-label-sm col-lg-12 mb-0" for="txtDeletionPeriod">Deletion Based On</label>
+                <label class="form-check-label" style=" margin-left: 1.8rem; font-size: 14px;">
+                    <input type="radio" class="form-check-input rdbDeletion" name="DeletionBasedOn" value="Created Date" checked />Created Date
+                </label>
+                <label class="form-check-label" style=" margin-left: 1.8rem; font-size: 14px;">
+                    <input type="radio" class="form-check-input rdbDeletion" name="DeletionBasedOn" value="Modified Date" />Modified Date
+                </label>
+
+                @*<input type="radio" name="DeletionBasedOn" value="Created Date" checked />Created Date
+                <input type="radio" name="DeletionBasedOn" value="Modified Date" />Modified Date*@
+            </div>
+        </div>
+        @if (Model.IsLogsRequiredforCompany == true)
+        {
+            <div class="form-group row" style="font-size:10px">
+                <div class="col-lg-4">
+                    <input type="checkbox" id="chkLogsRequired" name="IsLogsRequired" @(Model.IsLogsRequired == true ? "checked" : "") value="true" />
+                    <label class="col-form-label-sm" for="chkLogs">Logs Required?</label>
+                </div>
+                <div class="col-lg-4  form-inline">
+                    <label class="col-form-label-sm col-lg-6 " for="txtRetentionPeriod">Retention Period</label>
+                    <input type="number" min="1" class="col-lg-6 form-control" max="365" id="txtRetentionPeriod" name="RetentionPeriod" value="@Model.RetentionPeriod" />
+                </div>
+                <div class="col-lg-3 offset-lg-1">
+                    <label class="col-form-label-sm col-lg-12  mb-0" for="txtDeletionPeriod">Retention Based On</label>
+                    <label class="form-check-label" style=" margin-left: 1.8rem; font-size: 14px;">
+                        <input type="radio" class="form-check-input" name="RetentionBasedOn" value="Created Date" checked />Created Date
+                    </label>
+
+                    @*<input type="radio" name="RetentionBasedOn" value="Created Date" checked />Created Date*@
+                    @*<input type="radio" name="RetentionBasedOn" value="Modified Date" />Modified Date*@
+                </div>
+            </div>
+        }
+        <hr />
+        <div class="form-group row">
+            <div class="col-sm-4 offset-sm-4">
+                <label class="col-form-label-sm col-lg-6" for="">Archival to</label>
+                <select class="form-control" name="ArchivalType" id="slArchivalType">
+                    @if (!string.IsNullOrEmpty(Model.ArchivalType))
+                    {
+                        if (Model.ArchivalType == "AWS")
+                        {
+                            <option value="Local">Local</option>
+                            <option value="AWS" selected>AWS</option>
+                        }
+                        else
+                        {
+                            <option value="Local" selected>Local</option>
+                            <option value="AWS">AWS</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="Local">Local</option>
+                        <option value="AWS">AWS</option>
+                    }
+                </select>
+            </div>
+            @*<div class="col-sm-6">
+                <label class="col-form-label-sm col-lg-6" for="txtArchivalPath">Archival Path</label>
+                <input type="text" class="form-control" id="txtArchivalPath" name="ArchivalPath" value="@Model.ArchivalPath" />
+            </div>*@
+        </div>
+        @{
+            bool isAWSDetailsVisible = false;
+            if (Model.ArchivalType == "AWS")
+            {
+                isAWSDetailsVisible = true;
+            }
+        }
+        
+    <div class="form-group row cloud" style="display:@(isAWSDetailsVisible ? "block" : "none")">
+        <div class="col-sm-6">
+            <label class="col-form-label-sm col-lg-6" for="txtDeletionPeriod">AWS Access Key</label>
+            <input type="text" class="form-control" id="txtAWSAccessKey" name="ArchivalAWSAccessKey" value="@Model.ArchivalAWSAccessKey" />
+        </div>
+        <div class="col-sm-6">
+            <label class="col-form-label-sm col-lg-6" for="txtAWSSecurityKey">AWS Security Key</label>
+            <input type="text" class="form-control" id="txtAWSSecurityKey" name="ArchivalAWSSecurityKey" value="@Model.ArchivalAWSSecurityKey" />
+        </div>
+        <div class="col-sm-6">
+            <label class="col-form-label-sm col-lg-6" for="txtArchivalAWSRegion">AWS Region</label>
+            <input type="text" class="form-control" id="txtArchivalAWSRegion" name="ArchivalAWSRegion" value="@Model.ArchivalAWSRegion" />
+        </div>
+    </div>
+
+        <label id="lblErrMessage" class="float-left" style="color:red;display:none"></label>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" id="btnSaveDataRoom">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    </div>
+</form>
+<script>
+    $("#slArchivalType").change(function () {
+        $(".cloud input[type='text']").val("");
+        if ($(this).val() == "AWS") {
+            $(".cloud").show();
+            $("#lblStorageCategory").text("S3 Bucket Name");
+        }
+        else {
+            $("#lblStorageCategory").text("Storage Path");
+            $(".cloud").hide();
+        }
+    });
+
+    $("#chkArchival").click(function () {
+        if ($(this).prop("checked") == true) {
+            $("#chkDeletion").prop("disabled", true);
+            $("#txtDeletionPeriod").val("");
+            $("#txtDeletionPeriod").attr("disabled", true);  
+            $(".rdbDeletion").attr("disabled", true);
+        }
+        else {
+            $("#chkDeletion").prop("disabled", false);
+            $("#txtDeletionPeriod").val("");
+            $("#txtDeletionPeriod").attr("disabled", false);  
+            $(".rdbDeletion").attr("disabled", false);
+        }
+    });
+
+    $("#chkDeletion").click(function () {
+        if ($(this).prop("checked") == true) {
+            $("#chkArchival").prop("disabled", true);
+            $("#txtArchivalPeriod").val("");
+            $("#txtArchivalPeriod").attr("disabled", true);
+            $(".rdbArchival").attr("disabled", true);
+        }
+        else {
+            $("#chkArchival").prop("disabled", false);
+            $("#txtArchivalPeriod").val("");
+            $("#txtArchivalPeriod").attr("disabled", false);
+            $(".rdbArchival").attr("disabled", false);
+        }
+    });
+</script>

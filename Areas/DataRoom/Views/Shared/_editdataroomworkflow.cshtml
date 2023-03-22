@@ -1,0 +1,238 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+
+<style>
+    .row {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+</style>
+
+<div id="workfloweditpart">
+    @Html.Partial("~/Areas/DataRoom/Views/Shared/_editpartworkflow.cshtml", Model)
+</div>
+
+
+
+<div class="">
+   
+    <div id="divWorkFlowList">
+        @Html.Partial("~/Areas/DataRoom/Views/Shared/_dataroomworkflows.cshtml",Model)
+    </div>
+</div>
+
+<div class="modal-footer">
+  @*<label class="font-weight-bold float-left" style="margin-right:52%;font-size:14px;">Note: After entering the user in respective role, please click on "+" button</label>*@  <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+</div>
+
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script>
+    $(document).on("click","#chkIsReviewRequired",function () {
+        $("#chkIsSignleReviewSufficient").prop("checked", false);
+        $("#rdbIsSingleReviewerRequiredYes").prop("checked", false);
+        $("#rdbIsSingleReviewerRequiredNo").prop("checked", false);
+        if ($(this).prop("checked") == true) {
+            $(".reviewSection").show();
+            $("#rdbIsSingleReviewerRequiredYes").prop("checked", true);
+            $(".review").show();
+        }
+        else {
+            $(".reviewSection").hide();
+            $(".review").hide();
+        }
+    });
+
+    
+
+    $(document).on("change","input[type='radio'][name='WorkFlow.IsSingleInitiator']",function () {
+        $(".tdErrMsg").text("");
+        $(".tr_initiator").each(function () {
+            $(this).find(".hdnisactive").val(false);
+        });
+        $(".tr_initiator").hide();
+    });
+
+    $(document).on("change","input[type='radio'][name='WorkFlow.IsSingleReviewerRequired'],#chkIsReviewRequired",function () {
+        $(".tdErrMsg").text("");
+        $(".tr_reviewer").each(function () {
+            $(this).find(".hdnisactive").val(false);
+        });
+        $(".tr_reviewer").hide();
+    });
+
+    $(document).on("change","input[type='radio'][name='WorkFlow.IsSingleApproverRequired'],#chkIsApprovalRequired",function () {
+        $(".tdErrMsg").text("");
+        $(".tr_approver").each(function () {
+            $(this).find(".hdnisactive").val(false);
+        });
+        $(".tr_approver").hide();
+    });
+
+    $(document).on("change","input[type='radio'][name='IsSingleReviewerRequired']",function () {
+        $("#chkIsSignleReviewSufficient").prop("checked", false);
+        if ($(this).val() == 'true') {
+            $(".oneAmongReview").hide();
+        }
+        else {
+            $(".oneAmongReview").show();
+        }
+    });
+
+    $(document).on("click","#chkIsApprovalRequired",function () {
+        $("#IsSignleApprovalSufficient").prop("checked", false);
+        $("#rdbIsSingleApproverRequiredYes").prop("checked", false);
+        $("#rdbIsSingleApproverRequiredNo").prop("checked", false);
+        if ($(this).prop("checked") == true) {
+            $(".approvalSection").show();
+            $("#rdbIsSingleApproverRequiredYes").prop("checked", true);
+            $(".approval").show();
+        }
+        else {
+            $(".approvalSection").hide();
+            $(".approval").hide();
+        }
+    });
+    $(document).on("change","input[type='radio'][name='IsSingleApproverRequired']",function () {
+        $("#IsSignleApprovalSufficient").prop("checked", false);
+        if ($(this).val() == 'true') {
+            $(".oneAmongApproval").hide();
+        }
+        else {
+            $(".oneAmongApproval").show();
+        }
+    });
+
+    $(document).on("keypress", ".workflowuser", function () {
+        var thisVal = $(this).val();
+        var hdnUserId = $(this).closest("tr").find(".workflowuserid");
+        $(this).autocomplete({
+            appendTo: "#dataroomWorkFlowCreationModel",
+            source: function (request, response) {
+                $.ajax({
+                    url: '/dataroom/workflowusers?searchString=' + thisVal + "&dataroomid=" + $("#hdnWorkFlowDataRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $(this).closest("tr").find(".workflowuserid").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $(this).val(ui.item.label);
+                $(hdnUserId).val(ui.item.val);
+            }
+        });
+    });
+
+    $(document).on("click", ".btnAddWorkFlowUser", function () {
+        $(this).closest("tr").find(".tdErrMsg").text("");
+        var category = $(this).attr("data-category");
+        var fullname = $(this).closest("tr").find(".workflowuser").val();
+        var userid = $(this).closest("tr").find(".workflowuserid").val();
+
+        var rolename = fnCheckUserAddedorNot(userid);
+        if (rolename != "") {
+            $(this).closest("tr").find(".tdErrMsg").text("User already added in " + rolename + " role");
+            return false;
+        }
+
+
+        if (category == "initiator") {
+            var singleinitiator = $("#rdbIsSingleInitiatorYes").prop("checked");
+            var initiatorlength = 1;
+            $("input.initiator").each(function () {
+                if ($(this).closest("tr").find(".hdnisactive").val() != 'false') {
+                    initiatorlength++;
+                }
+            });
+            if (singleinitiator == true && initiatorlength > 1) {
+                $(this).closest("tr").find(".tdErrMsg").text("Only One Initiator will be allowed");
+                return false;
+            }
+        }
+
+        if (category == "reviewer") {
+            var singlereviewer = $("#rdbIsSingleReviewerRequiredYes").prop("checked");
+            var reviewerlength = 1;
+            $("input.reviewer").each(function () {
+                if ($(this).closest("tr").find(".hdnisactive").val() != 'false') {
+                    reviewerlength++;
+                }
+            });
+            if (singlereviewer == true && reviewerlength > 1) {
+                $(this).closest("tr").find(".tdErrMsg").text("Only One Reviewer will be allowed");
+                return false;
+            }
+        }
+
+        if (category == "approver") {
+            var singleapprover = $("#rdbIsSingleApproverRequiredYes").prop("checked");
+            var approverlength = 1;
+            $("input.approver").each(function () {
+                if ($(this).closest("tr").find(".hdnisactive").val() != 'false') {
+                    approverlength++;
+                }
+            });
+            if (singleapprover == true && approverlength > 1) {
+                $(this).closest("tr").find(".tdErrMsg").text("Only One Approver will be allowed");
+                return false;
+            }
+        }
+
+
+        
+        
+        if (fullname == "") {
+            $(this).closest("tr").find(".workflowuser").css({ "border-color": "red" });
+            $("#lblWorkFlowErrMessage").text("Please Enter User Name");
+            $("#lblWorkFlowErrMessage").show();
+            return false;
+        }
+        else {
+            $(this).closest("tr").find(".workflowuser").css({ "border-color": "#d1d3e2" });
+        }
+        var len = $(".workflowusername").length;
+        var roleid = 0; var rolename = "";
+        if (category == "initiator") {
+            roleid = "@AppRole.Initiator";
+            rolename = "Initiator";
+        }
+        else if (category == "reviewer") {
+            roleid = "@AppRole.Reviewer";
+            rolename = "Reviewer";
+        }
+        else {
+            roleid = "@AppRole.Approver";
+            rolename = "Approver";
+        }
+        var tr = '<tr class="tr_' + category + '"><td><input type="text" class="form-control ' + category + ' workflowusername" name="WorkFlowUsers[' + len + '].UserName" value="' + fullname + '" readonly/><input type="hidden" class="hdnworkflowid" data-category="' + category + '" value="' + userid + '" name="WorkFlowUsers[' + len + '].UserId"/><input type="hidden" class="hdnroleid" value="' + roleid + '" name="WorkFlowUsers[' + len + '].RoleId"/><input type="hidden" class="hdnrolename" value="' + rolename + '" name="WorkFlowUsers[' + len + '].RoleName"/><input type="hidden" class="hdnisactive" value="true" name="WorkFlowUsers[' + len + '].IsActive"/></td><td><input type="button" value="X" class="btn btn-danger deleteWorkFlowUser"/></td><td colspan="6"></td></tr>';
+        $(tr).insertAfter($(this).closest('tr'));
+        $(this).closest("tr").find(".workflowuser").val("");
+        $(this).closest("tr").find(".workflowuserid").val("");
+    });
+
+    function fnCheckUserAddedorNot(userid) {
+        var isExists = false; var rolename = "";
+        $(".hdnworkflowid").each(function () {
+            if ($(this).closest("tr").find(".hdnisactive").val() != 'false') {
+                if (userid == $(this).val()) {
+                    isExists = true;
+                    rolename = $(this).attr("data-category");
+                    return false;
+                }
+            }
+        });
+        return rolename;
+    };
+
+    $(document).on("click", ".deleteWorkFlowUser", function () {
+        $(this).closest("tr").find(".hdnisactive").val(false);
+        $(this).closest("tr").hide();
+    });
+
+
+</script>

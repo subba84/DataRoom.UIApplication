@@ -1,0 +1,242 @@
+﻿@model DataRooms.UI.Areas.Company.Model.CustomCompanyModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+
+<!-- Content Header (Page header) -->
+<div class="content-header pb-0">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                    <li class="breadcrumb-item active">Company</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <button class="float-right btn-curved editCompany" data-id="0" data-toggle="modal" data-target="#companyModel">
+                    <i class="fas fa-plus"></i>&nbsp; Add Company
+                </button>
+            </div>
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<form method="post" action="@Url.Action("List","ManageCompany",new { area = "Company"})" id="frmCompanyList">
+    <section class="content">
+        <div class="container-fluid border-top">
+            <h5 class="mt-2">Companies</h5>
+            <div class="row">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead class="tbl-header">
+                            <tr>
+                                <th>S.No.</th>
+                                <th>Company</th>
+                                <th>Storage Type</th>
+                                <th>Is Active</th>
+                                <th>Created On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PagedCompanies != null && Model.PagedCompanies.Count() > 0)
+                            {
+                                int i = 1;
+                                foreach (var company in Model.PagedCompanies)
+                                {
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>@company.CompanyName</td>
+                                        <td>@company.StorageCategory</td>
+                                        <td>@(company.IsActive == true ? "Yes" : "No")</td>
+                                        <td>@company.CreatedOn.ToApplicationFormat()</td>
+                                        <td>
+                                            <button type="button" class="btn btn-link p-0 mr-2 editCompany" data-id="@company.Id" data-toggle="modal" data-target="#companyModel">
+                                                <i class="far fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-link p-0 text-danger deleteCompany" data-id="@company.Id" title="Delete">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                        @*<td><i class="fas fa-fw fa-edit editCompany theme" data-id="@company.Id" data-toggle="modal" data-target="#companyModel"></i></td>
+                                        <td><i class="fas fa-fw fa-trash deleteCompany" data-id="@company.Id" style="color:red"></i></td>*@
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6">No Companies Found..</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ml-auto" align="center">
+                    Page @(Model.PagedCompanies.PageCount < Model.PagedCompanies.PageNumber ? 0 : Model.PagedCompanies.PageNumber)
+                    of @Model.PagedCompanies.PageCount
+                    <input type="hidden" id="hdnSearch" name="SearchString" value="@Model.SearchString" />
+                    <input type="hidden" name="RecordsPerPage" value="@Model.RecordsPerPage" />
+                    <input type="hidden" name="CurrentPage" id="hdnCurrentPage" value="@Model.CurrentPage" />
+                    <input type="hidden" name="SortOrder" id="hdnSortOrder" value="@Model.SortOrder" />
+                    <input type="hidden" name="SortColumn" id="hdnSortColumn" value="@Model.SortColumn" />
+                    @Html.PagedListPager(Model.PagedCompanies, page => "#")
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+</form>
+
+
+
+
+
+
+<div class="modal fade" id="companyModel" tabindex="-1" role="dialog" aria-labelledby="companyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="divCompanyModalContent">
+
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on("click","#btnSave",function () {
+        $("#lblErrMessage").hide();
+        // validations...
+        var companyname = $("#txtCompanyName").val();
+        if (companyname == "") {
+            $("#txtCompanyName").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Enter Company Name");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtCompanyName").css({ "border-color": "#d1d3e2" });
+        }
+
+
+        var storagecategory = $("#slStorageCategory").val();
+        var storagepath = $("#txtStoragePath").val();
+        if (storagepath == "") {
+            $("#txtStoragePath").css({ "border-color": "red" });
+            if (storagecategory == "AWS") {
+                $("#lblErrMessage").text("Please Enter S3 Bucket Name");
+            }
+            else {
+                $("#lblErrMessage").text("Please Enter Storage Path");
+            }
+
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtStoragePath").css({ "border-color": "#d1d3e2" });
+        }
+
+        if (storagecategory == "AWS") {
+            var accesskey = $("#txtCloudAccessKey").val();
+            if (accesskey == "") {
+                $("#txtCloudAccessKey").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter AWS Access Key");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtCloudAccessKey").css({ "border-color": "#d1d3e2" });
+            }
+            var secretkey = $("#txtCloudSecurityKey").val();
+            if (secretkey == "") {
+                $("#txtCloudSecurityKey").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter AWS Secret Key");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtCloudSecurityKey").css({ "border-color": "#d1d3e2" });
+            }
+        }
+
+        if ($("#chkLogsRequired").prop("checked") == true) {
+            var logspath = $("#txtLogsPath").val();
+            if (logspath == "") {
+                $("#txtLogsPath").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter Logs Storage Path");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtLogsPath").css({ "border-color": "#d1d3e2" });
+            }
+        }
+        if ($("#chkExternalSharingRequired").prop("checked") == true) {
+            var sharingUrl = $("#txtSharingUrl").val();
+            if (sharingUrl == "") {
+                $("#txtSharingUrl").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter Sharing Url");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtSharingUrl").css({ "border-color": "#d1d3e2" });
+            }
+        }
+        formloader();
+        $("#frmCompany").submit();
+    });
+
+    //Edit Functionality
+    $(document).on("click", ".editCompany", function () {
+        var companyid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageCompany",new { area = "Company"})",
+            data: { "id": companyid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divCompanyModalContent").html('');
+                $("#divCompanyModalContent").html(data.HTML);
+            }
+        });
+    });
+
+    //Delete Functionality
+    $(document).on("click", ".deleteCompany", function () {
+        var companyid = $(this).attr("data-id");
+        fnConfirm("Are you sure, you want to delete company?");
+        $(document).on("click", "#btnConfirmOk", function () {
+            window.location.href = "@Url.Action("Delete", "ManageCompany",new { area = "Company"})?id=" + companyid;
+        });
+    });
+
+
+    //List Filter Functionality
+    $(document).on("change", ".txtGlobalSearch", function () {
+        $("#hdnSearch").val($(this).val());
+        $("#frmUserList").submit();
+    });
+
+    $(document).on("keypress", ".txtGlobalSearch", function (event) {
+        if (event.keyCode == 13) {
+            $("#hdnSearch").val($(this).val());
+            $("#frmCompanyList").submit();
+        }
+    });
+
+    $(document).ready(function () {
+        $(".txtGlobalSearch").val($("#hdnSearch").val());
+    });
+
+    $(document).on("click", ".pagination li", function () {
+        var currentPage = $(this).find('a').text();
+        $("#hdnCurrentPage").val(currentPage);
+        $("#frmCompanyList").submit();
+    });
+</script>

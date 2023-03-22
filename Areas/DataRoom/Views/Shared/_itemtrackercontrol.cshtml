@@ -1,0 +1,279 @@
+﻿@*<input type="hidden" id="hdnItemTrackerControlDataRoomId" />
+<input type="hidden" id="hdnItemTrackerControlDataRoomName" />
+<input type="hidden" id="hdnItemTrackerControlFolderId" />
+<input type="hidden" id="hdnItemTrackerControlFolderName" />
+<input type="hidden" id="hdnItemTrackerControlItemTrackerId" />
+<input type="hidden" id="hdnItemTrackerControlItemTrackerName" />*@
+<div class="form-group row">
+    <div class="col-lg-6">
+        <label class="font-weight-bold">Control Type</label>
+        <select class="form-control" id="slControlType">
+            <option value="0">Select</option>
+            <option value="@ControlType.TextBox">Text Box</option>
+            <option value="@ControlType.Dropdown">Dropdown</option>
+            <option value="@ControlType.TwoLevelDropDown">2 Level Dropdown</option>
+            <option value="@ControlType.ThreeLevelDropdown">3 Level Dropdown</option>
+            <option value="@ControlType.FileUpload">File Upload</option>
+            <option value="@ControlType.DateControl">Date</option>
+        </select>
+    </div>
+    <div class="col-lg-4">
+        <label class="font-weight-bold">Is Mandatory</label><br />
+        <input type="checkbox" class="" id="chkControlMandatory" value="true" />
+    </div>
+</div>
+
+<div id="dynamicControlContent">
+
+</div>
+<hr />
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" id="btnItemTrackerControlSave">Save</button>
+    <button class="btn btn-danger" id="btnItemTrackerControlCancel" type="button" data-dismiss="modal">Cancel</button>
+</div>
+
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+
+    $(document).on("change", "#slControlType", function () {
+        $("#dynamicControlContent").html('');
+        var controlValue = $(this).val();
+        if (controlValue == "@ControlType.TextBox") {
+            $("#dynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">Control Name</label><input type="text" class="form-control txtControlName" id="" /></div>');
+        }
+        else if (controlValue == "@ControlType.Dropdown") {
+            $("#dynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">Control Name</label><input type="text" class="form-control txtControlName" id="" /></div>');
+            $("#dynamicControlContent").append('<div class=""><label class="font-weight-bold">Control Data(Comma Seperated)</label><input type="text" class="form-control 1stLevelData" id="" /></div>');
+        }
+        else if (controlValue == "@ControlType.TwoLevelDropDown") {
+            $("#dynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">Control Name</label><input type="text" class="form-control txtControlName" id="txtLevelOneControlName" /></div>');
+            $("#dynamicControlContent").append('<div class=""><label class="font-weight-bold">1st Level Data(Comma Seperated)</label><input type="text" class="form-control 1stLevelData" id="" /></div>');
+            $("#dynamicControlContent").append('<div id="subDynamicControlContent"></div>');
+            $("#dynamicControlContent").append('<div class="" style="padding:5px"><input type="button" class="btn btn-primary" value="Next" id="btnControlNext"/></div>');
+        }
+        if (controlValue == "@ControlType.ThreeLevelDropdown") {
+            $("#dynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">Control Name</label><input type="text" class="form-control txtControlName" id="txtLevelOneControlName" /></div>');
+            $("#dynamicControlContent").append('<div class=""><label class="font-weight-bold">1st Level Data(Comma Seperated)</label><input type="text" class="form-control 1stLevelData" id="" /></div>');
+            $("#dynamicControlContent").append('<div id="subDynamicControlContent"></div>');
+            $("#dynamicControlContent").append('<div id="nextSubDynamicControlContent"></div>');
+            $("#dynamicControlContent").append('<div class="" style="padding:5px"><input type="button" class="btn btn-primary" value="Next" id="btnControlNext"/></div>');
+        }
+        if (controlValue == "@ControlType.FileUpload") {
+            $("#dynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">Control Name</label><input type="text" class="form-control txtControlName" id="" /></div>');
+        }
+        if (controlValue == "@ControlType.DateControl") {
+            $("#dynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">Control Name</label><input type="text" class="form-control txtControlName datecontrol" id="" /></div>');
+        }
+    });
+
+    $(document).on("click", "#btnControlNext", function () {
+        $("#subDynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">2nd Level Control Name</label><input type="text" class="form-control" id="txtLevelTwoControlName" /></div><label class="font-weight-bold">2nd Level Control Data(Comma Seperated)</label>');
+        var firstLevelData = $(".1stLevelData").val().split(',');
+        if (firstLevelData != null && firstLevelData.length > 0) {
+            for (var i = 0; i < firstLevelData.length; i++) {
+                $("#subDynamicControlContent").append('<div class="row"><div class="col-lg-3"><input type="text" class="form-control levelOneData" readonly value="' + firstLevelData[i] + '" /></div><div class="col-lg-6"><input type="text" data-parent="' + firstLevelData[i] + '" class="form-control 2ndLevelData" id="" /></div></div>');
+            }
+        }
+        debugger;
+        $(this).hide();
+        if ($("#slControlType").val() == "4") {
+            $("#dynamicControlContent").append('<div class="" style="padding:5px"><input type="button" class="btn btn-primary" value="Next" id="btn2ndControlNext"/></div>');
+        }
+    });
+
+    $(document).on("click", "#btn2ndControlNext", function () {
+        $("#nextSubDynamicControlContent").append('<div class="col-lg-6"><label class="font-weight-bold">3rd Level Control Name</label><input type="text" class="form-control" id="txtLevelThreeControlName" /></div><label class="font-weight-bold">3rd Level Control Data(Comma Seperated)</label>');
+        $(".2ndLevelData").each(function () {
+            var thisDataValues = $(this).val().split(',');
+            var parentData = $(this).attr("data-parent");
+            if (thisDataValues != null && thisDataValues.length > 0) {
+                for (var i = 0; i < thisDataValues.length; i++) {
+                    $("#nextSubDynamicControlContent").append('<div class="row"><div class="col-lg-3"><input type="text" class="form-control" readonly value="' + parentData + '" /></div><div class="col-lg-3"><input type="text" class="form-control levelTwoData" readonly data-parent="' + parentData + '" value="' + thisDataValues[i] + '" /></div><div class="col-lg-6"><input type="text" data-levelone="' + parentData + '" data-leveltwo="' + thisDataValues[i] + '" class="form-control 3rdLevelData" id="" /></div></div>');
+                }
+            }
+        });
+        if ($("#slControlType").val() == "4") {
+            $(this).hide();
+        }
+    });
+
+    function fnSaveControl() {
+        var structuralData = [];
+
+        if ($("#slControlType").val() == "@ControlType.TextBox") {
+            var controlName = $(".txtControlName").val();
+            var submodel = {
+                ControlName: controlName,
+                ControlData: "",
+                ControlReferenceData: ""
+            };
+            structuralData.push(submodel);
+        }
+        else if ($("#slControlType").val() == "@ControlType.Dropdown") {
+            var controlName = $(".txtControlName").val();
+            var thisVal = $(".1stLevelData").val().split(',');
+            for (var i = 0; i < thisVal.length; i++) {
+                var submodel = {
+                    ControlName: controlName,
+                    ControlData: thisVal[i],
+                    ControlReferenceData: ""
+                };
+                structuralData.push(submodel);
+            }
+        }
+        else if ($("#slControlType").val() == "@ControlType.TwoLevelDropDown") {
+            $(".levelOneData").each(function () {
+                var controlName = $("#txtLevelOneControlName").val();
+                var controlData = $(this).val();
+                var submodel = {
+                    ControlName: controlName,
+                    ControlData: controlData,
+                    ControlReferenceData: ""
+                };
+                structuralData.push(submodel);
+            });
+
+            $(".2ndLevelData").each(function () {
+                var controlName = $("#txtLevelTwoControlName").val();
+                var thisVal = $(this).val().split(',');
+                var referenceData = $(this).attr("data-parent");
+                for (var i = 0; i < thisVal.length; i++) {
+                    var submodel = {
+                        ControlName: controlName,
+                        ControlData: thisVal[i],
+                        ControlReferenceData: referenceData
+                    };
+                    structuralData.push(submodel);
+                }
+            });
+        }
+        else if ($("#slControlType").val() == "@ControlType.ThreeLevelDropdown") {
+            $(".levelOneData").each(function () {
+                var controlName = $("#txtLevelOneControlName").val();
+                var controlData = $(this).val();
+                var submodel = {
+                    ControlName: controlName,
+                    ControlData: controlData,
+                    ControlReferenceData: ""
+                };
+                structuralData.push(submodel);
+            });
+
+            $(".levelTwoData").each(function () {
+                var controlName = $("#txtLevelTwoControlName").val();
+                var controlData = $(this).val();
+                var referenceData = $(this).attr("data-parent");
+                var submodel = {
+                    ControlName: controlName,
+                    ControlData: controlData,
+                    ControlReferenceData: referenceData
+                };
+                structuralData.push(submodel);
+            });
+
+            $(".3rdLevelData").each(function () {
+                var controlName = $("#txtLevelThreeControlName").val();
+                var thisVal = $(this).val().split(',');
+                var referenceData = $(this).attr("data-leveltwo");
+                for (var i = 0; i < thisVal.length; i++) {
+                    var submodel = {
+                        ControlName: controlName,
+                        ControlData: thisVal[i],
+                        ControlReferenceData: referenceData
+                    };
+                    structuralData.push(submodel);
+                }
+            });
+        }
+        else if ($("#slControlType").val() == "@ControlType.FileUpload") {
+            var controlName = $(".txtControlName").val();
+            var submodel = {
+                ControlName: controlName,
+                ControlData: "",
+                ControlReferenceData: ""
+            };
+            structuralData.push(submodel);
+        }
+        if ($("#slControlType").val() == "@ControlType.DateControl") {
+            var controlName = $(".txtControlName").val();
+            var submodel = {
+                ControlName: controlName,
+                ControlData: "",
+                ControlReferenceData: ""
+            };
+            structuralData.push(submodel);
+        }
+
+        var dataroomid = $("#hdnItemTrackerControlDataRoomId").val();
+        var dataroomname = $("#txtItemTrackerControlDataRoomName").val();
+        var folderid = $("#hdnItemTrackerControlFolderId").val();
+        var foldername = $("#txtItemTrackerControlFolderName").val();
+        var itemtrackerid = $("#hdnItemTrackerControlItemTrackerId").val();
+        var itemtrackername = $("#txtItemTrackerControlItemTrackerName").val();
+        var itemtrackername = $("#txtItemTrackerControlItemTrackerName").val();
+        var itemtrackerguid = $("#hdnItemTrackerMetaGuid").val();
+
+        var model = {
+            DataRoomId: dataroomid,
+            DataRoomName: dataroomname,
+            FolderId: folderid,
+            FolderName: foldername,
+            ItemTrackerId: itemtrackerid,
+            ItemTrackerName: itemtrackername,
+            IsMandatory: $("#chkControlMandatory").prop("checked"),
+            ControlType: $("#slControlType").val(),
+            ControlData: structuralData,
+            ItemTrackerGuid: itemtrackerguid
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveItemTrackerControl", "ManageItemTracker", new { area = "DataRoom"})",
+            data: JSON.stringify(model),
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                fnGetItemTrackerControls(dataroomid, dataroomname, folderid, foldername, itemtrackerid, itemtrackername, itemtrackerguid);
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+
+    };
+
+    $("#btnItemTrackerControlSave").click(function () {
+        var controlType = $("#slControlType").val();
+        if (controlType == "0") {
+            $("#slControlType").css({ "border-color": "red" });
+            return false;
+        }
+        else {
+            $("#slControlType").css({ "border-color": "#d1d3e2" });
+        }
+
+        var isControlEmpty = false;
+        $("#dynamicControlContent input[type='text']").each(function () {
+            if ($(this).val() == null || $(this).val() == "") {
+                $(this).css({ "border-color": "red" });
+                isControlEmpty = true;
+                return false;
+            }
+            else {
+                $(this).css({ "border-color": "#d1d3e2" });
+            }
+        });
+
+        if (isControlEmpty == true) {
+            return false;
+        }
+
+        fnSaveControl();
+    });
+
+</script>

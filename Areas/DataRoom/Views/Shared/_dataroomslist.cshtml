@@ -1,0 +1,58 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+
+@if (Model.DataRooms != null && Model.DataRooms.Count() > 0)
+{
+    <div class="row" style="padding:5px;">
+        @foreach (var dataroom in Model.DataRooms)
+        {
+            <div class="divDataroom col-lg-1 col-md-4 col-sm-12" id="" style="border:none;padding:5px;" data-id="@dataroom.Id" title="@dataroom.DataRoomName | @dataroom.CreatorName | @dataroom.CreatedOn.ToApplicationFormat()">
+                <div class="float-right dataroomControlsDiv" style="font-size:14px;">
+                    <a class="text-black-50" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <h6 style="font-weight:bold"><i class="fa fa-ellipsis-h" style="float:right"></i></h6>
+                    </a>
+                    <ul class="dropdown-menu" style="margin-top:-80px;">
+                        <li>
+                            <a class="dropdown-item editDataRoom" href="#" data-name="@dataroom.DataRoomName" data-id="@dataroom.Id" title="Edit SharBox" style="cursor:pointer;padding:5px !important;color:darkblue" @*data-target="#confirmModel" data-toggle="modal"*@>
+                                <i class="fa fa-edit fa-1x" style="color:blue"></i> Edit SharBox
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item addDataRoomPermission" href="#" data-id="@dataroom.Id" data-permissionid="0" title="Add SharBox Permission" style="cursor:pointer;padding:5px !important">
+                                <i class="fa fa-user-cog ml-1 fa-1x" style="color: blue"></i> Add Permisson
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item viewDataRoomPermission" href="#" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="View SharBox Permissions" style="cursor:pointer;padding:5px !important">
+                                <i class="fa fa-eye ml-1 fa-1x" style="color: deepskyblue"></i> View Permisson
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item manageDataRoomWorkFlow" href="#" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="Manage Work Flows" style="cursor:pointer;padding:5px !important">
+                                <i class="fa fa-cog ml-1 fa-1x" style="color: darkviolet"></i> Manage Workflows
+                            </a>
+                        </li>
+                        @*<li>
+                            <a class="dropdown-item manageWorkFlowUsers" href="#" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" data-dataroomid="@dataroom.Id" title="View SharBox Permissions" style="cursor:pointer;padding:5px !important">
+                                <i class="fa fa-eye ml-1 fa-1x" style="color: orange"></i> Manage Work Flow Users
+                            </a>
+                        </li>*@
+                        <li>
+                            <a class="dropdown-item deleteDataRoom" href="#" data-name="@dataroom.DataRoomName" data-id="@dataroom.Id" title="Delete SharBox" style="cursor:pointer;padding:5px !important" @*data-target="#confirmModel" data-toggle="modal"*@>
+                                <i class="fa fa-trash fa-1x" style="color:red"></i> Delete SharBox
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="" align="center" style="margin-top:24px;">
+                    <i class="fa fa-folder fa-4x float-md-none" data-id="@dataroom.Id" style="cursor:pointer;color:goldenrod"></i>
+                </div>
+                <div align="center">
+                    @{
+                        string dataroomname = dataroom.DataRoomName.Length > 17 ? dataroom.DataRoomName.Substring(0, 14) + "..." : dataroom.DataRoomName;
+                    }
+                    <span class="nowrap">@dataroomname</span>
+                </div>
+            </div>
+        }
+    </div>
+}

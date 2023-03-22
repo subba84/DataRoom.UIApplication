@@ -1,0 +1,163 @@
+﻿@model DataRooms.UI.Areas.Company.Model.CustomCompanyModel
+
+<form class="user" method="post" action="@Url.Action("Edit","ManageCompany",new { area = "Company"})" id="frmCompany">
+    <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">Add Company</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <div class="col-lg-4 mb-3 mb-sm-0">
+                <input type="hidden" name="company.Id" value="@Model.CompanyDetails.Id" />
+                <input type="hidden" name="company.CreatedBy" value="@Model.CompanyDetails.CreatedBy" />
+                <input type="hidden" name="company.CreatorName" value="@Model.CompanyDetails.CreatorName" />
+                <input type="hidden" name="company.CreatedOn" value="@Model.CompanyDetails.CreatedOn" />
+                <label class="col-form-label-sm font-weight-bold" for="chkIsActive">Company</label>
+                <input type="text" class="form-control" id="txtCompanyName"
+                       placeholder="Company Name.." name="company.CompanyName" value="@Model.CompanyDetails.CompanyName" />
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="chkIsActive">Is Active</label><br />
+                <input type="checkbox" class="form-check-label" @(Model.CompanyDetails.IsActive ? "checked" : "") value="true" id="chkIsActive"
+                       name="company.IsActive">
+            </div>
+            <div class="col-lg-4 mb-3 mb-sm-0">
+                <label class="col-form-label-sm font-weight-bold">Storage Type</label>
+                <select class="form-control" name="company.StorageCategory" id="slStorageCategory">
+                    @if (!string.IsNullOrEmpty(Model.CompanyDetails.StorageCategory))
+                    {
+                        if (Model.CompanyDetails.StorageCategory == "AWS")
+                        {
+                            <option value="Local">Local</option>
+                            <option value="AWS" selected>AWS</option>
+                        }
+                        else
+                        {
+                            <option value="Local" selected>Local</option>
+                            <option value="AWS">AWS</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="Local">Local</option>
+                        <option value="AWS">AWS</option>
+                    }
+                </select>
+            </div>
+            @{
+                var cloudDetailsHide = true; string storagename = "Storage Path";
+                if (Model.CompanyDetails.StorageCategory == "AWS")
+                {
+                    cloudDetailsHide = false;
+                    storagename = "S3 Bucket Name";
+                }
+            }
+        </div>
+        <div class="form-group row cloud" style="display:@(cloudDetailsHide ? "none" : "block")">
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="chkIsActive">Access Key</label><br />
+                <input type="text" name="company.CloudAccessKey" id="txtCloudAccessKey" class="form-control" value="@Model.CompanyDetails.CloudAccessKey" />
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="chkIsActive">Security Key</label><br />
+                <input type="text" name="company.CloudSecurityKey" id="txtCloudSecurityKey" class="form-control" value="@Model.CompanyDetails.CloudSecurityKey" />
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="">Region</label><br />
+                <input type="text" name="company.AWSRegion" id="txtCloudRegion" class="form-control" value="@Model.CompanyDetails.AWSRegion" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-lg-4 storageCategory">
+                <label class="col-form-label-sm font-weight-bold" id="lblStorageCategory">@storagename</label><br />
+                <input type="text" name="company.StoragePath" id="txtStoragePath" class="form-control" value="@Model.CompanyDetails.StoragePath" />
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="chkLogsRequired">Logs Required?</label><br />
+                <input type="checkbox" class="form-check-label" @(Model.CompanyDetails.IsLogsRequired ? "checked" : "") value="true" id="chkLogsRequired"
+                       name="company.IsLogsRequired">
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="chkIsActive">Logs Path</label><br />
+                <input type="text" name="company.LogsStoragePath" class="form-control" id="txtLogsPath" value="@Model.CompanyDetails.LogsStoragePath" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="chkExternalSharingRequired">External Sharing Required?</label><br />
+                <input type="checkbox" class="form-check-label" @(Model.CompanyDetails.IsExternalSharingEnabled ? "checked" : "") value="true" id="chkExternalSharingRequired"
+                       name="company.IsExternalSharingEnabled">
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold" for="txtSharingUrl">Sharing Url</label><br />
+                <input type="text" name="company.SharingUrl" class="form-control" id="txtSharingUrl" value="@Model.CompanyDetails.SharingUrl" />
+            </div>
+        </div>
+
+        <hr />
+
+        <input type="hidden" name="aDInfo.Id" value="@Model.ADDetails.Id" />
+        <h4 class="font-weight-bold">AD Configuration</h4>
+        <hr />
+        <div class="row">
+            <div class="col-lg-3">
+                <label class="col-form-label-sm font-weight-bold">Is AD Sync?</label><br />
+                <input type="checkbox" class="form-check-label" value="Y" @(Model.ADDetails.IsADSync == "Y" ? "checked" : "") name="aDInfo.IsADSync" />
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold">IP Address</label>
+                <input type="text" class="form-control" value="@Model.ADDetails.IPAddress" name="aDInfo.IPAddress" />
+            </div>
+            <div class="col-lg-4">
+                <label class="col-form-label-sm font-weight-bold">Domain</label>
+                <input type="text" class="form-control" value="@Model.ADDetails.DomainName" name="aDInfo.DomainName" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <label id="lblErrMessage" style="float:left;color:red"></label>
+
+        <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+        <input type="button" class="btn btn-success" id="btnADSync" value="AD Sync" />
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    </div>
+</form>
+
+
+<script>
+    $("#slStorageCategory").change(function () {
+        $(".cloud input[type='text']").val("");
+        if ($(this).val() == "AWS") {
+            $(".cloud").show();
+            $("#lblStorageCategory").text("S3 Bucket Name");
+        }
+        else {
+            $("#lblStorageCategory").text("Storage Path");
+            $(".cloud").hide();
+        }
+    });
+
+    $(document).on("click", "#btnADSync", function () {
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ADSync","ManageSetting",new { area = "Settings" })",
+            dataType: "json",
+            data: {},
+            beforeSend: function () {
+                formloader();
+            },
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                $("#adConfigModel").modal("hide");
+                fnAlert("AD Sync Successfully Done");
+            }
+        });
+    });
+</script>

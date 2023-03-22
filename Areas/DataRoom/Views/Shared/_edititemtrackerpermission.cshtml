@@ -1,0 +1,166 @@
+﻿@model DataRooms.UI.Models.ItemTrackerPermission
+
+<style>
+</style>
+<form class="user" method="post" action="@Url.Action("SaveItemTrackerPermission","ManageItemTrackerPermission",new { area = "DataRoom"})" id="frmAddItemTrackerPermission">
+    @*<div class="modal-header">
+        <h5 class="modal-title" id="folderModalLabel">Item Tracker Permission</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>*@
+    <div class="modal-body ui-front">
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0" style="display:none">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="CreatedBy" value="@Model.CreatedBy" />
+                <input type="hidden" name="CreatorName" value="@Model.CreatorName" />
+                <input type="hidden" name="CreatedOn" value="@Model.CreatedOn" />
+
+                <label class="col-form-label-sm" for="">SharBox</label>
+                <input type="text" class="form-control" id="txtItemTrackerPermissionDataRoomName"
+                       placeholder="Room Name" readonly name="DataRoomName" value="@Model.DataRoomName" />
+                <input type="hidden" name="DataRoomId" id="hdnItemTrackerPermissionDataRoomId" value="@Model.DataRoomId" />
+            </div>
+            <div class="col-sm-6" style="display:none">
+                <label class="col-form-label-sm" for="">Folder</label>
+                <input class="form-control" rows="3" id="txtItemTrackerPermissionFolderName"
+                       placeholder="Folder Name" readonly name="FolderName" value="@Model.FolderName" />
+                <input type="hidden" name="FolderId" id="hdnItemTrackerPermissionFolderId" value="@Model.FolderId" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="">Item Tracker</label>
+                <input class="form-control" rows="3" id="txtItemTrackerPermissionItemTrackerName"
+                       placeholder="Item Tracker Name" readonly name="ItemTrackerName" value="@Model.ItemTrackerName" />
+                <input type="hidden" name="ItemTrackerId" id="hdnItemTrackerPermissionItemTrackerId" value="@Model.ItemTrackerId" />
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtUserName">User</label>
+                <input class="form-control" rows="3" id="txtItemTrackerPermissionUserName"
+                       placeholder="Full Name" name="UserName" value="@Model.UserName" />
+                <input type="hidden" name="UserId" id="hdnItemTrackerPermissionUserId" value="@Model.UserId" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <label class="col-form-label-sm" for="">Permissions</label>
+                <div class="row" style="font-size:11px;">
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <input type="checkbox" name="HasFullControl" value="true" id="chkItemTrackerPermission_0" @(Model.HasFullControl ? "checked" : "") class="chkItemTrackerPermission" />
+                        <label for="chkItemTrackerPermission_0">Full Control</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <input type="checkbox" name="HasRead" value="true" id="chkItemTrackerPermission_1" @(Model.HasRead ? "checked" : "") class="chkItemTrackerPermission childItemTrackerPermissions" />
+                        <label for="chkItemTrackerPermission_1">Read</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-2">
+                        <input type="checkbox" name="HasWrite" value="true" id="chkItemTrackerPermission_2" @(Model.HasWrite ? "checked" : "") class="chkItemTrackerPermission childItemTrackerPermissions" />
+                        <label for="chkItemTrackerPermission_2">Write</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        <input type="checkbox" name="HasDelete" value="true" id="chkItemTrackerPermission_3" @(Model.HasDelete ? "checked" : "") class="chkItemTrackerPermission childItemTrackerPermissions" />
+                        <label for="chkItemTrackerPermission_3">Delete</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <label class="col-form-label-sm" for="">IsActive</label>
+                <input type="checkbox" class="form-check-label" @(Model.IsActive ? "checked" : "") value="true" id="chkItemTrackerPermissionIsActive"
+                       name="IsActive">
+            </div>
+        </div>
+        <label id="lblItemTrackerPermissionErrMessage" class="float-left text-red" style="display:none"></label>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnItemTrackerPermissionSave">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnItemTrackerPermissionClose">Close</button>
+    </div>
+</form>
+
+@*<link href="~/CustomContent/css/jquery-ui.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/Jquery.ui.min.js"></script>*@
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script>
+    $("#txtItemTrackerPermissionUserName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetUsersBasedonDataRoom", "ManageFolderPermission",new { area = "Folders" })?searchString=' + $("#txtItemTrackerPermissionUserName").val() + "&dataroomid=" + $("#hdnItemTrackerPermissionDataRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnItemTrackerPermissionUserId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtItemTrackerPermissionUserName").val(ui.item.label);
+                $("#hdnItemTrackerPermissionUserId").val(ui.item.val);
+        }
+    });
+
+    
+
+    $(document).on("click", "#chkItemTrackerPermission_0", function () {
+        if ($(this).prop("checked") == true) {
+            $(".childItemTrackerPermissions").prop("checked", true);
+        }
+        else {
+            $(".childItemTrackerPermissions").prop("checked", false);
+        }
+    });
+
+    $(document).on("click", ".childItemTrackerPermissions", function () {
+        if ($(".childItemTrackerPermissions:checked").length == 3) {
+            $("#chkItemTrackerPermission_0").prop("checked", true);
+        }
+        else {
+            $("#chkItemTrackerPermission_0").prop("checked", false);
+        }
+    });
+
+    $(document).on("click", "#btnItemTrackerPermissionSave", function () {
+
+        //$.post("@Url.Action("SaveItemTrackerPermission", "ManageItemTrackerPermission",new { area = "DataRooms"})", $('#frmAddItemTrackerPermission').serialize());
+        
+
+        //fnAlert("Permission Saved Successfully");
+
+       
+    });
+
+    $(document).on("click", "#btnItemTrackerPermissionSave", function () {
+        var form = $("#frmAddItemTrackerPermission");
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                fnAlert("Permission Saved Successfully");
+            }
+        });
+    });
+
+</script>
+
+

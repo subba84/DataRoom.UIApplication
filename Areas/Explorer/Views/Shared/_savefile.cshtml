@@ -1,0 +1,478 @@
+﻿@model DataRooms.UI.Areas.Explorer.Model.ExplorerCustomModel
+
+<div class="modal fade" id="fileModel"  data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="fileModelLabel" aria-hidden="true">
+    @{
+        Guid gd = Guid.NewGuid();
+        string guid = gd.ToString();
+    }
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fileModelLabel">File</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="@Model.DataRoom.IsWorkFlowRequired" id="hdnWorkFlowRequiredforFile" />
+                <input type="hidden" name="DataRoomId" id="hdnDragDataRoomId" value="@Model.DataRoom.Id" />
+                <input type="hidden" name="DataRoomName" id="hdnDragDataRoomName" value="@Model.DataRoom.DataRoomName" />
+                <input type="hidden" name="FolderId" id="hdnDragFolderId" />
+                <input type="hidden" name="FolderName" id="hdnDragFolderName" />
+                <input type="hidden" name="" id="hdnGuid" value="@guid" />
+                <div class="form-group row">
+                    <div class="col-sm-6 mb-3 mb-sm-0">
+                        <label class="col-form-label-sm" for="txtDataRoomName">SharBox</label><br />
+                        <span class="font-weight-bold">@Model.DataRoom.DataRoomName</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="col-form-label-sm" for="txtDescription">Folder</label><br />
+                        <span class="font-weight-bold" id="spnFileFolder"></span>
+                    </div>
+                </div>
+                @*<div class="form-group row">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <label class="col-form-label-sm" for="">Is Work Flow Required</label><br />
+                            <div>
+                                <input type="checkbox" id="chkIsWorkFlowRequired" value="true" />
+                            </div>
+                        </div>
+                    </div>*@
+                <div class="form-group row">
+                    <div class="col-sm-12 mb-3 mb-sm-0">
+                        <label class="col-form-label-sm" for="txtFileDescription">File Description</label>
+                        <textarea class="form-control" id="txtFileDescription"
+                                  placeholder="File Description" name=""></textarea>
+                    </div>
+                </div>
+
+                <hr />
+                <form action="/file/savefileintemp" class="dropzone" id="dropzoneJsForm" style="background-color: #e3e0d042;" method="post" enctype="multipart/form-data" name="files">
+                    <input type="hidden" name="guid" id="" value="@guid" />
+                    <button type="submit" style="display:none">Submit data and files!</button>
+                </form>
+                <div class="form-group row">
+                    @*<label class="font-weight-bold">Total Files Uploaded : </label> <p id="output" style="color:blue;font-weight:bold">0</p>*@
+                </div>
+                <label id="lblFileErrMessage" class="float-left text-red errMsg" style="display:none;color:red;"></label>
+                <div id="progressDiv" style="display:none"></div>
+                <!--<div id="progress_wrapper">
+                    <label id="progress_status">50% completed</label>-->
+                @*<progress id="fileprogress" style="display:none"></progress>*@
+                <!--<div class="progress mb-3">
+                        <div id="fileprogress" class="progress-bar" area-valuenow="25" area-valuemin="0" area-valuemax="100"></div>
+                    </div>
+                </div>-->
+                @*<div class="progress">
+                        <div class="progress-bar" id="progressbar" role="progressbar" style="width:0px;" area-valuenow="0" area-valuemin="0" area-valuemax="100"></div>
+                    </div>*@
+
+            </div>
+            <div class="modal-footer">
+                @*<button type="button" class="btn btn-primary" data-dismiss="modal" value="Submit" id="btnSubmitClose">Submit</button>*@
+                <button type="button" class="btn btn-primary" @*data-dismiss="modal"*@ value="Save" id="btnClose">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<span id="progress-text"></span>
+
+<style>
+    .ui-widget-header {
+        background: #0094ff;
+        border: 1px solid #DDDDDD;
+        color: #333333;
+        font-weight: bold;
+    }
+</style>
+<script>
+    $(document).on("click", "#btnSaveFile", function () {
+        var form = $("#frmFile");
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+            }
+        });
+    });
+
+    $("#btnClose,#btnSubmitClose").click(function () {
+
+        var dataroomid = $("#hdnDragDataRoomId").val();
+        var dataroomname = $("#hdnDragDataRoomName").val();
+        var folderid = $("#hdnDragFolderId").val();
+        var foldername = $("#hdnDragFolderName").val();
+        var description = $("#txtFileDescription").val();
+        var guid = $("#hdnGuid").val();
+        var status = $(this).val();
+        //var isworkflowrequired = $("#chkIsWorkFlowRequired").prop("checked");
+
+        var modal = {
+            DataRoomId: dataroomid,
+            DataRoomName: dataroomname,
+            FolderId: folderid,
+            FolderName: foldername,
+            FileDescription: description,
+            //IsWorkFlowRequired: isworkflowrequired,
+            Guid: guid,
+            Status: status
+        };
+
+        if (folderid == null || folderid == "" || folderid == undefined) {
+            folderid = 0;
+        }
+
+        $.ajax({
+            type: "GET",
+            //url: "../file/checkworkflowusers?folderid=" + folderid,
+            url: '@Url.Action("CheckforWorkFlowUsers", "ManageFile", new { area = "Files" })?folderid=' + folderid,
+            data: {},
+            success: function (data) {
+                if (data == null || data == "") {
+                    fnFileProcessing();
+                }
+                else {
+                    fnAlert("There were no users configured for the work flow associated with this folder. Please contact Admin", 'red');
+                    $("#progressDiv").html('');
+                    $("#processModel").modal("hide");
+                    $("#fileModel").modal("hide");
+                    Dropzone.forElement('#dropzoneJsForm').removeAllFiles(true);
+                }
+            }
+        });
+
+
+        function fnFileProcessing() {
+            var filecount = Dropzone.forElement('#dropzoneJsForm').files.length;
+
+            $("#processModel").modal("show");
+
+            
+
+        var loopincr = 1;
+            for (var i = 0; i < filecount; i++){
+                console.log(i);
+            var indice = i;
+            $('#divProgressBarFile').html('<progress class="prog' + i + '" value="0"></progress>');
+            /*$('#progressDiv').append('<progress class="prog' + i + '" value="0"></progress> ' + Dropzone.forElement('#dropzoneJsForm').files[i].name +'  <br />');*/
+            var formData = new FormData();
+            formData.append("DataRoomId", dataroomid);
+            formData.append("DataRoomName", dataroomname);
+            if (folderid == null || folderid == undefined || folderid == "" || folderid == NaN) {
+                folderid = 0;
+            }
+            formData.append("FolderId", folderid);
+            formData.append("FolderName", foldername);
+            formData.append("FileDescription", description);
+            formData.append("Guid", guid);
+            formData.append("Status", status);
+            (function (index) {
+
+    $.ajax({
+        //url: "@Url.Action("Edit","ManageFile",new { area = "Files"})",  //server script to process data
+        url: "../file/edit",
+        type: 'POST',
+        xhr: function() {  // custom xhr
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){ // check if upload property exists
+                myXhr.upload.addEventListener('progress', function(e) { progressHandlingFunction(e, '.prog'+(index)) }, false); // for handling the progress of the upload
+            }
+            return myXhr;
+        },
+        //Ajax events
+        //beforeSend: beforeSendHandler,
+        success: function (data) {
+            //console.log(data);
+            completeHandler(data, '.prog' + index);
+        },
+        //error: errorHandler,
+        // Form data
+        data: formData,
+        //Options to tell JQuery not to process data or worry about content-type
+        cache: false,
+        contentType: false,
+        processData: false,
+    });
+            })(i);
+}
+
+        function progressHandlingFunction(e, klass) {
+            if (e.lengthComputable) {
+                $(klass).attr({ value: e.loaded, max: e.total });
+            }
+        }
+
+        function completeHandler(data, klass) {
+            $(klass).attr({ value: 0 });
+            $("#progress_status").text("File - " + data + " got saved..");
+            
+            console.log(filecount);
+
+            //$("#progress_status").text("Files Saved " + loopincr + " of " + filecount);
+            if (loopincr == filecount) {
+                console.log(loopincr + "--" + filecount);
+                $("#progressDiv").html('');
+                $("#processModel").modal("hide");
+                $("#fileModel").modal("hide");
+                $('#divProgressBarFile').html('');
+                fnAlert("File(s) Successfully Saved", 'green');
+                Dropzone.forElement('#dropzoneJsForm').removeAllFiles(true);
+                fnGetFolderContent(dataroomid, folderid);
+            }
+            loopincr++;
+        }
+        };
+
+
+
+
+
+
+
+        @*$.ajax({
+            //async:true,
+            type: 'POST',
+            url: "@Url.Action("Edit","ManageFile",new { area = "Files"})",
+            data: JSON.stringify(modal),
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                //formloader();
+            },
+            success: function (data) {
+                if (data == "Work Flow Users are not found") {
+                    fnAlert("There were no users configured for the work flow associated with this folder. Please contact Admin", 'red');
+                }
+                else {
+                    fnAlert("File(s) Successfully Saved", 'green');
+                    Dropzone.forElement('#dropzoneJsForm').removeAllFiles(true);
+                    fnGetFolderContent(dataroomid, folderid);
+                }
+                $("#fileModel").modal("hide");
+                $("#processModel").modal("hide");
+            },
+            complete: function () {
+                //formloaderstop();
+                //var progressbar = $("#progressbar-5");
+                //var progressLabel = $(".progress-label");
+                //progressLabel.text("Loading Completed!");
+                //progressbar.progressbar("value", 99);  //Reinitialize the progress bar value 0
+                //progressLabel.text("");
+                //progressbar.hide();
+                //$("#fileModel").modal("hide");
+                //$("#processModel").modal("hide");
+            },
+            //xhr: function () {
+            //    var fileXhr = new XMLHttpRequest();
+            //    $("#processModel").modal("show");
+
+            //    fileXhr.upload.addEventListener("progress", function (e) {
+            //        if (e.lengthComputable) {
+            //            var percentageComplete = (e.loaded / e.total) * 100;
+            //            $("#fileprogress").css({ 'width': Math.floor(percentageComplete) + '%' });
+            //            $("#progress_status").text(Math.floor(percentageComplete) + '% Completed');
+            //        }
+            //    });
+
+            //    fileXhr.upload.addEventListener("load", function (e) {
+            //        if (fileXhr.status == 200) {
+
+            //        }
+            //        else {
+            //            alert(fileXhr.status);
+            //        }
+            //    });
+            //    return fileXhr;
+            //}
+        });*@
+    });
+
+    var myApp;
+    myApp = myApp || (function () {
+        //var pleaseWaitDiv = $('<div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false"><div class="modal-header"><h1>Processing...</h1></div><div class="modal-body"><div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div></div>');
+        return {
+            showPleaseWait: function () {
+                //pleaseWaitDiv.modal();
+                $("#processModel").modal("show");
+            },
+            hidePleaseWait: function () {
+                $("#processModel").modal('hide');
+            },
+
+        };
+    })();
+
+    function uploadFile(dataroomid,dataroomname,folderid,foldername,filedescription,guid,status) {
+        myApp.showPleaseWait(); //show dialog
+        /*var file = document.getElementById('file_name').files[0];*/
+        var formData = new FormData();
+        formData.append("DataRoomId", dataroomid);
+        formData.append("DataRoomName", dataroomname);
+        formData.append("FolderId", folderid);
+        formData.append("FolderName", foldername);
+        formData.append("FileDescription", filedescription);
+        formData.append("Guid", guid);
+        formData.append("Status", status);
+        ajax = new XMLHttpRequest();
+        ajax.upload.addEventListener("progress", progressHandler, false);
+        ajax.addEventListener("load", completeHandler, false);
+        ajax.open("POST", "@Url.Action("Edit","ManageFile",new { area = "Files"})");
+        ajax.send(formData);
+    }
+
+    function progressHandler(event) {
+        var percent = (event.loaded / event.total) * 100;
+        //$('.bar').width(percent); //from bootstrap bar class
+        $('.bar').css({ 'width': Math.floor(percent) + '%' });
+    }
+
+    function completeHandler() {
+        myApp.hidePleaseWait(); //hide dialog
+        $('.bar').css({ 'width': 100 + '%' });
+    }
+
+
+    function LoadProgressBar(filecount) {
+        var incrNumber = 0;
+
+        var totalTimeNeeded = parseInt(filecount) * 1000;
+        var timeNeededForEachFile = parseInt(totalTimeNeeded) / 100;
+        if (timeNeededForEachFile < 1000) {
+            timeNeededForEachFile = 1000;
+        }
+        incrNumber = parseInt(timeNeededForEachFile);
+
+        var progressbar = $("#progressbar-5");
+        var progressLabel = $(".progress-label");
+        progressbar.show();
+        $("#progressbar-5").progressbar({
+            //value: false,
+            change: function () {
+                progressLabel.text(
+                    progressbar.progressbar("value") + "%");  // Showing the progress increment value in progress bar
+            },
+            complete: function () {
+                progressLabel.text("Loading Completed!");
+                progressbar.progressbar("value", 0);  //Reinitialize the progress bar value 0
+                progressLabel.text("");
+                progressbar.hide(); //Hiding the progress bar
+                //var markup = "<tr><td>" + result + "</td><td><a href='#' onclick='DeleteFile(\"" + result + "\")'><span class='glyphicon glyphicon-remove red'></span></a></td></tr>"; // Binding the file name
+                //$("#ListofFiles tbody").append(markup);
+                //$('#Files').val('');
+                //$('#FileBrowse').find("*").prop("disabled", false);
+            }
+        });
+        //function progress() {
+        //    var val = progressbar.progressbar("value") || 0;
+        //    progressbar.progressbar("value", val + 1);
+        //    if (val < 99) {
+        //      var x =  setTimeout(progress, incrNumber);
+        //    }
+        //}
+        //setTimeout(progress, incrNumber);
+
+        var x = setInterval(function () {
+            var val = progressbar.progressbar("value") || 0;
+            progressbar.progressbar("value", val + 1);
+            if (val > 99) {
+                clearInterval(x);
+            }
+        }, incrNumber);
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //var filecount = Dropzone.forElement('#dropzoneJsForm').files.length
+    @*setInterval(function () {
+        console.log("@DataRooms.DataCache.Files.Count()");
+        }, 1000);*@
+
+</script>
+
+
+
+
+
+@*<script src="~/Scripts/Dropzone.min.js"></script>
+    <link href="~/Content/Dropzone.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />*@
+
+@*<script src="~/Scripts/dropzone/dropzone.min.js"></script>*@
+@*<script src="~/Scripts/dropzone/dropzone-amd-module.min.js"></script>*@
+@*<script src="~/Content/plugins/dropzone/min/dropzone.min.js"></script>*@
+
+<script src="~/Scripts/dropzone/dropzone.js"></script>
+<link href="~/Scripts/dropzone/dropzone.min.css" rel="stylesheet" />
+<script>
+    Dropzone.options.dropzoneForm =
+    {
+
+        // The configuration we've talked about above
+        autoProcessQueue: false,
+        uploadMultiple: true,
+        parallelUploads: 100,
+        maxFiles: 100,
+        maxFileSize: 1024,
+        success: function (file, response) {
+            response = JSON.parse(response);
+            // code here..
+            alert();
+        },
+        init: function () {
+            var myDropzone = this;
+
+            this.on("addedfile", function () {
+                console.log("A file has been added");
+            });
+
+            // First change the button to actually tell Dropzone to process the queue.
+            //this.element.querySelector("button[type=submit]").addEventListener("click", function (e) {
+            //    alert();
+            //    debugger;
+            //    // Make sure that the form isn't actually being sent.
+            //    formloader();
+            //    e.preventDefault();
+            //    e.stopPropagation();
+            //    myDropzone.processQueue();
+
+            //});
+
+
+            this.on("complete", function (data) {
+            });
+        },
+        accept: function (file, done) {
+        }
+    };
+    $(document).ready(function () {
+
+    });
+
+
+
+</script>

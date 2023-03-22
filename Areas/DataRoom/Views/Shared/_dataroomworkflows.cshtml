@@ -1,0 +1,54 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+
+<h3>Work Flows</h3>
+<div class="table-responsive">
+    <table class="table table-bordered" style="width:100%">
+        <thead class="tbl-header">
+            <tr>
+                <th style="width:70px;">S. No.</th>
+                <th>Work Flows</th>
+                <th>Is Active</th>
+                <th style="width:80px; text-align:center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.WorkFlows != null && Model.WorkFlows.Count() > 0)
+            {
+                int sno = 1;
+                foreach (var item in Model.WorkFlows)
+                {
+                    <tr>
+                        <td>@sno</td>
+                        <td>@item.WorkFlowName</td>
+                        <td>@(item.IsActive == true ? "Yes" : "No")</td>
+                        <td style="cursor:pointer">
+                            <button class="btn btn-link p-0 mr-2" title="Edit" data-toggle="modal" data-target="#exampleModal">
+                            <i class="far fa-edit editDataRoomWorkFlow" data-id="@item.Id"
+                               data-workflowname="@item.WorkFlowName"
+                               data-isinitiatorreq="@item.IsInitiationRequired"
+                               data-isoneinitiator="@item.IsSingleInitiator"
+                               data-isreviewreq="@item.IsReviewRequired"
+                               data-isonereviewer="@item.IsSingleReviewerRequired"
+                               data-isoneamongreview="@item.IsSingleReviewSufficient"
+                               data-isapprovalreq="@item.IsApprovalRequired"
+                               data-isoneapprover="@item.IsSingleApproverRequired"
+                               data-isoneamongapproval="@item.IsSignleApprovalSufficient"
+                               data-dataroomid="@item.DataRoomId"
+                               data-dataroomname="@item.DataRoomName"></i>
+                            </button>
+                            <button class="btn btn-link p-0 text-danger" title="Delete"><i class="fas fa-trash-alt deleteDataRoomWorkFlow" data-id="@item.Id"></i></button>
+                        </td>
+                    </tr>
+                    sno++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">No Workflows found</td>
+                </tr>
+            }           
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,129 @@
+﻿@model DataRooms.UI.Areas.Admin.Model.FileCheckInModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+}
+
+
+
+<!-- Content Header (Page header) -->
+<div class="content-header pb-0">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                    <li class="breadcrumb-item active">File Check-Outs</li>
+                </ol>
+            </div><!-- /.col -->
+            
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<form method="post" action="@Url.Action("List","FileCheckIn",new { area = "Admin"})" id="frmCheckInList">
+    <section class="content">
+        <input type="hidden" name="SearchString" id="hdnSearch" />
+        <div class="container-fluid border-top">
+            <h5 class="mt-2 font-weight-bold">Cancel File Check-Outs</h5>
+            <div class="row">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="tbl-header">
+                            <tr>
+                                <th>S.No.</th>
+                                <th>File Name</th>
+                                <th>Folder</th>
+                                <th>SharBox</th>
+                                <th>Check-Out By</th>
+                                <th>Check-Out On</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PagedCheckedInFiles != null && Model.PagedCheckedInFiles.Count() > 0)
+                            {
+                                int i = 1;
+                                foreach (var file in Model.PagedCheckedInFiles)
+                                {
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>@file.FileName</td>
+                                        <td>@file.FolderName</td>
+                                        <td>@file.DataRoomName</td>
+                                        <td>@file.CheckOutByName</td>
+                                        <td>@file.CheckOutOn.ToApplicationFormat()</td>
+                                        <td style="text-align:center;cursor:pointer">
+                                            <i class="fas fa-edit editFile theme" data-id="@file.Id" data-name="@file.FileName"></i>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7">No Files Found..</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ml-auto" align="center">
+                    Page @(Model.PagedCheckedInFiles.PageCount < Model.PagedCheckedInFiles.PageNumber ? 0 : Model.PagedCheckedInFiles.PageNumber)
+                    of @Model.PagedCheckedInFiles.PageCount
+                    <input type="hidden" name="SearchString" value="@Model.SearchString" id="hdnSearch" />
+                    <input type="hidden" name="RecordsPerPage" value="@Model.RecordsPerPage" />
+                    <input type="hidden" name="CurrentPage" id="hdnCurrentPage" value="@Model.CurrentPage" />
+                    <input type="hidden" name="SortOrder" id="hdnSortOrder" value="@Model.SortOrder" />
+                    <input type="hidden" name="SortColumn" id="hdnSortColumn" value="@Model.SortColumn" />
+                    @Html.PagedListPager(Model.PagedCheckedInFiles, page => "#")
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+</form>
+
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    if ("@Model.SearchString" != null && "@Model.SearchString" != "") {
+        $(".txtGlobalSearch").val("@Model.SearchString");
+    }
+
+    //List Filter Functionality
+    $(document).on("change", ".txtGlobalSearch", function () {
+        $("#hdnSearch").val($(this).val());
+        $("#frmCheckInList").submit();
+    });
+
+    $(document).on("keypress", ".txtGlobalSearch", function (event) {
+        if (event.keyCode == 13) {
+            $("#hdnSearch").val($(this).val());
+            $("#frmCheckInList").submit();
+        }
+    });
+
+    $(document).ready(function () {
+        $(".txtGlobalSearch").val('@Model.SearchString');
+    });
+
+    $(document).on("click", ".pagination li", function () {
+        var currentPage = $(this).find('a').text();
+        $("#hdnCurrentPage").val(currentPage);
+        $("#frmCheckInList").submit();
+    });
+
+    $(document).on("click", ".editFile", function () {
+        var id = $(this).attr("data-id");
+        var name = $(this).attr("data-name");
+        fnConfirm("Are you sure, do you want to cancel check-out for file - " + name + " ?");
+        $("#btnConfirmOk").click(function () {
+            formloader();
+            window.location.href = "@Url.Action("CheckInFile","FileCheckIn",new { area = "Admin"})?id=" + id;
+        });
+    });
+</script>
+
+

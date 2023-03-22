@@ -1,0 +1,92 @@
+﻿@model DataRooms.UI.Areas.Explorer.Model.ExplorerCustomModel
+
+<div class="modal fade"  id="folderModel" tabindex="-1" role="dialog" aria-labelledby="folderModelLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width:325px;" role="document">
+        <form method="post" action="@Url.Action("Edit","ManageFolder",new { area = "Folders"})" id="frmFolder">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="folderModelLabel">Folder</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <label class="col-form-label-sm" for="txtDataRoomName">SharBox</label><br />
+                            <span class="font-weight-bold">@Model.DataRoom.DataRoomName</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="col-form-label-sm" for="txtDescription">Parent Folder</label><br />
+                            <span class="font-weight-bold" id="spnParentFolder"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-12 mb-3 mb-sm-0">
+                            <label class="col-form-label-sm" for="txtDataRoomName">Folder Name</label>
+                            <input type="text" class="form-control" id="txtFolderName"
+                                   placeholder="Folder Name" name="FolderName" />
+                            <input type="hidden" name="ParentFolderId" id="hdnParentFolderId" />
+                            <input type="hidden" name="ParentFolderName" id="hdnParentFolderName" />
+                            <input type="hidden" name="DataRoomId" id="hdnDataRoomId" value="@Model.DataRoom.Id" />
+                            <input type="hidden" name="DataRoomName" id="hdnDataRoomName" value="@Model.DataRoom.DataRoomName" />
+                            <input type="hidden" name="IsActive" id="" value="true" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-12 mb-3 mb-sm-0">
+                            <label class="col-form-label-sm" for="txtDataRoomName">Folder Description</label>
+                            <textarea class="form-control" id="txtFolderDescription"
+                                   placeholder="Folder Description" name="FolderDescription"></textarea>
+                        </div>
+                    </div>
+                    <label id="lblErrMessage" class="float-left text-red" style="display:none"></label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnSaveFolder" data-dismiss="modal">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+$(document).on("click", "#btnSaveFolder", function () {
+            // validations...
+            var foldername = $("#txtFolderName").val();
+            if (foldername == "") {
+                $("#txtFolderName").css({ "border-color": "red" });
+                $("#lblErrMessage").text("Please Enter Folder Name");
+                $("#lblErrMessage").show();
+                return false;
+            }
+            else {
+                $("#txtFolderName").css({ "border-color": "#d1d3e2" });
+            }
+        var form = $("#frmFolder");
+        var formData = new FormData(form[0]);
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                if (data != null) {
+                    //$("#folderModel").modal("hide");
+                    //$(".modal-backdrop").remove();
+                    fnGetFolderContent("@Model.DataRoom.Id", parseInt(data));
+                }
+            }
+        });
+});
+</script>

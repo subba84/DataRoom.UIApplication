@@ -1,0 +1,247 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+
+
+
+
+
+
+
+
+
+    <form method="post" id="frmSaveWorkFlow" enctype="multipart/form-data" action="@Url.Action("SaveDataRoomWorkFlow", "ManageDataRoomWorkFlowUser",new { area = "DataRoom"})">
+        <div class="bg-light p-2 border rounded">
+            <h5 class="color-blue-b">SharBox : <b class="text-dark">@Model.DataRoomName</b></h5>
+        </div>
+
+        @*WorkFlow Name*@
+        <div class="form-group row mt-3 col-md-12">
+            <label for="staticEmail" class="col-sm-3 col-form-label">Work flow name: </label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control required" name="WorkFlow.WorkFlowName" value="@Model.WorkFlow.WorkFlowName" id="txtWorkFlowName">
+                <input type="hidden" value="@Model.WorkFlow.Id" name="WorkFlow.Id" id="hdnWorkFlowId" />
+                <input type="hidden" value="@Model.DataRoomId" name="WorkFlow.DataRoomId" id="hdnWorkFlowDataRoomId" />
+                <input type="hidden" value="@Model.DataRoomName" name="WorkFlow.DataRoomName" id="hdnWorkFlowDataRoomName" />
+            </div>
+        </div>
+        <table style="border:none;width:100%" cellpadding="10" border="0">
+            @*<tr>
+                <td>Work Flow Name:</td>
+                <td colspan="7">
+                    <input type="text" class="form-control required" name="WorkFlow.WorkFlowName" value="@Model.WorkFlow.WorkFlowName" id="txtWorkFlowName" />
+                    <input type="hidden" value="" name="Id" id="hdnWorkFlowId" />
+                    <input type="hidden" value="@Model.DataRoomId" name="WorkFlow.DataRoomId" id="hdnWorkFlowDataRoomId" />
+                    <input type="hidden" value="@Model.DataRoomName" name="WorkFlow.DataRoomName" id="hdnWorkFlowDataRoomName" />
+                </td>
+            </tr>*@
+            <tr class="card-header bg-light heading-c py-1">
+                <td colspan="8">Initiator</td>
+            </tr>
+            <tr style="">
+                <td>Is Initiator Required</td>
+                <td>
+                    <input type="checkbox" checked name="WorkFlow.IsInitiationRequired" onclick="return false;" value="true" id="chkIsInitiationRequired" />
+                </td>
+                <td>One Initiator?</td>
+                <td>
+                    <input type="radio" @(Model.WorkFlow.IsSingleInitiator == true ? "checked" : "") name="WorkFlow.IsSingleInitiator" value="true" id="rdbIsSingleInitiatorYes" checked />
+                </td>
+                <td>Multiple Initiators?</td>
+                <td>
+                    <input type="radio" @(Model.WorkFlow.IsMultipleInitiator == true ? "checked" : "") name="WorkFlow.IsSingleInitiator" value="true" id="rdbIsSingleInitiatorNo" />
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="initiatorSection">
+                <td>
+                    <input type="text" class="form-control workflowuser" />
+                    <input type="hidden" class="workflowuserid" />
+                </td>
+                <td>
+                    <input type="button" value="+" class="btn btn-primary btnAddWorkFlowUser" data-category="initiator" id="" />
+                </td>
+                <td colspan="6" class="tdErrMsg"></td>
+            </tr>
+            @{
+                var initiators = Model.WorkFlowUsers.Where(x => x.RoleId == AppRole.Initiator);
+                var reviewers = Model.WorkFlowUsers.Where(x => x.RoleId == AppRole.Reviewer);
+                var approvers = Model.WorkFlowUsers.Where(x => x.RoleId == AppRole.Approver);
+                var autoincrement = 0;
+            }
+            @if (initiators != null && initiators.Count() > 0)
+            {
+                //autoincrement = 0;
+                foreach (var initiator in initiators.ToList())
+                {
+                    <tr class="initiatorslist">
+                        <td>
+                            <input type="text" class="form-control initiator workflowusername" name="WorkFlowUsers[@autoincrement].UserName" value="@initiator.UserName" readonly />
+                            <input type="hidden" class="hdnworkflowid" value="@initiator.UserId" name="WorkFlowUsers[@autoincrement].UserId" />
+                            <input type="hidden" class="hdnroleid" value="@AppRole.Initiator" name="WorkFlowUsers[@autoincrement].RoleId" />
+                            <input type="hidden" class="hdnrolename" value="@initiator.RoleName" name="WorkFlowUsers[@autoincrement].RoleName" />
+                            <input type="hidden" class="hdnisactive" value="true" name="WorkFlowUsers[@autoincrement].IsActive" />
+                        </td>
+                        <td>
+                            <input type="button" value="X" class="btn btn-danger deleteWorkFlowUser" />
+                        </td>
+                        <td colspan="6"></td>
+                    </tr>
+                    autoincrement++;
+                }
+            }
+
+            @{
+                bool issinglereviewrequired = false;
+                bool ismultiplereviewerrequired = false;
+                bool isoneamongreviewrequired = false;
+                if (Model.WorkFlow.IsReviewRequired == true)
+                {
+                    if (Model.WorkFlow.IsSingleReviewerRequired == true)
+                    {
+                        issinglereviewrequired = true;
+                    }
+                    else
+                    {
+                        ismultiplereviewerrequired = true;
+                    }
+                    if (issinglereviewrequired == false)
+                    {
+                        isoneamongreviewrequired = true;
+                    }
+                }
+            }
+            <tr  class="card-header bg-light heading-c py-1">
+                <td colspan="8">Reviewer</td>
+            </tr>
+            <tr>
+                <td>Is Review Required</td>
+                <td>
+                    <input type="checkbox" @(Model.WorkFlow.IsReviewRequired == true ? "checked" : "") name="WorkFlow.IsReviewRequired" value="true" id="chkIsReviewRequired" />
+                </td>
+                <td class="review" style="display:@(Model.WorkFlow.IsReviewRequired == true ? "revert" : "none")">One Reviewer?</td>
+                <td class="review" style="display:@(Model.WorkFlow.IsReviewRequired == true ? "revert" : "none")">
+                    <input type="radio" @(Model.WorkFlow.IsSingleReviewerRequired == true ? "checked" : "") name="WorkFlow.IsSingleReviewerRequired" value="true" id="rdbIsSingleReviewerRequiredYes" />
+                </td>
+                <td class="review" style="display:@(Model.WorkFlow.IsReviewRequired == true ? "revert" : "none")">Multiple Reviewers?</td>
+                <td class="review" style="display:@(Model.WorkFlow.IsReviewRequired == true ? "revert" : "none")">
+                    <input type="radio" @(Model.WorkFlow.IsSingleReviewerRequired == false ? "checked" : "") name="WorkFlow.IsSingleReviewerRequired" value="false" id="rdbIsSingleReviewerRequiredNo" />
+                </td>
+                <td class="oneAmongReview" style="display:@(isoneamongreviewrequired == true ? "revert" : "none")">Is One Among Review Enough?</td>
+                <td class="oneAmongReview" style="display:@(isoneamongreviewrequired == true ? "revert" : "none")">
+                    <input type="checkbox" @(Model.WorkFlow.IsSingleReviewSufficient == true ? "checked" : "") name="WorkFlow.IsSingleReviewSufficient" value="true" id="chkIsSignleReviewSufficient" />
+                </td>
+            </tr>
+            <tr class="reviewSection" style="display:@(Model.WorkFlow.IsReviewRequired == true ? "revert" : "none")">
+                <td>
+                    <input type="text" class="form-control workflowuser" />
+                    <input type="hidden" class="workflowuserid" />
+                </td>
+                <td>
+                    <input type="button" value="+" class="btn btn-primary btnAddWorkFlowUser" data-category="reviewer" id="" />
+                </td>
+                <td colspan="6" class="tdErrMsg"></td>
+            </tr>
+            @if (reviewers != null && reviewers.Count() > 0)
+            {
+                //autoincrement = 0;
+                foreach (var reviewer in reviewers.ToList())
+                {
+                    <tr class="reviewerslist" style="display:@(Model.WorkFlow.IsReviewRequired == true ? "revert" : "none")">
+                        <td>
+                            <input type="text" class="form-control reviewer workflowusername" name="WorkFlowUsers[@autoincrement].UserName" value="@reviewer.UserName" readonly />
+                            <input type="hidden" class="hdnworkflowid" value="@reviewer.UserId" name="WorkFlowUsers[@autoincrement].UserId" />
+                            <input type="hidden" class="hdnroleid" value="@AppRole.Reviewer" name="WorkFlowUsers[@autoincrement].RoleId" />
+                            <input type="hidden" class="hdnrolename" value="@reviewer.RoleName" name="WorkFlowUsers[@autoincrement].RoleName" />
+                            <input type="hidden" class="hdnisactive" value="true" name="WorkFlowUsers[@autoincrement].IsActive" />
+                        </td>
+                        <td>
+                            <input type="button" value="X" class="btn btn-danger deleteWorkFlowUser" />
+                        </td>
+                        <td colspan="6"></td>
+                    </tr>
+                    autoincrement++;
+                }
+            }
+
+            @{
+                bool issingleapprovalrequired = false;
+                bool ismultipleapproverrequired = false;
+                bool isoneamongapproverequired = false;
+                if (Model.WorkFlow.IsReviewRequired == true)
+                {
+                    if (Model.WorkFlow.IsSingleReviewerRequired == true)
+                    {
+                        issingleapprovalrequired = true;
+                    }
+                    else
+                    {
+                        ismultipleapproverrequired = true;
+                    }
+                    if (issingleapprovalrequired == false)
+                    {
+                        isoneamongapproverequired = true;
+                    }
+                }
+            }
+
+            <tr  class="card-header bg-light heading-c py-1">
+                <td colspan="8">Approver</td>
+            </tr>
+            <tr>
+                <td>Is Approval Required</td>
+                <td>
+                    <input type="checkbox" @(Model.WorkFlow.IsApprovalRequired == true ? "checked" : "") name="WorkFlow.IsApprovalRequired" value="true" id="chkIsApprovalRequired" />
+                </td>
+                <td class="approval" style="display:@(Model.WorkFlow.IsApprovalRequired == true ? "revert" : "none")">One Approver?</td>
+                <td class="approval" style="display:@(Model.WorkFlow.IsApprovalRequired == true ? "revert" : "none")">
+                    <input type="radio" @(Model.WorkFlow.IsSingleApproverRequired == true ? "checked" : "") name="WorkFlow.IsSingleApproverRequired" value="true" id="rdbIsSingleApproverRequiredYes" />
+                </td>
+                <td class="approval" style="display:@(Model.WorkFlow.IsApprovalRequired == true ? "revert" : "none")">Multiple Approvers?</td>
+                <td class="approval" style="display:@(Model.WorkFlow.IsApprovalRequired == true ? "revert" : "none")">
+                    <input type="radio" @(Model.WorkFlow.IsSingleApproverRequired == false ? "checked" : "") name="WorkFlow.IsSingleApproverRequired" value="false" id="rdbIsSingleApproverRequiredNo" />
+                </td>
+                <td class="oneAmongApproval" style="display:@(isoneamongapproverequired == true ? "revert" : "none")">Is One Among Approval Enough?</td>
+                <td class="oneAmongApproval" style="display:@(isoneamongapproverequired == true ? "revert" : "none")">
+                    <input type="checkbox" @(Model.WorkFlow.IsSignleApprovalSufficient == true ? "checked" : "") name="WorkFlow.IsSignleApprovalSufficient" value="true" id="chkIsSignleApprovalSufficient" />
+                </td>
+            </tr>
+            <tr class="approvalSection" style="display:@(Model.WorkFlow.IsApprovalRequired == true ? "revert" : "none")">
+                <td>
+                    <input type="text" class="form-control workflowuser" />
+                    <input type="hidden" class="workflowuserid" />
+                </td>
+                <td>
+                    <input type="button" value="+" class="btn btn-primary btnAddWorkFlowUser" id="" data-category="approver" />
+                </td>
+                <td colspan="6" class="tdErrMsg"></td>
+            </tr>
+            @if (approvers != null && approvers.Count() > 0)
+            {
+                //autoincrement = 0;
+                foreach (var approver in approvers.ToList())
+                {
+                    <tr class="approverslist" style="display:@(Model.WorkFlow.IsApprovalRequired == true ? "revert" : "none")">
+                        <td>
+                            <input type="text" class="form-control approver workflowusername" name="WorkFlowUsers[@autoincrement].UserName" value="@approver.UserName" readonly />
+                            <input type="hidden" class="hdnworkflowid" value="@approver.UserId" name="WorkFlowUsers[@autoincrement].UserId" />
+                            <input type="hidden" class="hdnroleid" value="@AppRole.Approver" name="WorkFlowUsers[@autoincrement].RoleId" />
+                            <input type="hidden" class="hdnrolename" value="@approver.RoleName" name="WorkFlowUsers[@autoincrement].RoleName" />
+                            <input type="hidden" class="hdnisactive" value="true" name="WorkFlowUsers[@autoincrement].IsActive" />
+                        </td>
+                        <td>
+                            <input type="button" value="X" class="btn btn-danger deleteWorkFlowUser" />
+                        </td>
+                        <td colspan="6"></td>
+                    </tr>
+                    autoincrement++;
+                }
+            }
+            <tr>
+                <td colspan="8" style="text-align:center">
+                    <label style="float:left;color:red;" id="lblWorkFlowErrMsg"></label>
+                    <input type="button" class="btn btn-primary" id="btnSaveWorkFlow" value="Save" />
+                </td>
+            </tr>
+        </table>
+        <label id="lblWorkFlowErrMessage" style="float:left;color:red"></label>
+    </form>

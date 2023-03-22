@@ -1,0 +1,337 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.ItemTrackerModel
+<style>
+    .mandatory {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+<form method="post" action="@Url.Action("SaveItemTrackerData", "ManageItemTracker", new { area = "DataRoom"})" enctype="multipart/form-data" id="frmItemTracker">
+    <input type="hidden" id="hdnItemTrackerFormDataRoomId" value="@Model.DataRoomId" name="model[0].DataRoomId" />
+    <input type="hidden" id="hdnItemTrackerFormDataRoomName" value="@Model.DataRoomName" name="model[0].DataRoomName" />
+    <input type="hidden" id="hdnItemTrackerFormFolderId" value="@Model.FolderId" name="model[0].FolderId" />
+    <input type="hidden" id="hdnItemTrackerFormFolderName" value="@Model.FolderName" name="model[0].FolderName" />
+    <input type="hidden" id="hdnItemTrackerFormItemTrackerId" value="@Model.ItemTrackerId" name="model[0].ItemTrackerId" />
+    <input type="hidden" id="hdnItemTrackerFormItemTrackerName" value="@Model.ItemTrackerName" name="model[0].ItemTrackerName" />
+    @{
+        string rowGuid = string.Empty;
+        if (Model.DataRoomItemTrackerData != null && Model.DataRoomItemTrackerData.Count() > 0)
+        {
+            rowGuid = Model.DataRoomItemTrackerData.FirstOrDefault().RowGuid;
+        }
+    }
+    <input type="hidden" id="hdnItemTrackerFormRowGuid" value="@rowGuid" name="model[0].RowGuid" />
+    @if (Model.DataRoomItemTrackerControls != null && Model.DataRoomItemTrackerControls.Count > 0)
+    {
+        <div class="form-group row divFormControlPart">
+            @{
+                var consolidatedData = from c in Model.DataRoomItemTrackerControls
+                                       group c by new
+                                       {
+                                           c.ControlType,
+                                           c.ControlName,
+                                           c.ControlGuid
+                                       } into gcs
+                                       select new DataRooms.UI.Models.ItemTrackerControl()
+                                       {
+                                           ControlType = gcs.Key.ControlType,
+                                           ControlName = gcs.Key.ControlName,
+                                           ControlGuid = gcs.Key.ControlGuid
+                                       };
+            }
+
+
+            @if (consolidatedData != null && consolidatedData.Count() > 0)
+            {
+                int fileincrement = 0; int controlincrement = 0;
+                foreach (var control in consolidatedData)
+                {
+
+
+                    var controlInfo = DataRooms.DataCache.ItemTrackerControls.Where(x => x.ControlGuid == control.ControlGuid);
+                    switch (Convert.ToInt32(control.ControlType))
+                    {
+                        case ControlType.TextBox:
+                            <div class="col-lg-4">
+                                @if (controlInfo.First().IsMandatory)
+                                {
+                                    <label class="font-weight-bold">@control.ControlName <span class="mandatory">*</span></label>
+                                }
+                                else
+                                {
+                                    <label class="font-weight-bold">@control.ControlName</label>
+                                }
+
+                                @{
+                                    var textBoxDataDetails = Model.DataRoomItemTrackerData.Where(x => x.ControlGuid == control.ControlGuid);
+                                    string textBoxData = string.Empty;
+                                    if (textBoxDataDetails != null && textBoxDataDetails.Count() > 0)
+                                    {
+                                        textBoxData = textBoxDataDetails.First().ControlDataName;
+                                    }
+                                }
+
+
+                                <input type="text" value="@textBoxData" class="form-control @(controlInfo.First().IsMandatory ? "required" : "")" placeholder="Please Enter @control.ControlName" name="model[@controlincrement].ControlDataName" data-name="@control.ControlName" />
+                                <input type="hidden" value="@control.ControlGuid" name="model[@controlincrement].ControlGuid" />
+                                <input type="hidden" value="@control.ControlName" name="model[@controlincrement].ControlName" />
+                                <input type="hidden" value="@control.ControlType" name="model[@controlincrement].ControlTypeId" />
+                            </div>
+                            break;
+                        case ControlType.Dropdown:
+                            <div class="col-lg-4">
+                                @{
+                                    var dropDownData = controlInfo;
+                                }
+                                @if (controlInfo.First().IsMandatory)
+                                {
+                                    <label class="font-weight-bold">@control.ControlName <span class="mandatory">*</span></label>
+                                }
+                                else
+                                {
+                                    <label class="font-weight-bold">@control.ControlName</label>
+                                }
+                                @{
+                                    var dropDownDetails = Model.DataRoomItemTrackerData.Where(x => x.ControlGuid == control.ControlGuid);
+                                    int dropDownDataId = 0;
+                                    if (dropDownDetails != null && dropDownDetails.Count() > 0)
+                                    {
+                                        dropDownDataId = dropDownDetails.First().ControlDataId;
+                                    }
+                                }
+                                <input type="hidden" value="@control.ControlGuid" name="model[@controlincrement].ControlGuid" />
+                                <input type="hidden" value="@control.ControlName" name="model[@controlincrement].ControlName" />
+                                <input type="hidden" value="@control.ControlType" name="model[@controlincrement].ControlTypeId" />
+                                <select class="form-control @(controlInfo.First().IsMandatory ? "required" : "")" id="" name="model[@controlincrement].ControlDataId" data-name="@control.ControlName">
+                                    <option value="0">Select</option>
+                                    @if (dropDownData != null && dropDownData.Count() > 0)
+                                    {
+                                        foreach (var item in dropDownData.OrderBy(x => x.ControlMasterData).ToList())
+                                        {
+                                            if (item.Id == dropDownDataId)
+                                            {
+                                                <option value="@item.Id" selected>@item.ControlMasterData</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id">@item.ControlMasterData</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            break;
+                        case ControlType.TwoLevelDropDown:
+                            <div class="col-lg-4">
+                                @{
+                                    var twoLevelDropDownData = controlInfo;
+                                }
+                                @if (controlInfo.First().IsMandatory)
+                                {
+                                    <label class="font-weight-bold">@control.ControlName <span class="mandatory">*</span></label>
+                                }
+                                else
+                                {
+                                    <label class="font-weight-bold">@control.ControlName</label>
+                                }
+                                @{
+                                    var twoLevelDropDownDetails = Model.DataRoomItemTrackerData.Where(x => x.ControlGuid == control.ControlGuid);
+                                    int twoLevelDropDownDataId = 0;
+                                    if (twoLevelDropDownDetails != null && twoLevelDropDownDetails.Count() > 0)
+                                    {
+                                        twoLevelDropDownDataId = twoLevelDropDownDetails.First().ControlDataId;
+                                    }
+                                }
+                                <input type="hidden" value="@control.ControlGuid" name="model[@controlincrement].ControlGuid" />
+                                <input type="hidden" value="@control.ControlName" name="model[@controlincrement].ControlName" />
+                                <input type="hidden" value="@control.ControlType" name="model[@controlincrement].ControlTypeId" />
+                                <select class="form-control twolevel @(controlInfo.First().IsMandatory ? "required" : "")" id="twolevel_@controlincrement" name="model[@controlincrement].ControlDataId" data-name="@control.ControlName">
+                                    <option value="0">Select</option>
+                                    @if (twoLevelDropDownData != null && twoLevelDropDownData.Count() > 0)
+                                    {
+                                        foreach (var item in twoLevelDropDownData.OrderBy(x => x.ControlMasterData).ToList())
+                                        {
+                                            if (item.ControlReferenceId == 0)
+                                            {
+                                                if (item.Id == twoLevelDropDownDataId)
+                                                {
+                                                    <option value="@item.Id" selected>@item.ControlMasterData</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">@item.ControlMasterData</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!string.IsNullOrEmpty(rowGuid))
+                                                {
+                                                    var controlData = Model.DataRoomItemTrackerData.Where(x => x.RowGuid == rowGuid && x.ControlGuid == control.ControlGuid);
+                                                    if (controlData != null && controlData.Count() > 0)
+                                                    {
+                                                        <option value="@controlData.First().ControlDataId" selected>@controlData.First().ControlDataName</option>
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            break;
+                        case ControlType.ThreeLevelDropdown:
+                            <div class="col-lg-4">
+                                @{
+                                    var threeLevelDropDownData = controlInfo;
+                                }
+                                @if (controlInfo.First().IsMandatory)
+                                {
+                                    <label class="font-weight-bold">@control.ControlName <span class="mandatory">*</span></label>
+                                }
+                                else
+                                {
+                                    <label class="font-weight-bold">@control.ControlName</label>
+                                }
+                                @{
+                                    var threeLevelDropDownDetails = Model.DataRoomItemTrackerData.Where(x => x.ControlGuid == control.ControlGuid);
+                                    int threeLevelDropDownDataId = 0;
+                                    if (threeLevelDropDownDetails != null && threeLevelDropDownDetails.Count() > 0)
+                                    {
+                                        threeLevelDropDownDataId = threeLevelDropDownDetails.First().ControlDataId;
+                                    }
+                                }
+                                <input type="hidden" value="@control.ControlGuid" name="model[@controlincrement].ControlGuid" />
+                                <input type="hidden" value="@control.ControlName" name="model[@controlincrement].ControlName" />
+                                <input type="hidden" value="@control.ControlType" name="model[@controlincrement].ControlTypeId" />
+                                <select class="form-control threelevel @(controlInfo.First().IsMandatory ? "required" : "")" id="threelevel_@controlincrement" name="model[@controlincrement].ControlDataId" data-name="@control.ControlName">
+                                    <option value="0">Select</option>
+                                    @if (threeLevelDropDownData != null && threeLevelDropDownData.Count() > 0)
+                                    {
+                                        foreach (var item in threeLevelDropDownData.OrderBy(x => x.ControlMasterData).ToList())
+                                        {
+                                            if (item.ControlReferenceId == 0)
+                                            {
+                                                if (item.Id == threeLevelDropDownDataId)
+                                                {
+                                                    <option value="@item.Id" selected>@item.ControlMasterData</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">@item.ControlMasterData</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!string.IsNullOrEmpty(rowGuid))
+                                                {
+                                                    var controlData = Model.DataRoomItemTrackerData.Where(x => x.RowGuid == rowGuid && x.ControlGuid == control.ControlGuid);
+                                                    if (controlData != null && controlData.Count() > 0)
+                                                    {
+                                                        <option value="@controlData.First().ControlDataId" selected>@controlData.First().ControlDataName</option>
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            break;
+                        case ControlType.FileUpload:
+                            <div class="col-lg-4">
+                                @if (controlInfo.First().IsMandatory)
+                                {
+                                    <label class="font-weight-bold">@control.ControlName <span class="mandatory">*</span></label>
+                                }
+                                else
+                                {
+                                    <label class="font-weight-bold">@control.ControlName</label>
+                                }
+                                <input type="file" class="form-control @(controlInfo.First().IsMandatory ? "required" : "") inputFiles" name="files[@fileincrement]" data-name="@control.ControlName" />
+                                <input type="hidden" value="@control.ControlGuid" name="model[@controlincrement].ControlGuid" />
+                                <input type="hidden" value="@control.ControlName" name="model[@controlincrement].ControlName" />
+                                <input type="hidden" value="@control.ControlType" name="model[@controlincrement].ControlTypeId" />
+                                @{
+                                    fileincrement++;
+                                }
+
+                            </div>
+                            break;
+                        case ControlType.DateControl:
+                            <div class="col-lg-4">
+                                @if (controlInfo.First().IsMandatory)
+                                {
+                                    <label class="font-weight-bold">@control.ControlName <span class="mandatory">*</span></label>
+                                }
+                                else
+                                {
+                                    <label class="font-weight-bold">@control.ControlName</label>
+                                }
+
+                                @{
+                                    var dateControlDataDetails = Model.DataRoomItemTrackerData.Where(x => x.ControlGuid == control.ControlGuid);
+                                    string dateControlData = string.Empty;
+                                    if (dateControlDataDetails != null && dateControlDataDetails.Count() > 0)
+                                    {
+                                        dateControlData = dateControlDataDetails.First().ControlDataName;
+                                    }
+                                }
+
+
+                                <input type="text" value="@dateControlData" readonly class="form-control datecontrol @(controlInfo.First().IsMandatory ? "required" : "")" placeholder="Please Enter @control.ControlName" name="model[@controlincrement].ControlDataName" data-name="@control.ControlName" />
+                                <input type="hidden" value="@control.ControlGuid" name="model[@controlincrement].ControlGuid" />
+                                <input type="hidden" value="@control.ControlName" name="model[@controlincrement].ControlName" />
+                                <input type="hidden" value="@control.ControlType" name="model[@controlincrement].ControlTypeId" />
+                            </div>
+                            break;
+                    }
+                    controlincrement++;
+                }
+            }
+        </div>
+        <hr />
+        <div class="modal-footer">
+            <label id="lblItemTrackerErrMsg" style="float:left;color:red;font-weight:bold"></label>
+            <button type="button" class="btn btn-success" id="btnItemTrackerDataSave">Save</button>
+            <button class="btn btn-danger" id="btnItemTrackerDataCancel" type="button" data-dismiss="modal">Cancel</button>
+        </div>
+
+    }
+</form>
+
+<script>
+    $(document).on("change", ".twolevel", function () {
+        var thisiddigit = $(this).attr("id").match(/\d+/);
+        var nextControl = parseInt(thisiddigit) + 1;
+        
+        $.getJSON("/getmasterdatabasedonparent?parentid=" + $(this).val(), function (data) {
+            $("#twolevel_" + nextControl).html('');
+            $("#twolevel_" + nextControl).append('<option value="0">Select</option>');
+            $.each(data, function (index, item) {
+                $("#twolevel_" + nextControl).append('<option value="' + item.Id + '">' + item.ControlMasterData + '</option>');
+            });
+        });
+    });
+    $(document).on("change", ".threelevel", function () {
+        var thisiddigit = $(this).attr("id").match(/\d+/);
+        var nextControl = parseInt(thisiddigit) + 1;
+        var nextSubControl = parseInt(thisiddigit) + 2;
+        $("#threelevel_" + nextControl).html('');
+        $("#threelevel_" + nextSubControl).html('');
+        $.getJSON("/getmasterdatabasedonparent?parentid=" + $(this).val(), function (data) {
+            $("#threelevel_" + nextControl).html('');
+            $("#threelevel_" + nextControl).append('<option value="0">Select</option>');
+            $.each(data, function (index, item) {
+                $("#threelevel_" + nextControl).append('<option value="' + item.Id + '">' + item.ControlMasterData + '</option>');
+            });
+        });
+    });
+
+    var rowid = $("#hdnItemTrackerFormRowGuid").val();
+    if (rowid == null || rowid == "") {
+
+    }
+
+    $(document).ready(function () {
+        $(".datecontrol").datepicker({ dateFormat: 'dd-mm-yy' });
+    });
+</script>

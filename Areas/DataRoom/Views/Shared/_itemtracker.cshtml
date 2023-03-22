@@ -1,0 +1,170 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.ItemTrackerModel
+
+<div class="form-group row" style="padding:3px;">
+    <div class="col-lg-4" style="display:none">
+        <label class="col-sm-6 font-weight-bold">SharBox</label>
+        <input type="text" class="form-control" readonly id="txtItemTrackerDataRoomName" />
+        <input type="hidden" id="hdnItemTrackerDataRoomId" />
+    </div>
+    <div class="col-lg-4" style="display:none">
+        <label class="col-sm-6 font-weight-bold">Folder</label>
+        <input type="text" class="form-control" readonly id="txtItemTrackerFolderName" />
+        <input type="hidden" id="hdnItemTrackerFolderId" />
+    </div>
+    <div class="col-lg-4">
+        <label class="col-sm-6 font-weight-bold">Item Tracker</label>
+        <input type="text" class="form-control" readonly id="txtItemTrackerItemTrackerName" />
+        <input type="hidden" id="hdnItemTrackerItemTrackerId" />
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-lg-6">
+        @{
+            int id = 0;
+            if (Model.DataRoomItemTrackerData != null && Model.DataRoomItemTrackerData.Count() > 0)
+            {
+                id = Model.DataRoomItemTrackerData.First().ItemTrackerId;
+            }
+        }
+
+
+        <div class="btn-group" role="group" aria-label="Basic example" style="background-color:#ffffff;">
+            <button type="button" data-id="@id" class="btn writeAccess" title="Download PDF" id="btnDownloadItemTrackerData">
+                <i class="fas fa-file-pdf" style="color:red"></i>
+            </button>
+            <button type="button" data-id="@id" class="btn writeAccess" title="Download Excel" id="btnDownloadItemTrackerDataExcel">
+                <i class="fas fa-file-excel" style="color:green"></i>
+            </button>
+            @*<input type="button" value="PDF" data-id="@id" class="btn btn-primary writeAccess" id="btnDownloadItemTrackerData" style="float:left" />
+                <input type="button" value="Excel" data-id="@id" class="btn btn-primary writeAccess" id="btnDownloadItemTrackerDataExcel" style="float:left" />*@
+            @*<button type="button" class="btn btn-secondary">Right</button>*@
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <input type="button" value="Add Item Tracker" class="btn btn-primary writeAccess" id="btnAddItemTracker" style="float:right" />
+    </div>
+</div>
+<div class="form-group" id="divItemTrackerList" style="overflow-x:auto">
+    @{
+        List<string> columns = Model.DataRoomItemTrackerControls.OrderBy(x => x.Id).Select(x => x.ControlName).Distinct().ToList();
+    }
+    @if (columns != null && columns.Count > 0)
+    {
+        int colcount = 3;
+        <table class="table table-bordered">
+            <thead>
+                <tr class="tbl-header">
+                    <th colspan="3" class="writeAccess">Actions</th>
+                    @if (columns != null && columns.Count() > 0)
+                    {
+                        foreach (var column in columns)
+                        {
+                            <th>@column</th>
+                            colcount++;
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DataRoomItemTrackerData != null && Model.DataRoomItemTrackerData.Count() > 0)
+                {
+                    int itemtrackerid = Model.DataRoomItemTrackerData.First().ItemTrackerId;
+                    List<string> distinctRows = Model.DataRoomItemTrackerData.OrderBy(x => x.Id).Select(x => x.RowGuid).Distinct().ToList();
+                    if (distinctRows != null && distinctRows.Count() > 0)
+                    {
+                        foreach (var row in distinctRows)
+                        {
+                            var rowData = Model.DataRoomItemTrackerData.OrderBy(x => x.Id).Where(x => x.RowGuid == row);
+                            if (rowData != null && rowData.Count() > 0)
+                            {
+                                var columnData = rowData.Select(x => x.ControlGuid).ToList();
+                                int rowcolcount = 3;
+                                <tr>
+                                    <td class="writeAccess">
+                                        <a href="#" class="editItemTrackerData" title="Edit Item Tracker" data-guid="@row"><i class="las la-edit fa-lg" style="color:darkgoldenrod"></i> </a>
+                                    </td>
+                                    <td class="writeAccess">
+                                        <a href="#" class="deleteItemTrackerData" data-guid="@row" title="Delete Item Tracker"><i class="las la-trash fa-lg" style="color:red"></i> </a>
+                                    </td>
+                                    <td class="writeAccess">
+                                        <a href="#" class="itemTrackerHistory" data-id="@itemtrackerid" data-guid="@row" title="View Item Tracker History"><i class="las la-history fa-lg" style="color:green"></i> </a>
+                                    </td>
+                                    @if (columnData != null && columnData.Count() > 0)
+                                    {
+                                        foreach (var item in columnData)
+                                        {
+                                            if (Model.DataRoomItemTrackerControls.Select(x => x.ControlGuid).ToList().Contains(item))
+                                            {
+                                                <td>
+                                                    @{
+                                                        int controlType = 0; int controlDataId = 0;
+                                                        string controlData = string.Empty;
+                                                        var data = rowData.Where(x => x.ControlGuid == item);
+                                                        if (data != null && data.Count() > 0)
+                                                        {
+                                                            controlType = data.First().ControlTypeId;
+                                                            controlData = data.First().ControlDataName;
+                                                        }
+                                                        switch (controlType)
+                                                        {
+                                                            case ControlType.TextBox:
+                                                                @controlData;
+                                                                break;
+                                                            case ControlType.Dropdown:
+                                                                @controlData
+                                                                break;
+                                                            case ControlType.TwoLevelDropDown:
+                                                                @controlData
+                                                                break;
+                                                            case ControlType.ThreeLevelDropdown:
+                                                                @controlData
+                                                                break;
+                                                            case ControlType.FileUpload:
+                                                                <a href="#" class="downloadItemTrackerFile" data-guid="@item" title="Download File">
+                                                                    <i class="las la-download fa-lg" style="color:darkblue"></i>
+                                                                </a>
+                                                                break;
+                                                            case ControlType.DateControl:
+                                                                @controlData
+                                                                break;
+                                                        }
+                                                    }
+                                                </td>
+                                                rowcolcount++;
+                                            }
+
+                                        }
+                                    }
+
+                                    @if (colcount > rowcolcount)
+                                    {
+                                        int diifcolcount = colcount - rowcolcount;
+                                        for (int i = 0; i < diifcolcount; i++)
+                                        {
+                                            <td></td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div>No Data Available..</div>
+    }
+</div>
+
+<script>
+
+
+
+
+</script>

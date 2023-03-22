@@ -1,0 +1,47 @@
+﻿@model DataRooms.UI.Areas.Explorer.Model.ExplorerCustomModel
+
+<style>
+    .highlite {
+        background: #bea9a9;
+    }
+</style>
+
+<div class="row">
+        <div class="col-lg-12 theme">
+            @if (Model.DataRooms != null && Model.DataRooms.Count() > 0)
+            {
+            <ul id="" class="" style="list-style-type:none">
+                @foreach (var dataroom in Model.DataRooms)
+                {
+                    
+                <li class="node" data-roomid="@dataroom.Id" data-folderid="0" style="cursor:pointer" data-path="@dataroom.DataRoomName">
+                    @dataroom.DataRoomName
+                    @if (Model.Folders != null && Model.Folders.Count() > 0)
+                    {
+                        var dataroomfolders = Model.Folders.Where(x => x.DataRoomId == dataroom.Id);
+                        if (dataroomfolders != null && dataroomfolders.Count() > 0)
+                        {
+                            <ul style="list-style-type:none">
+                                @foreach (var folder in dataroomfolders.ToList())
+                                {
+                                    string path = !string.IsNullOrEmpty(folder.ParentFolderName) ? dataroom.DataRoomName + "/" + folder.ParentFolderName + "/" + folder.FolderName : dataroom.DataRoomName + "/" + folder.FolderName;
+                                    <li class="node" data-roomid="@dataroom.Id" data-folderid="@folder.Id" style="cursor:pointer" data-path="@path"><i class="glyphicon glyphicon-folder-close"></i> @folder.FolderName</li>
+                                }
+                            </ul>
+                        }
+                    }
+
+                </li>
+                }
+            </ul>
+            }
+        </div>
+    </div>
+<div class="row">
+    <label>Selected Path : </label>
+    <p id="selectedFolderPath" style="color:green;font-weight:bold"></p>
+</div>
+
+
+
+

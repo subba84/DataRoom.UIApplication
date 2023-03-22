@@ -1,0 +1,282 @@
+﻿@model List<DataRooms.UI.Models.ItemTrackerPermission>
+
+@if (Model.Count == 0)
+{
+    <div>No Permissions found for this item tracker permissions..</div>
+}
+else
+{
+    <div class="row" style="border-bottom:1px solid orangered;padding:5px;margin-left:0px;margin-right:0px;">
+        <div class="col-lg-4" style="display:none">
+            <label><b>SharBox</b></label>
+            <div>
+                <input type="hidden" value="@Model[0].DataRoomId" id="hdnItemTrackerPermissionDataRoomId" />
+                <span>@Model[0].DataRoomName</span>
+            </div>
+        </div>
+        <div class="col-lg-4" style="display:none">
+            <label><b>Folder</b></label>
+            <div>
+                <input type="hidden" value="@Model[0].FolderId" id="hdnItemTrackerPermissionFolderId" />
+                <span>@Model[0].FolderName</span>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label><b>Item Tracker</b></label>
+            <div>
+                <input type="hidden" value="@Model[0].ItemTrackerId" id="hdnItemTrackerPermissionItemTrackerId" />
+                <span>@Model[0].ItemTrackerName</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row" id="divItemTrackerPermissionControls" style="background-color:#ede2e2;display:none;margin-top:20px;margin-left:0px;margin-right:0px;">
+        <div class="col-lg-3">
+            <label>User</label>
+            <div>
+                <span><b id="bItemTrackerPermissionUser"></b></span>
+                <input type="hidden" id="hdnItemTrackerPermissionId" />
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <label>Permissions</label>
+            <div class="row">
+                <div class="col-lg-3">
+                    <span>Full</span>
+                    <input type="checkbox" id="chkItemTrackerPermissionFull" />
+                </div>
+                <div class="col-lg-3">
+                    <span>Read</span>
+                    <input type="checkbox" id="chkItemTrackerPermissionRead" />
+                </div>
+                <div class="col-lg-3">
+                    <span>Write</span>
+                    <input type="checkbox" id="chkItemTrackerPermissionWrite" />
+                </div>
+                <div class="col-lg-3">
+                    <span>Delete</span>
+                    <input type="checkbox" id="chkItemTrackerPermissionDelete" />
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <label>Is Active</label>
+            <div>
+                <input type="checkbox" id="chkItemTrackerPermissionIsActive" />
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div>
+                <input type="button" class="btn btn-secondary" style="margin-top:10px;" value="Save" id="btnSingleItemTrackerPermissionSave" />
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row" style="margin-top:10px;margin-right:0px;margin-left:0px;">
+        <div class="col-lg-12" style="overflow:auto" id="divItemTrackerPermissionListPart">
+            <div class="form-group row">
+                <div class="col-lg-6" align="left">
+                    <h5><b>Item Tracker Permissions</b></h5>
+                </div>
+                <div class="col-lg-6" align="right">
+                    <input type="text" id="txtItemTrackerPermissionSearch" placeholder="Search with User Name.." />
+                </div>
+            </div>
+            <table class="table table-bordered" id="tblItemTrackerPermissions" width="50%" cellspacing="0">
+                <thead>
+                    <tr class="tbl-header">
+                        <th>S.No.</th>
+                        <th>User</th>
+                        <th>Permission</th>
+                        <th>Is Active</th>
+                        <th colspan="2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count() > 0)
+                    {
+                        int i = 1;
+                        foreach (var permission in Model)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td class="tdItemTrackerPermissionUserName">
+                                    @permission.UserName
+                                </td>
+                                @{
+                                    List<string> permissions = new List<string>();
+                                    if (permission.HasFullControl == true)
+                                    {
+                                        permissions.Add("Full Control");
+                                    }
+                                    if (permission.HasRead == true)
+                                    {
+                                        permissions.Add("Read");
+                                    }
+                                    if (permission.HasWrite == true)
+                                    {
+                                        permissions.Add("Write");
+                                    }
+                                    if (permission.HasDelete == true)
+                                    {
+                                        permissions.Add("Delete");
+                                    }
+                                }
+                                <td>@string.Join(",", permissions)</td>
+                                <td>@(permission.IsActive == true ? "Yes" : "No")</td>
+                                <td style="cursor:pointer"><i class="fas fa-fw fa-edit theme editItemTrackerPermission" data-id="@permission.Id" data-fullcontrol="@permission.HasFullControl" data-read="@permission.HasRead" data-write="@permission.HasWrite" data-delete="@permission.HasDelete" data-isactive="@permission.IsActive"></i></td>
+                                <td style="cursor:pointer"><i class="fas fa-fw fa-trash text-red deleteItemTrackerPermission" data-username="@permission.UserName" data-id="@permission.Id"></i></td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6">No Files Found..</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#txtItemTrackerPermissionSearch').keyup(function () {
+                search_table_item_permission($(this).val());
+            });
+            function search_table_item_permission(value) {
+                $('#tblItemTrackerPermissions tr').each(function () {
+                    var found = 'false';
+                    $(this).each(function () {
+                        if ($(this).text().toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+                            found = 'true';
+                        }
+                    });
+                    if (found == 'true') {
+                        $(this).show();
+                    }
+                    else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+
+    </script>
+
+    <script>
+    $(document).on("click", ".editItemTrackerPermission", function () {
+        var user = $(this).parent().parent().find(".tdItemTrackerPermissionUserName").text();
+        var full = $(this).attr("data-fullcontrol");
+        var read = $(this).attr("data-read");
+        var write = $(this).attr("data-write");
+        var delte = $(this).attr("data-delete");
+        var isactive = $(this).attr("data-isactive");
+        var id = $(this).attr("data-id");
+        $("#hdnItemTrackerPermissionId").val(id);
+        $("#bItemTrackerPermissionUser").text(user);
+        if (full == "True") {
+            $("#chkItemTrackerPermissionFull").prop("checked", true);
+        }
+        else {
+            $("#chkItemTrackerPermissionFull").prop("checked", false);
+        }
+        if (read == "True") {
+            $("#chkItemTrackerPermissionRead").prop("checked", true);
+        }
+        else {
+            $("#chkItemTrackerPermissionRead").prop("checked", false);
+        }
+        if (write == "True") {
+            $("#chkItemTrackerPermissionWrite").prop("checked", true);
+        }
+        else {
+            $("#chkItemTrackerPermissionWrite").prop("checked", false);
+        }
+        if (delte == "True") {
+            $("#chkItemTrackerPermissionDelete").prop("checked", true);
+        }
+        else {
+            $("#chkItemTrackerPermissionDelete").prop("checked", false);
+        }
+        if (isactive == "True") {
+            $("#chkItemTrackerPermissionIsActive").prop("checked", true);
+        }
+        else {
+            $("#chkItemTrackerPermissionIsActive").prop("checked", false);
+        }
+        $("#divItemTrackerPermissionControls").show();
+    });
+
+$(document).on("click", "#btnSingleItemTrackerPermissionSave", function () {
+            var full = $("#chkItemTrackerPermissionFull").prop("checked");
+            var read = $("#chkItemTrackerPermissionRead").prop("checked");
+            var write = $("#chkItemTrackerPermissionWrite").prop("checked");
+            var delte = $("#chkItemTrackerPermissionDelete").prop("checked");
+            var isactive = $("#chkItemTrackerPermissionIsActive").prop("checked");
+            var id = $("#hdnItemTrackerPermissionId").val();
+
+            $("#divItemTrackerPermissionListPart").html('');
+
+        var modal = {
+            Id: id,
+            HasFullControl: full,
+            HasRead: read,
+            HasWrite: write,
+            HasDelete: delte,
+            IsActive: isactive
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveItemTrackerPermission", "ManageItemTrackerPermission", new { area = "DataRoom"})",
+            data: JSON.stringify(modal),
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divItemTrackerPermissionListPart").html('');
+                $("#divItemTrackerPermissionListPart").html(data.HTML);
+                $("#divItemTrackerPermissionControls").hide();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+
+  $(document).on("click", ".deleteItemTrackerPermission", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeleteItemTrackerPermission", "ManageItemTrackerPermission", new { area = "DataRoom"})?id=" + id,
+            data: {},
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divItemTrackerPermissionListPart").html('');
+                $("#divItemTrackerPermissionListPart").html(data.HTML);
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    });
+    </script>
+}
+
+
+
+
+
+

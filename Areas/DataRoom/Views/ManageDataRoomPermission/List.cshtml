@@ -1,0 +1,145 @@
+﻿@model DataRooms.UI.Areas.DataRoom.Models.DataRoomCustomModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <form method="post" action="@Url.Action("List","ManageDataRoomPermission",new { area = "DataRoom"})" id="frmDataRoomPermissionList">
+        <!-- DataTales Example -->
+        <div class="row p-2">
+            <div class="col-lg-4 font-weight-bold text-primary">
+                <img src="~/CustomContent/img/dataroom3.png" class="float-left" width="30" height="30" /><h3 class="font-weight-bold text-primary ml-5">@Model.DataRoom.DataRoomName</h3>
+            </div>
+        </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3" style="height:65px;">
+                <div class="form-group row">
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <h5 class="font-weight-bold theme float-left">Permissions</h5>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="form-group row">
+                            <div class="col-sm-2">
+                                <label class="col-form-label-sm" for="txtSearch">Search</label>
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="txtSearch" placeholder="Search with User Name" name="SearchString" value="@Model.SearchString"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="#" class="btn btn-primary float-right editDataRoomPermission" data-id="0" data-toggle="modal" data-target="#dataRoomPermissionModel">+ Add</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    @Html.Partial("~/Areas/DataRoom/Views/Shared/_dataroompermissionlist.cshtml", Model)
+                </div>
+                <br />
+                <div id='Paging' style="text-align:center">
+                    Page @(Model.PagedDataRoomPermissions.PageCount < Model.PagedDataRoomPermissions.PageNumber ? 0 : Model.PagedDataRoomPermissions.PageNumber)
+                    of @Model.PagedDataRoomPermissions.PageCount
+                    <input type="hidden" name="RecordsPerPage" value="@Model.RecordsPerPage" />
+                    <input type="hidden" name="CurrentPage" id="hdnCurrentPage" value="@Model.CurrentPage" />
+                    <input type="hidden" name="SortOrder" id="hdnSortOrder" value="@Model.SortOrder" />
+                    <input type="hidden" name="SortColumn" id="hdnSortColumn" value="@Model.SortColumn" />
+                    <input type="hidden" name="DataRoomId" value="@Model.DataRoomId" />
+                    @Html.PagedListPager(Model.PagedDataRoomPermissions, page => "#")
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="dataRoomPermissionModel" tabindex="-1" role="dialog" aria-labelledby="dataRoomPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divDataRoomPermissionModalContent">
+
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on("click","#btnSave", function () {
+        $("#lblErrMessage").hide();
+        // validations...
+        var fullname = $("#txtDataRoomName").val();
+        if (fullname == "") {
+            $("#txtDataRoomName").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Enter SharBox Name");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtDataRoomName").css({ "border-color": "#d1d3e2" });
+        }
+        var username = $("#txtUserName").val();
+        if (username == "") {
+            $("#txtUserName").css({ "border-color": "red" });
+            $("#lblErrMessage").text("Please Enter Description");
+            $("#lblErrMessage").show();
+            return false;
+        }
+        else {
+            $("#txtUserName").css({ "border-color": "#d1d3e2" });
+        }
+
+        if ($(".chkPermission:checked").length == 0) {
+            $("#lblErrMessage").text("Please Select Permissions");
+            $("#lblErrMessage").show();
+            return false;
+        }
+    });
+
+    //Edit Functionality
+    $(document).on("click", ".editDataRoomPermission", function () {
+        var roomid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("Edit","ManageDataRoomPermission",new { area = "DataRoom"})",
+            data: { "id": roomid,"dataroomid":"@Model.DataRoomId" },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divDataRoomPermissionModalContent").html('');
+                $("#divDataRoomPermissionModalContent").html(data.HTML);
+                $("#dataRoomPermissionModel").modal("show");
+            }
+        });
+    });
+
+    @*//Delete Functionality
+    $(document).on("click", ".deleteDataRoomPermission", function () {
+        var roomid = $(this).attr("data-id");
+        window.location.href = "@Url.Action("Delete", "ManageDataRoomPermission",new { area = "DataRoom"})?id=" + roomid;
+    });*@
+
+
+      //Delete Functionality
+    $(document).on("click", ".deleteDataRoomPermission", function (e) {
+        var roomid = $(this).attr("data-id");
+        var username = $(this).attr("data-name");
+        fnConfirm("Are you sure, you want to remove permission of - " + username + "?");
+        $("#btnConfirmOk").click(function () {
+            formloader();
+            window.location.href = "@Url.Action("Delete", "ManageDataRoomPermission",new { area = "DataRoom"})?id=" + roomid;
+        });
+    });
+
+    //List Filter Functionality
+    $("#txtSearch").change(function () {
+        $("#frmDataRoomPermissionList").submit();
+    });
+
+    //$.getJSON("/userroles/getallroles", function (data) {
+    //    $.each(data, function (item, index) {
+    //        alert(item.RoleName);
+    //    });
+    //});
+</script>
+
