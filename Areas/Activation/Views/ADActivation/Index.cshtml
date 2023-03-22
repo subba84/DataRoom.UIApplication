@@ -1,0 +1,85 @@
+﻿@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>IT Manager - AD Activation</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        label {
+            font-weight: bold;
+        }
+    </style>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />    
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row" style="background-color: #eee;height:100px;">
+            <div class="col-md-4">
+                <img src="~/CustomContent/img/AppLogo.jpeg" alt="Mountain" style="height: 100px; padding: 12px;">
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container" style="padding-top: 70px;">
+        <div class="card" style="padding:50px;">
+            <form method="post" action="@Url.Action("SaveADInfo","ADActivation",new { area = "Activation"})" enctype="multipart/form-data">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email">Need Active Directory Sync?</label>
+                            <div>
+                                <input type="radio" id="rdbYes" name="IsADSync" value="Y" /><span>&nbsp;Yes</span>
+                                &nbsp;&nbsp;
+                                <input type="radio" id="rdbNo" name="IsADSync" value="N" /><span>&nbsp;No</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ad">
+                        <div class="form-group">
+                            <label for="email">Host/IP Address</label>
+                            <input type="text" class="form-control" id="txtIPAddress" name="IPAddress" />
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row ad">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email">User Name</label>
+                            <input type="text" class="form-control" id="txtUserName" name="UserName" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email">Password</label>
+                            <input type="password" class="form-control" id="txtPassword" name="Password" />
+                        </div>
+                    </div>
+                </div><br>
+                <button class="btn btn-success" type="submit">Next</button>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(".ad").hide();
+    $("input[type='radio'][name='IsADSync']").change(function () {
+        $("#txtIPAddress").val("");
+        $("#txtUserName").val("");
+        $("#txtPassword").val("");
+        if ($(this).val() == "Y") {
+            $(".ad").show();
+        }
+        else {
+            $(".ad").hide();
+        }
+    });
+</script>
