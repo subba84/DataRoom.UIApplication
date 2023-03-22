@@ -1,0 +1,48 @@
+2022-11-25 13:20:36.8706 DEBUG before updation -- C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 13:21:00.5650 DEBUG response from service ---StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+{
+  Transfer-Encoding: chunked
+  Date: Fri, 25 Nov 2022 07:51:00 GMT
+  Server: Microsoft-IIS/10.0
+  X-Powered-By: ASP.NET
+}
+2022-11-25 13:21:00.5650 DEBUG update success---C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 13:21:00.5650 DEBUG after updation -- C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 13:21:24.4081 DEBUG response from service ---StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+{
+  Transfer-Encoding: chunked
+  Date: Fri, 25 Nov 2022 07:51:24 GMT
+  Server: Microsoft-IIS/10.0
+  X-Powered-By: ASP.NET
+}
+2022-11-25 13:21:24.4081 DEBUG update success---C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 13:22:36.9721 DEBUG response from service ---StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+{
+  Transfer-Encoding: chunked
+  Date: Fri, 25 Nov 2022 07:52:36 GMT
+  Server: Microsoft-IIS/10.0
+  X-Powered-By: ASP.NET
+}
+2022-11-25 13:22:36.9721 DEBUG update success---C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 13:22:54.5270 DEBUG response from service ---StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+{
+  Transfer-Encoding: chunked
+  Date: Fri, 25 Nov 2022 07:52:54 GMT
+  Server: Microsoft-IIS/10.0
+  X-Powered-By: ASP.NET
+}
+2022-11-25 13:22:54.5270 DEBUG update success---C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 13:26:05.2903 DEBUG response from service ---StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+{
+  Transfer-Encoding: chunked
+  Date: Fri, 25 Nov 2022 07:56:05 GMT
+  Server: Microsoft-IIS/10.0
+  X-Powered-By: ASP.NET
+}
+2022-11-25 13:26:05.2903 DEBUG update success---C:\SharBoxWorkingSpace\EBX/1
+2022-11-25 14:00:00.0194 DEBUG Company id - 0
+2022-11-25 14:00:00.0734 ERROR Get All AD Users..AD Error..Unknown error (0x80005000)
+2022-11-25 14:00:04.2404 ERROR Error in DataCacheLoadService--An error occurred while sending the request.
+2022-11-25 15:00:00.0053 DEBUG Company id - 0
+2022-11-25 15:00:00.0232 ERROR Get All AD Users..AD Error..Unknown error (0x80005000)
+2022-11-25 15:00:04.1224 ERROR Error in DataCacheLoadService--An error occurred while sending the request.

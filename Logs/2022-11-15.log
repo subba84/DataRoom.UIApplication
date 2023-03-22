@@ -1,0 +1,22 @@
+2022-11-15 13:39:34.8501 DEBUG before updation -- C:\SharBoxWorkingSpace\TetraSoft/1
+2022-11-15 13:39:35.0336 DEBUG response from service ---StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+{
+  Transfer-Encoding: chunked
+  Date: Tue, 15 Nov 2022 08:09:34 GMT
+  Server: Microsoft-IIS/10.0
+  X-Powered-By: ASP.NET
+}
+2022-11-15 13:39:35.0336 DEBUG update success---C:\SharBoxWorkingSpace\TetraSoft/1
+2022-11-15 13:39:35.0336 DEBUG after updation -- C:\SharBoxWorkingSpace\TetraSoft/1
+2022-11-15 14:00:00.0250 DEBUG Company id - 0
+2022-11-15 14:00:21.4372 ERROR Get All AD Users..AD Error..The server is not operational.
+
+2022-11-15 15:00:00.0323 DEBUG Company id - 0
+2022-11-15 15:00:21.3982 ERROR Get All AD Users..AD Error..The server is not operational.
+
+2022-11-15 19:19:47.0062 DEBUG Company id - 0
+2022-11-15 19:20:08.1179 ERROR Get All AD Users..AD Error..The server is not operational.
+
+2022-11-15 20:00:07.5199 DEBUG Company id - 0
+2022-11-15 20:00:54.0268 ERROR Get All AD Users..AD Error..The server is not operational.
+
