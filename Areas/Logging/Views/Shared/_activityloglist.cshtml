@@ -1,0 +1,50 @@
+﻿@model PagedList.IPagedList<DataRooms.UI.Models.ActivityLog>
+@using PagedList.Mvc;
+
+<style>
+    .text-blue {
+        color: dodgerblue;
+    }
+
+    .text-red {
+        color: red;
+    }
+    
+</style>
+
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead class="tbl-header">
+        <tr>
+            <th>S.No.</th>
+            <th class="header" data-column="ActivityCategory">Category</th>
+            <th>Description</th>
+            <th class="header" data-column="UserName">User Name</th>
+            <th class="header" data-column="CreatedOn">Activity Date</th>
+            @*<th>View</th>*@
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+            int i = 1;
+            foreach (var user in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>@user.ActivityCategory</td>
+                    <td>@user.ActivityDescription</td>
+                    <td>@user.CreatorName</td>
+                    <td>@user.CreatedOn.ToApplicationFormat()</td>
+                    @*<td><i class="fas fa-fw fa-eye theme viewLog" data-id="@user.Id"></i></td>*@
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">No Logs Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>

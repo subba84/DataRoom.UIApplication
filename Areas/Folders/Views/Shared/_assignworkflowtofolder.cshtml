@@ -1,0 +1,98 @@
+﻿@model IEnumerable<DataRooms.UI.Models.WorkFlowMaster>
+<style>
+    .row {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-4">
+        <h4 class="form-label font-weight-bold">SharBox</h4>
+        <div>
+            <span>@ViewBag.DataRoomName</span>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <h4 class="form-label font-weight-bold">Parent Folder</h4>
+        <div>
+            <span>@ViewBag.ParentFolder</span>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <h4 class="form-label font-weight-bold">Folder</h4>
+        <div>
+            <span>@ViewBag.Folder</span>
+            <input type="hidden" id="hdnWorkFlowFolderId" value="@ViewBag.FolderId" />
+        </div>
+    </div>
+</div>
+
+<hr/>
+<h3>Available Work Flows</h3>
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead class="tbl-header">
+        <tr>
+            @*<th>S.No.</th>*@
+            <th>Name</th>
+            <th>Is Initiator Required?</th>
+            <th>Is One Initiator?</th>
+            <th>Is Review Required?</th>
+            <th>Is One Reviewer?</th>
+            <th>Is One Among Review?</th>
+            <th>Is Approval Required?</th>
+            <th>Is One Approver?</th>
+            <th>Is One Among Approval?</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+            int i = 1;
+            foreach (var workflow in Model)
+            {
+                <tr>
+                    @*<td>@i</td>*@
+                    <td>@workflow.WorkFlowName</td>
+                    <td>@(workflow.IsInitiationRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleInitiator == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsReviewRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleReviewerRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleReviewSufficient == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsApprovalRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleApproverRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSignleApprovalSufficient == true ? "Yes" : "No")</td>
+                    <td style="text-align:center">
+                        @{ 
+                            bool isChecked = false;
+                            int folderworkflowid = ViewBag.WorkFlowId;
+                            if(workflow.Id == folderworkflowid)
+                            {
+                                isChecked = true;
+                            }
+                        }
+                        <input type="radio" name="workflow" value="@workflow.Id" checked="@isChecked" />
+                    </td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="12">No Work Flows Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div align="center" style="padding:10px;">
+    <label id="wrkflowerrmsg" style="color:red;float:left"></label>
+    <input type="button" class="btn btn-primary" value="Save" id="btnFolderWorkFlowSave"/>
+</div>
+
+
+
+
+

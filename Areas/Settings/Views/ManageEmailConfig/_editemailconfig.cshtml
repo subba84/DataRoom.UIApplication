@@ -1,0 +1,150 @@
+﻿@model List<DataRooms.UI.Models.EmailConfiguration>
+
+<form method="post" id="frmEmailConfig" action="@Url.Action("Edit","ManageEmailConfig",new { area = "Settings"})" enctype="multipart/form-data">
+    <div>
+        <h4 class="font-weight-bold">Out Bound Email</h4>
+        <div class="dropdown-divider"></div>
+        <input type="hidden" name="EmailConfigurations[0].MailType" value="OutBound" />
+        <input type="hidden" name="EmailConfigurations[0].Id" value="@Model[0].Id" />
+        <div class="row">
+            <div class="col-lg-3">
+                <label class="font-weight-bold">Protocal</label>
+                <select class="form-control" name="EmailConfigurations[0].Protocal">
+                    @if (Model[0].Protocal == "Exchange")
+                    {
+                        <option value="Exchange" selected>Exchange</option>
+                        <option value="Smtp">Smtp</option>
+                        <option value="Imap">Imap</option>
+                    }
+                    else if (Model[0].Protocal == "Smtp")
+                    {
+                        <option value="Exchange">Exchange</option>
+                        <option value="Smtp" selected>Smtp</option>
+                        <option value="Imap">Imap</option>
+                    }
+                    else if (Model[0].Protocal == "Imap")
+                    {
+                        <option value="Exchange">Exchange</option>
+                        <option value="Smtp">Smtp</option>
+                        <option value="Imap" selected>Imap</option>
+                    }
+                    else
+                    {
+                        <option value="Exchange">Exchange</option>
+                        <option value="Smtp">Smtp</option>
+                        <option value="Imap">Imap</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label class="font-weight-bold">Server</label>
+                <input type="text" class="form-control" value="@Model[0].ServerAddress" name="EmailConfigurations[0].ServerAddress" />
+            </div>
+            <div class="col-lg-3">
+                <label class="font-weight-bold">Port</label>
+                <input type="number" class="form-control" value="@Model[0].PortNumber" name="EmailConfigurations[0].PortNumber" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <label class="font-weight-bold">Sender Email Id</label>
+                <input type="text" class="form-control" value="@Model[0].SenderAddress" name="EmailConfigurations[0].SenderAddress" />
+            </div>
+            <div class="col-lg-3">
+                <label class="font-weight-bold">Username</label>
+                <input type="text" class="form-control" value="@Model[0].Username" name="EmailConfigurations[0].Username" />
+            </div>
+            <div class="col-lg-3">
+                <label class="font-weight-bold">Password</label>
+                <input type="password" class="form-control" value="@Model[0].Password" name="EmailConfigurations[0].Password" />
+            </div>
+        </div>
+
+        <hr />
+
+        @*<h4>Incoming Email</h4>
+        <input type="hidden" name="EmailConfigurations[1].MailType" value="Incoming" />
+        <input type="hidden" name="EmailConfigurations[1].Id" value="@Model[1].Id" />
+        <div class="row">
+            <div class="col-lg-3">
+                <label>Protocal</label>
+                <select class="form-control" name="EmailConfigurations[1].Protocal">
+                    @if (Model[1].Protocal == "Exchange")
+                    {
+                        <option value="Exchange" selected>Exchange</option>
+                        <option value="Smtp">Smtp</option>
+                        <option value="Imap">Imap</option>
+                    }
+                    else if (Model[1].Protocal == "Smtp")
+                    {
+                        <option value="Exchange">Exchange</option>
+                        <option value="Smtp" selected>Smtp</option>
+                        <option value="Imap">Imap</option>
+                    }
+                    else if (Model[1].Protocal == "Imap")
+                    {
+                        <option value="Exchange">Exchange</option>
+                        <option value="Smtp">Smtp</option>
+                        <option value="Imap" selected>Imap</option>
+                    }
+                    else
+                    {
+                        <option value="Exchange">Exchange</option>
+                        <option value="Smtp">Smtp</option>
+                        <option value="Imap">Imap</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label>Server</label>
+                <input type="text" class="form-control" value="@Model[1].ServerAddress" name="EmailConfigurations[1].ServerAddress" />
+            </div>
+            <div class="col-lg-3">
+                <label>Port</label>
+                <input type="number" class="form-control" value="@Model[1].PortNumber" name="EmailConfigurations[1].PortNumber" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <label>Username</label>
+                <input type="text" class="form-control" value="@Model[1].Username" name="EmailConfigurations[1].Username" />
+            </div>
+            <div class="col-lg-3">
+                <label>Password</label>
+                <input type="password" class="form-control" value="@Model[1].Password" name="EmailConfigurations[1].Password" />
+            </div>
+        </div>*@
+    </div>
+
+    <div align="right" class="" style="margin-top:20px;">
+        <input type="button" class="btn btn-primary" id="btnEmailSave" value="Save" />
+        <input type="button" class="btn btn-danger" id="btnEmailCancel" data-dismiss="modal" value="Close" />
+    </div>
+</form>
+
+@*<script src="~/Scripts/jquery-3.4.1.min.js"></script>*@
+<script>
+    $(document).on("click", "#btnEmailSave", function () {
+        var form = $("#frmEmailConfig");
+        var formData = new FormData(form[0]);
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            dataType:"json",
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                $("#emailConfigModel").modal("hide");
+                fnAlert("Email Configuration Saved Successfully");
+            }
+        });
+    });
+</script>

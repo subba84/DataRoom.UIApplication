@@ -1,0 +1,97 @@
+﻿@model DataRooms.UI.Areas.Files.Models.FileCustomModel
+
+<form method="post" action="@Url.Action("EditFileforSubmission","ManageFile",new { area = "Files"})" enctype="multipart/form-data" id="frmEditFile">
+    <div class="modal-header">
+        <h5 class="modal-title" id="">File Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body ui-front">
+        <div class="row">
+            <div class="col-lg-4">
+                <label>File Name</label>
+                <div>
+                    <span>@Model.File.FileName</span>
+                    <input type="hidden" name="Id" value="@Model.File.Id" />
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <label>Folder Name</label>
+                <div>
+                    <span>@Model.File.FolderName</span>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <label>SharBox Name</label>
+                <div>
+                    <span>@Model.File.DataRoomName</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label>Upload a File</label>
+                <input type="file" class="form-control" name="uploadedfile" />
+            </div>
+        </div>
+        <div class="" style="margin-top:10px;">
+            <label>Comments:</label>
+            <div>
+                <textarea class="form-control" rows="3" name="FileDescription" maxlength="512">@Model.File.FileDescription</textarea>
+            </div>
+        </div>
+        <input type="hidden" name="Status" value="Save" id="hdnFileChangesStatus" />
+    </div>
+    <div class="modal-footer">
+        <input type="button" value="Save" id="btnSaveFileChanges" class="btn btn-primary" />
+        @if (Model.File.IsWorkFlowRequired == true)
+        {
+            <input type="button" value="Submit" id="btnSubmitFileChanges" class="btn btn-primary" />
+        }
+        <input type="button" value="Close" id="btnCancel" class="btn btn-danger" data-dismiss="modal"/>
+    </div>
+
+</form>
+
+
+<script>
+    $(document).on("click", "#btnSaveFileChanges,#btnSubmitFileChanges", function () {
+        var thisVal = $(this).val();
+        if (thisVal != "Save") {
+            $("#hdnFileChangesStatus").val("Submitted");
+        }
+        var form = $("#frmEditFile");
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            type: "POST",
+            url: $(form).prop("action"),
+            data: formData,
+            beforeSend: function () {
+                formloader();
+            },
+            contentType: false,
+            processData: false,
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) { },
+            success: function (data) {
+                $("#editFileChangesModel").modal("hide");
+                if (data == "Work Flow Users are not found") {
+                    fnAlert("There were no users configured for the work flow associated with this sharbox. Please contact Admin", 'red');
+                }
+                else {
+                    if (thisVal == "Submit") {
+                    fnAlert("File Submitted and Send for Approval.");
+                }
+                fnGetFolderContent("@Model.File.DataRoomId", "@Model.File.FolderId");
+                }
+
+
+            }
+        });
+    });
+</script>

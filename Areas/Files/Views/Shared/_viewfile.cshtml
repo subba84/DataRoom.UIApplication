@@ -1,0 +1,86 @@
+﻿@model DataRooms.UI.Areas.Files.Models.FileCustomModel
+
+
+<div class="modal-header">
+    <h5 class="modal-title" id="">File Details</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body ui-front">
+    <div class="row">
+        <div class="col-lg-4">
+            <h4 class="font-weight-bold">File Name</h4>
+            <div>
+                <span>@Model.File.FileName</span>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <h4 class="font-weight-bold">
+                Folder Name
+            </h4>
+            <div>
+                <span>@Model.File.FolderName</span>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <h4 class="font-weight-bold">SharBox Name</h4>
+            <div>
+                <span>@Model.File.DataRoomName</span>
+            </div>
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.WaitingWith))
+    {
+        <div class="" style="margin-top:10px;">
+            <label>Waiting With: <span style="font-weight:bold;color:red;">@Model.WaitingWith</span></label>
+
+        </div>
+    }
+
+</div>
+
+
+<div class="">
+    <h4>Audit History</h4>
+    <table class="table table-bordered" id="" width="100%" cellspacing="0">
+        <thead class="tbl-header">
+            <tr>
+                <th>S.No.</th>
+                <th>User Name</th>
+                <th>Action</th>
+                <th>Comments</th>
+                <th>Action On</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.AuditLogs != null && Model.AuditLogs.Count() > 0)
+            {
+                int i = 1;
+                foreach (var task in Model.AuditLogs.OrderByDescending(x => x.Id).ToList())
+                {
+                    <tr>
+                        <td style="text-align:center">@i</td>
+                        <td>@task.AuditorName</td>
+                        <td>@task.Status</td>
+                        <td>@task.Comments</td>
+                        <td>@task.AuditOn.ToApplicationFormat()</td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">No History Found..</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-footer">
+    <input type="button" value="Close" id="btnCancel" class="btn btn-danger" data-dismiss="modal" />
+</div>
+

@@ -1,0 +1,44 @@
+﻿@model IEnumerable<DataRooms.UI.Models.FileVersion>
+
+<table class="table table-bordered" id="tblFileVersions" cellspacing="0">
+    <thead>
+        <tr class="tbl-header">
+            <th>S.No.</th>
+            <th>Version</th>
+            <th>Created By</th>
+            <th>Created On</th>
+            <th>Download</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+            int i = 1;
+            foreach (var version in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td class="">
+                        @version.FileVersionNumber
+                    </td>
+                    <td>@version.CreatorName</td>
+                    <td>@version.CreatedOn.ToApplicationFormat()</td>
+                    <td style="cursor:pointer"><i class="fas fa-fw fa-download downloadFileVersion" data-fileexists="@version.IsFileExists" data-id="@version.Id" data-fileid="@version.FileId"></i></td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">No Versions Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-dismiss="modal" id="">Close</button>
+</div>
+
+

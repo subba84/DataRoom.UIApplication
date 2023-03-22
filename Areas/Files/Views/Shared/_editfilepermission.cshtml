@@ -1,0 +1,226 @@
+﻿@model DataRooms.UI.Models.FilePermission
+
+<style>
+</style>
+<form class="user" method="post" action="@Url.Action("Edit","ManageFilePermission",new { area = "Files"})" id="frmAddFilePermission">
+    <div class="modal-header">
+        <h5 class="modal-title" id="folderModalLabel">File Permission</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body ui-front">
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="CreatedBy" value="@Model.CreatedBy" />
+                <input type="hidden" name="CreatorName" value="@Model.CreatorName" />
+                <input type="hidden" name="CreatedOn" value="@Model.CreatedOn" />
+
+                <label class="col-form-label-sm" for="txtDataRoomName">SharBox</label>
+                <input type="text" class="form-control" id="txtDataRoomName"
+                       placeholder="Room Name" readonly name="DataRoomName" value="@Model.DataRoomName" />
+                <input type="hidden" name="DataRoomId" id="hdnRoomId" value="@Model.DataRoomId" />
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtFolderName">Folder</label>
+                <input class="form-control" rows="3" id="txtFolderName"
+                       placeholder="Folder Name" readonly name="FolderName" value="@Model.FolderName" />
+                <input type="hidden" name="FolderId" id="hdnFolderId" value="@Model.FolderId" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtFileName">File</label>
+                <input class="form-control" rows="3" id="txtFileName"
+                       placeholder="File Name" readonly name="FileName" value="@Model.FileName" />
+                <input type="hidden" name="FileId" id="hdnFileId" value="@Model.FileId" />
+            </div>
+            <div class="col-sm-6">
+                <label class="col-form-label-sm" for="txtUserName">User</label>
+                <input class="form-control" rows="3" id="txtUserName"
+                       placeholder="Full Name" name="UserName" value="@Model.UserName" />
+                <input type="hidden" name="UserId" id="hdnUserId" value="@Model.UserId" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <label class="col-form-label-sm" for="txtConfirmPassword">Permissions</label>
+                <div class="row" style="font-size:11px;">
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <input type="checkbox" name="HasFullControl" value="true" id="chk_0" @(Model.HasFullControl ? "checked" : "") class="chkPermission" />
+                        <label for="chk_0">Full Control</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-0">
+                        <input type="checkbox" name="HasRead" value="true" id="chk_1" @(Model.HasRead ? "checked" : "") class="chkPermission childPermissions" />
+                        <label for="chk_1">Read</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-2">
+                        <input type="checkbox" name="HasWrite" value="true" id="chk_2" @(Model.HasWrite ? "checked" : "") class="chkPermission childPermissions" />
+                        <label for="chk_2">Write</label>
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        <input type="checkbox" name="HasDelete" value="true" id="chk_3" @(Model.HasDelete ? "checked" : "") class="chkPermission childPermissions" />
+                        <label for="chk_3">Delete</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <label class="col-form-label-sm" for="txtPassword">IsActive</label>
+                <input type="checkbox" class="form-check-label" @(Model.IsActive ? "checked" : "") value="true" id="chkIsActive"
+                       name="IsActive">
+            </div>
+        </div>
+        <label id="lblErrMessage" class="float-left text-red" style="display:none"></label>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnFilePermissionSave">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnFilePermissionClose">Close</button>
+    </div>
+</form>
+
+@*<link href="~/CustomContent/css/jquery-ui.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/Scripts/Jquery.ui.min.js"></script>*@
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script>
+    $("#txtUserName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetUsersBasedonDataRoom", "ManageFolderPermission",new { area = "Folders" })?searchString=' + $("#txtUserName").val() + "&dataroomid=" + $("#hdnRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnUserId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FullName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtUserName").val(ui.item.label);
+                $("#hdnUserId").val(ui.item.val);
+        }
+    });
+
+    @*$("#txtDataRoomName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetDataRooms", "ManageFolderPermission",new { area = "Folders" })?searchString=' + $("#txtDataRoomName").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnRoomId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.DataRoomName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtDataRoomName").val(ui.item.label);
+                $("#hdnRoomId").val(ui.item.val);
+        }
+    });
+
+    $("#txtFolderName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetFoldersbasedonDataRoom", "ManageFolderPermission",new { area = "Folders" })?searchString=' + $("#txtFolderName").val() + "&dataroomid=" + $("#hdnRoomId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnFolderId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FolderName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtFolderName").val(ui.item.label);
+                $("#hdnFolderId").val(ui.item.val);
+        }
+    });
+
+    $("#txtFileName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetFilesbasedonDataRoomandFolder", "ManageFilePermission",new { area = "Files" })?searchString=' + $("#txtFileName").val() + "&dataroomid=" + $("#hdnRoomId").val() + "&folderid=" + $("#hdnFolderId").val(),
+                    dataType: "json",
+                    success: function (data) {
+                        $("#hdnFileId").val('');
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.FileName,
+                                val: item.Id
+                            }
+                        }));
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#txtFileName").val(ui.item.label);
+                $("#hdnFileId").val(ui.item.val);
+        }
+    });*@
+
+    $(document).on("click", "#chk_0", function () {
+        if ($(this).prop("checked") == true) {
+            $(".childPermissions").prop("checked", true);
+        }
+        else {
+            $(".childPermissions").prop("checked", false);
+        }
+    });
+
+    $(document).on("click", ".childPermissions", function () {
+        if ($(".childPermissions:checked").length == 3) {
+            $("#chk_0").prop("checked", true);
+        }
+        else {
+            $("#chk_0").prop("checked", false);
+        }
+    });
+
+    $(document).on("click", "#btnFilePermissionSave", function () {
+
+        $.post("@Url.Action("Edit","ManageFilePermission",new { area = "Files"})", $('#frmAddFilePermission').serialize());
+
+        //$("#btnFilePermissionClose").trigger("click");
+
+        fnAlert("Permission Saved Successfully");
+
+        @*var form = $("#frmAddFilePermission");
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Edit","ManageFilePermission",new { area = "Files"})",
+            data: JSON.stringify(form),
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divFilePermissionListPart").html('');
+                $("#divFilePermissionListPart").html(data.HTML);
+                $("#divFilePermissionControls").hide();
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });*@
+    });
+
+</script>
+

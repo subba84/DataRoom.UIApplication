@@ -1,0 +1,66 @@
+﻿@model List<DataRooms.UI.Models.FolderPermission>
+<div class="row">
+    <div class="col-lg-6" align="left">
+        <h5><b>Folder Permissions</b></h5>
+    </div>
+    <div class="col-lg-6" align="right">
+        <label>Search : </label>
+        <input type="text" id="txtFolderPermissionSearch" placeholder="Search with User Name.." />
+    </div>
+</div>
+<table class="table table-bordered" id="tblFolderPermissions" width="50%" cellspacing="0">
+    <thead>
+        <tr>
+            <th>S.No.</th>
+            <th>User</th>
+            <th>Permission</th>
+            <th>Is Active</th>
+            <th colspan="2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+            int i = 1;
+            foreach (var permission in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td class="tdFolderPermissionUserName">
+                        @permission.UserName
+                    </td>
+                    @{
+                        List<string> permissions = new List<string>();
+                        if (permission.HasFullControl == true)
+                        {
+                            permissions.Add("Full Control");
+                        }
+                        if (permission.HasRead == true)
+                        {
+                            permissions.Add("Read");
+                        }
+                        if (permission.HasWrite == true)
+                        {
+                            permissions.Add("Write");
+                        }
+                        if (permission.HasDelete == true)
+                        {
+                            permissions.Add("Delete");
+                        }
+                    }
+                    <td>@string.Join(",", permissions)</td>
+                    <td>@(permission.IsActive == true ? "Yes" : "No")</td>
+                    <td style="cursor:pointer"><i class="fas fa-fw fa-edit theme editFolderPermission" data-id="@permission.Id" data-fullcontrol="@permission.HasFullControl" data-read="@permission.HasRead" data-write="@permission.HasWrite" data-delete="@permission.HasDelete" data-isactive="@permission.IsActive"></i></td>
+                    <td style="cursor:pointer"><i class="fas fa-fw fa-trash text-red deleteFolderPermission" data-username="@permission.UserName" data-id="@permission.Id"></i></td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6">No Folders Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,115 @@
+﻿@model DataRooms.UI.Models.WorkFlowMaster
+
+<style>
+    .row{
+        margin-right:0px;
+        margin-left:0px;
+    }
+</style>
+<form method="post" action="@Url.Action("EditWorkFlow","Master",new { area = "Masters"})" id="frmWorkFlow">
+    <div class="modal-header">
+        <h5 class="modal-title" id="">Work Flow</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <label>Work Flow Name</label>
+            <div>
+                <input type="text" class="form-control required" name="WorkFlowName" value="@Model.WorkFlowName" />
+                <input type="hidden" value="@Model.Id" name="Id"/>
+            </div>
+        </div>
+    </div>
+    <hr style="color:orangered" />
+    <div class="row">
+        <h5>Initiator</h5>
+        <div class="col-lg-4">
+            <label>Is Initiator Required</label>
+            <div>
+                <input type="checkbox" name="IsInitiationRequired" @(Model.IsInitiationRequired == true ? "checked" : "") value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>One Initiator?</label>
+            <div>
+                <input type="checkbox" name="IsSingleInitiator" @(Model.IsSingleInitiator == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>Multiple Initiators?</label>
+            <div>
+                <input type="checkbox" name="IsMultipleInitiator" @(Model.IsMultipleInitiator == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+    </div>
+
+    <hr style="color:orangered" />
+    <div class="row">
+        <h5>Reviewer</h5>
+        <div class="col-lg-4">
+            <label>Is Review Required</label>
+            <div>
+                <input type="checkbox" name="IsReviewRequired" @(Model.IsReviewRequired == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>One Reviewer?</label>
+            <div>
+                <input type="checkbox" name="IsSingleReviewerRequired" @(Model.IsSingleReviewerRequired == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>Multiple Reviewers?</label>
+            <div>
+                <input type="checkbox" name="IsMultipleReviewersRequired" @(Model.IsMultipleReviewersRequired == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+    </div>
+
+    <hr style="color:orangered" />
+    <div class="row">
+        <h5>Approver</h5>
+        <div class="col-lg-4">
+            <label>Is Approval Required</label>
+            <div>
+                <input type="checkbox" name="IsApprovalRequired" @(Model.IsApprovalRequired == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>One Approver?</label>
+            <div>
+                <input type="checkbox" name="IsSingleApproverRequired" @(Model.IsSingleApproverRequired == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>Multiple Approvers?</label>
+            <div>
+                <input type="checkbox" name="IsMultipleApproversRequired" @(Model.IsMultipleApproversRequired == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+    </div>
+
+    <hr style="color:orangered" />
+    <div class="row">
+        <h5>Approver</h5>
+        <div class="col-lg-4">
+            <label>Is One Among Review Sufficient?</label>
+            <div>
+                <input type="checkbox" name="IsSingleReviewSufficient" @(Model.IsSingleReviewSufficient == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <label>Is One Among Approval Sufficient?</label>
+            <div>
+                <input type="checkbox" name="IsSignleApprovalSufficient" @(Model.IsSignleApprovalSufficient == true ? "checked" : "")  value="true"/>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+    </div>
+</form>
+

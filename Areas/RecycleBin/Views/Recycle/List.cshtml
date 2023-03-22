@@ -1,0 +1,272 @@
+﻿@model DataRooms.UI.Areas.RecycleBin.Model.RecycleBinModel
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+
+<div class="content-header pb-0">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                    <li class="breadcrumb-item active">Recycle Bin</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <button class="float-right btn-curved" id="btnEmptyRecycleBin">
+                    <i class="fas fa-plus"></i>&nbsp; Empty Recycle Bin
+                </button>
+            </div>
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<form method="post" action="@Url.Action("List","Recycle",new { area = "RecycleBin" })" id="frmRecycleBin">
+    <section class="content">
+        <input type="hidden" name="SearchString" id="hdnSearch" />
+        <div class="container-fluid border-top">
+
+            <div class="card mt-3">
+                <div class="card-header bg-light p-2">
+                    <b>SharBox</b>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        @if (Model.DataRooms != null && Model.DataRooms.Count() > 0)
+                        {
+                            foreach (var dataroom in Model.DataRooms)
+                            {
+                                <div class="divDataroom col-lg-2 col-md-3 col-6 mb-2" data-id="@dataroom.Id" title="@dataroom.DataRoomName | @dataroom.CreatorName | @dataroom.CreatedOn.ToApplicationFormat()">
+                                    <div class="card-a">
+                                        <div class="btn-group w-100">
+                                            <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                                  style="border-top-right-radius: 6px;">
+                                                @dataroom.DataRoomName
+                                            </span>
+                                            <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                                  aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                                <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                            </span>
+                                            <div class="dropdown-menu dropdown-menu-right pl-2">
+                                                <ul class="list-unstyled mb-0">
+                                                    <li><a href="#" class="deleteDataRoom" data-category="Data Room" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" title="Delete SharBox"><i class="las la-trash fa-lg color-red-b"></i> Delete SharBox</a></li>
+                                                    <li><a href="#" class="restoreDataRoom" data-category="Data Room" data-id="@dataroom.Id" data-name="@dataroom.DataRoomName" title="Restore SharBox"><i class="las la-edit fa-lg color-red-b"></i> Restore SharBox</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-a-body">
+                                            <img src="~/Content/dist/img/folder-icon.png" alt="folder-image">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>No SharBoxs Found..</div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header  bg-light p-2">
+                    <b>Folder</b>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        @if (Model.Folders != null && Model.Folders.Count() > 0)
+                        {
+                            foreach (var folder in Model.Folders)
+                            {
+                                <div class="folderDiv col-lg-2 col-md-3 col-6 mb-2" data-id="@folder.Id" data-name="@folder.FolderName" data-path="@folder.ParentFolderName > @folder.FolderName" title="@folder.FolderName | @folder.CreatorName | Created On : @folder.CreatedOn.ToApplicationFormat()">
+                                    <div class="card-a">
+                                        <div class="btn-group w-100">
+                                            <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                                  style="border-top-right-radius: 6px;">
+                                                @{
+                                                    string foldername = folder.FolderName.Length > 17 ? folder.FolderName.Substring(0, 12) + "..." : folder.FolderName;
+                                                }
+                                                @foldername
+                                            </span>
+                                            <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                                  aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                                <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                            </span>
+                                            <div class="dropdown-menu dropdown-menu-right pl-2">
+                                                <ul class="list-unstyled mb-0">
+                                                    <li><a href="#" class="deleteFolder" data-category="Folder" data-id="@folder.Id" data-name="@folder.FolderName" title="Delete Folder"><i class="las la-trash fa-lg color-red-b"></i> Delete Folder</a></li>
+                                                    <li><a href="#" class="restoreFolder" data-category="Folder" data-id="@folder.Id" data-name="@folder.FolderName" title="Restore Folder"><i class="las la-edit fa-lg color-red-b"></i> Restore Folder</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-a-body">
+                                            <img src="~/Content/dist/img/folder-icon.png" alt="folder-image">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>No Folders Found..</div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header bg-light p-2">
+                    <b>Files</b>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        @if (Model.Files != null && Model.Files.Count() > 0)
+                        {
+                            foreach (var file in Model.Files)
+                            {
+                                <div class="fileDiv col-lg-2 col-md-3 col-6 mb-2" @(file.CreatedBy == Convert.ToInt32(Session["UserId"]) ? "owncreate" : "") data-id="@file.FolderId" data-dataroomid="@file.DataRoomId" data-folderid="@file.FolderId" data-name="@file.FolderName" data-path="@file.FolderName > @file.FileName" title="@file.FileName | @file.CreatorName | @file.CreatedOn.ToApplicationFormat()">
+                                    <div class="card-a">
+                                        <div class="btn-group w-100">
+                                            <span class="btn btn-light btn-sm card-a-header text-left" type="button"
+                                                  style="border-top-right-radius: 6px;">
+                                                @{
+                                                    string filename = file.FileName.Length > 20 ? file.FileName.Substring(0, 17) + "..." : file.FileName;
+                                                }
+                                                @filename
+                                            </span>
+                                            <span class="btn btn-sm btn-light dropdown-toggle-split menuIconHide" data-toggle="dropdown"
+                                                  aria-haspopup="true" aria-expanded="false" style="border-top-right-radius: 6px;">
+                                                <img src="~/Content/dist/img/menu-icon.png" class="menuIcon">
+                                            </span>
+                                            <div class="dropdown-menu dropdown-menu-right pl-2">
+                                                <ul class="list-unstyled mb-0">
+                                                    <li><a href="#" class="deleteFile" data-category="File" data-id="@file.Id" data-name="@file.FileName" title="Delete File"><i class="las la-trash fa-lg color-red-b"></i> Delete File</a></li>
+                                                    <li><a href="#" class="restoreFile" data-id="@file.Id" data-name="@file.FileName" title="Restore File"><i class="las la-trash-restore fa-lg color-red-b"></i> Restore File</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-a-body">
+                                            @if (file.ContentType == ".csv"
+                                        || file.ContentType == ".xls" || file.ContentType == ".xlsx")
+                                            {
+                                                <img src="~/Content/dist/img/file-icon.png" alt="folder-image">
+                                            }
+                                            else if (file.ContentType == ".jpg" || file.ContentType == ".JPEG" || file.ContentType == ".png")
+                                            {
+                                                <img src="~/Content/dist/img/icon-img.png" alt="folder-image">
+                                            }
+                                            else if (file.ContentType == ".doc" || file.ContentType == ".docx")
+                                            {
+                                                <img src="~/Content/dist/img/file-icon.png" alt="folder-image">
+                                            }
+                                            else if (file.ContentType == ".pdf")
+                                            {
+                                                <img src="~/Content/dist/img/icon-pdf.png" alt="folder-image">
+                                            }
+                                            else
+                                            {
+                                                <img src="~/Content/dist/img/icon-files.png" alt="folder-image">
+                                            }
+                                            @*<img src="~/Content/dist/img/folder-icon.png" alt="folder-image">*@
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>No Files Found..</div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+</form>
+
+
+
+
+
+
+
+
+
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script>
+    if ("@Model.SearchString" != null && "@Model.SearchString" != "") {
+        $(".txtGlobalSearch").val("@Model.SearchString");
+    }
+
+
+    $(document).on("change", ".txtGlobalSearch", function () {
+        var searchVal = $(this).val();
+        $("#hdnSearch").val(searchVal);
+        formloader();
+        $("#frmRecycleBin").submit();
+    });
+
+    //List Filter Functionality
+    $(document).on("change", ".txtGlobalSearch", function () {
+        $("#hdnSearch").val($(this).val());
+        $("#frmRecycleBin").submit();
+    });
+
+    $(document).on("keypress", ".txtGlobalSearch", function (event) {
+        if (event.keyCode == 13) {
+            $("#hdnSearch").val($(this).val());
+            $("#frmRecycleBin").submit();
+        }
+    });
+
+    $(document).ready(function () {
+        $(".txtGlobalSearch").val($("#hdnSearch").val());
+    });
+
+    $(document).on("click", ".pagination li", function () {
+        var currentPage = $(this).find('a').text();
+        $("#hdnCurrentPage").val(currentPage);
+        $("#frmRecycleBin").submit();
+    });
+
+
+
+
+
+
+
+
+
+    $(document).on("click", ".deleteDataRoom,.deleteFolder,.deleteFile", function () {
+        var flag = $(this).attr("data-category");
+        var id = $(this).attr("data-id");
+        var name = $(this).attr("data-name");
+        fnConfirm("Are you sure, you want to delete " + name + "?");
+        $("#btnConfirmOk").click(function () {
+            formloader();
+            window.location.href = "@Url.Action("Delete","Recycle",new { area = "RecycleBin"})?id=" + id + "&flag=" + flag;
+        });
+    });
+
+    $(document).on("click", ".restoreDataRoom,.restoreFolder,.restoreFile", function () {
+        var flag = $(this).attr("data-category");
+        var id = $(this).attr("data-id");
+        var name = $(this).attr("data-name");
+        fnConfirm("Are you sure, you want to restore " + name + "?");
+        $("#btnConfirmOk").click(function () {
+            formloader();
+            window.location.href = "@Url.Action("Restore","Recycle",new { area = "RecycleBin"})?id=" + id + "&flag=" + flag;
+        });
+    });
+
+    $(document).on("click", "#btnEmptyRecycleBin", function () {
+        fnConfirm("Are you sure, you want to empty recycle bin?");
+        $("#btnConfirmOk").click(function () {
+            formloader();
+            window.location.href = "@Url.Action("EmptyRecycleBin", "Recycle",new { area = "RecycleBin"})";
+        });
+    });
+
+    </script>

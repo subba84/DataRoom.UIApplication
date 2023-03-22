@@ -1,0 +1,104 @@
+﻿@model IEnumerable<DataRooms.UI.Models.WorkFlowMaster>
+@{
+    ViewBag.Title = "WorkFlows";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-6">
+        <h2>Work Flows</h2>
+    </div>
+    <div class="col-lg-6">
+        <input type="button" value="Create Your Own Work Flow" class="btn btn-primary editWorkFlow" data-id="0" id="btnCreateWorkFlow" style="float:right;margin-top:10px;"/>
+    </div>
+</div>
+
+
+
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th>S.No.</th>
+            <th>Name</th>
+            <th>Is Initiator Required?</th>
+            <th>Is One Initiator?</th>
+            <th>Is Review Required?</th>
+            <th>Is One Reviewer?</th>
+            <th>Is One Among Review?</th>
+            <th>Is Approval Required?</th>
+            <th>Is One Approver?</th>
+            <th>Is One Among Approval?</th>
+            <th colspan="2">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+            int i = 1;
+            foreach (var workflow in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>@workflow.WorkFlowName</td>
+                    <td>@(workflow.IsInitiationRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleInitiator == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsReviewRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleReviewerRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleReviewSufficient == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsApprovalRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSingleApproverRequired == true ? "Yes" : "No")</td>
+                    <td>@(workflow.IsSignleApprovalSufficient == true ? "Yes" : "No")</td>
+                    <td><i class="fas fa-fw fa-edit theme editWorkFlow" data-id="@workflow.Id"></i></td>
+                    <td><i class="fas fa-fw fa-trash text-red deleteWorkFlow" data-id="@workflow.Id"></i></td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="12">No Work Flows Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<div class="modal" id="workFlowModel" tabindex="-1" role="dialog" aria-labelledby="workFlowModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="divWorkFlowModalContent">
+
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on("click","#btnSave",function () {
+        $("#frmWorkFlow").submit();
+    });
+    //Edit Functionality
+    $(document).on("click", ".editWorkFlow", function () {
+        var workflowid = $(this).attr("data-id");
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("EditWorkFlow","Master",new { area = "Masters"})",
+            data: { "id": workflowid },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                $("#divWorkFlowModalContent").html('');
+                $("#divWorkFlowModalContent").html(data.HTML);
+                $("#workFlowModel").modal("show");
+            }
+        });
+    });
+
+    //Delete Functionality
+    $(document).on("click", ".deleteWorkFlow", function () {
+        var workflowid = $(this).attr("data-id");
+        window.location.href = "@Url.Action("DeleteWorkFlow", "Master",new { area = "Masters" })?id=" + workflowid;
+    });
+</script>
+

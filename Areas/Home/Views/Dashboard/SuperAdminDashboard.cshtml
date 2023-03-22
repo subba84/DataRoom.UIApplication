@@ -1,0 +1,196 @@
+﻿
+@{
+    ViewBag.Title = "Super Admin Dashboard";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- <div class="col-sm-6">
+              <h4 class="m-0">Dashboard</h4>
+            </div> -->
+            <div class="col-sm-12">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/superadmin/dashboard">Home</a></li>
+                    @*<li class="breadcrumb-item active">Dashboard</li>*@
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid border-top pt-2">        
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-5 connectedSortable">
+                <div class="card">
+                    <div class="card-header bg-light py-1 px-2">
+                        <h5>Company Wise Storage</h5>
+                    </div><!-- /.card-header -->
+                    <div class="card-body py-2 px-2" id="divCompanySize">
+
+                    </div><!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+
+
+            </section>
+            <!-- /.Left col -->
+            <!-- right col (We are only adding the ID to make the widgets sortable)-->
+            <section class="col-lg-7 connectedSortable">
+                <div class="card">
+                    <div class="card-header bg-light py-1 px-2">
+                        <h5>Company Wise Users Count</h5>
+                    </div><!-- /.card-header -->
+                    <div class="card-body py-2 px-2" id="divCompanyUsers">
+
+                    </div><!-- /.card-body -->
+                </div>
+            </section>
+            <!-- right col -->
+        </div>
+        <!-- /.row (main row) -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    @*$(document).ready(function () {
+            $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetDataforSuperAdminDashboard", "Admin",new { area="Home"})",
+            data: {},
+            async:true,
+            dataType: "json",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divLastModifiedFiles").html('');
+                $("#divLastModifiedFiles").html(data.HTML);
+            },
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) {
+
+            }
+        });
+    });*@
+    $(document).ready(function () {
+            $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetDataforSuperAdminDashboard", "Dashboard", new { area="Home"})",
+            data: {},
+            async: true,
+            dataType: "json",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                
+                var seriesData = [];
+                if (data != null && data.length > 0) {
+                    seriesData.push(["Element", "Size", { role: "style" }]);
+                    for (var i = 0; i < data.length; i++) {
+                        seriesData.push([data[i].CompanyName, parseFloat(data[i].CompanyStorage), "#111546"]);
+                    }
+                }
+                google.charts.setOnLoadCallback(function () {
+                    // Force chart to redraw upon resize
+                    $(window).resize(function () {
+                        drawChart(seriesData);
+                    });
+
+                    drawChart(seriesData);
+                });
+
+
+                var seriesUsersData = [];
+                if (data != null && data.length > 0) {
+                    seriesUsersData.push(["Element", "Size", { role: "style" }]);
+                    for (var i = 0; i < data.length; i++) {
+                        seriesUsersData.push([data[i].CompanyName, parseInt(data[i].UserCount), "#111546"]);
+                    }
+                }
+                google.charts.setOnLoadCallback(function () {
+                    // Force chart to redraw upon resize
+                    $(window).resize(function () {
+                        drawUsersChart(seriesUsersData);
+                    });
+
+                    drawUsersChart(seriesUsersData);
+                });
+            },
+            complete: function () {
+                formloaderstop();
+            },
+            error: function (err) {
+
+            }
+        });
+    });
+</script>
+
+
+<script src="~/Scripts/GoogleChart.js"></script>
+@*<script src="https://www.google.com/jsapi"></script>*@
+<script type="text/javascript">
+    google.charts.load("current", { packages: ['corechart'] });
+
+    function drawChart(seriesdata) {
+        var data = google.visualization.arrayToDataTable(seriesdata);
+        var view = new google.visualization.DataView(data);
+        view.setColumns([0, 1,
+            {
+                calc: "stringify",
+                sourceColumn: 1,
+                type: "string",
+                role: "annotation"
+            },
+            2]);
+
+        var options = {
+            title: "Company by Size(GB)",
+            width: 500,
+            height: 300,
+            bar: { groupWidth: "95%" },
+            legend: { position: "none" },
+        };
+        var chart = new google.visualization.ColumnChart(document.getElementById("divCompanySize"));
+        chart.draw(view, options);
+    }
+
+
+    function drawUsersChart(seriesdata) {
+        var data = google.visualization.arrayToDataTable(seriesdata);
+        var view = new google.visualization.DataView(data);
+        view.setColumns([0, 1,
+            {
+                calc: "stringify",
+                sourceColumn: 1,
+                type: "string",
+                role: "annotation"
+            },
+            2]);
+
+        var options = {
+            title: "Company Wise Users Count",
+            width: 500,
+            height: 300,
+            bar: { groupWidth: "95%" },
+            legend: { position: "none" },
+        };
+        var chart = new google.visualization.ColumnChart(document.getElementById("divCompanyUsers"));
+        chart.draw(view, options);
+    }
+</script>
+

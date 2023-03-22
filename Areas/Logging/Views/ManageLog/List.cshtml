@@ -1,0 +1,123 @@
+﻿@model DataRooms.UI.Areas.Logging.Models.ActivityLogModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_BootstrapLayout.cshtml";
+}
+
+@*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+
+<div class="content-header pb-0">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                    <li class="breadcrumb-item active">Activity Logs</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<form method="post" action="@Url.Action("List","ManageLog",new { area = "Logging"})" id="frmActivityLogList">
+    <section class="content">
+        <div class="container-fluid border-top">
+            <h5 class="mt-2">Activity Logs</h5>
+            <div class="row">
+                <div class="table-responsive">
+                    @Html.Partial("~/Areas/Logging/Views/Shared/_activityloglist.cshtml", Model.PagedActivityLogs)
+                </div>
+                <div class="ml-auto" align="center">
+                    Page @(Model.PagedActivityLogs.PageCount < Model.PagedActivityLogs.PageNumber ? 0 : Model.PagedActivityLogs.PageNumber)
+                    of @Model.PagedActivityLogs.PageCount
+                    <input type="hidden" name="RecordsPerPage" value="@Model.RecordsPerPage" />
+                    <input type="hidden" name="CurrentPage" id="hdnCurrentPage" value="@Model.CurrentPage" />
+                    <input type="hidden" name="SortOrder" id="hdnSortOrder" value="@Model.SortOrder" />
+                    <input type="hidden" name="SortColumn" id="hdnSortColumn" value="@Model.SortColumn" />
+                    @Html.PagedListPager(Model.PagedActivityLogs, page => "#")
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+</form>
+
+
+
+
+<input type="button" data-toggle="modal" data-target="#datalogModel" id="btnShowDatalogModel" />
+<div class="modal fade" id="datalogModel" tabindex="-1" role="dialog" aria-labelledby="logModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title theme" id="changeRoleModalLabel">Data Log</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="divLogModalContent"></div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/Scripts/Jquery.ui.min.js"></script>
+<script>
+
+    //List Filter Functionality
+    $("#txtSearch").change(function () {
+        $("#frmActivityLogList").submit();
+    });
+
+    $(document).on("click", ".pagination li", function () {
+        var currentPage = $(this).find('a').text();
+        $("#hdnCurrentPage").val(currentPage);
+        $("#frmActivityLogList").submit();
+    });
+
+    $(document).on("click", ".header", function () {
+        var sortColumn = $(this).attr('data-column');
+        var storedSortColumn = $("#hdnSortColumn").val();
+        var sortOrder = $("#hdnSortOrder").val();
+        debugger;
+        if (sortColumn == storedSortColumn && sortOrder == "asc") {
+            $("#hdnSortOrder").val("desc");
+        }
+        else {
+            $("#hdnSortOrder").val("asc");
+        }
+        $("#hdnSortColumn").val(sortColumn);
+        $("#frmActivityLogList").submit();
+    });
+
+    $(document).on("click", ".viewLog", function () {
+        var id = $(this).attr("data-id");
+        fnViewLog(id);
+    });
+
+    function fnViewLog(id) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetDataLogsbyActivityLogId", "ManageLog",new { area = "Logging"})?activitylogid=" + id,
+            data: {},
+            async:true,
+            dataType: "json",
+            beforeSend: function () {
+                formloader();
+            },
+            success: function (data) {
+                $("#divLogModalContent").html('');
+                $("#divLogModalContent").html(data.HTML);
+                $("#btnShowDatalogModel").trigger("click");
+                //$("#datalogModel").modal("show");
+            },
+            error: function (err) {
+
+            },
+            complete: function () {
+                formloaderstop();
+            }
+        });
+    };
+</script>
+

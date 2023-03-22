@@ -1,0 +1,55 @@
+﻿@model DataRooms.UI.Areas.Logging.Models.ActivityLogModel
+
+@if (Model.DataLogs != null && Model.DataLogs.Count() > 0)
+{
+    foreach (var datalog in Model.DataLogs)
+    {
+        <h3><b>@datalog.TableName</b></h3>        
+        <div class="row">
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Old Value</th>
+                        <th>New Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (datalog.OriginalData != null && datalog.OriginalData.Count > 0)
+                    {
+                        foreach (var column in datalog.OriginalData)
+                        {
+                            if (column.Value != datalog.ModifiedData[column.Key])
+                            {
+                                <tr style="background-color:#dadab3">
+                                    <td>@column.Key</td>
+                                    <td>@column.Value</td>
+                                    <td>@datalog.ModifiedData[column.Key]</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>@column.Key</td>
+                                    <td>@column.Value</td>
+                                    <td>@datalog.ModifiedData[column.Key]</td>
+                                </tr>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">No Log Found...</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <hr />
+    }
+}
+else
+{
+    <div>No Log Found..</div>
+}
